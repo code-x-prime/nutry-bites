@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import Razorpay from "razorpay";
 import { logger } from "./utils/logger.js";
 
-// Routes
+// Routes 
 import userRoutes from "./routes/user.routes.js";
 import partnerRoutes from "./routes/partner.routes.js";
 import partnerAuthRoutes from "./routes/partner.auth.routes.js";

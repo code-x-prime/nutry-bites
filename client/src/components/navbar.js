@@ -564,8 +564,8 @@ export function Navbar() {
           {/* Menu Header */}
           <div className="bg-[#1F6F78] px-5 py-6 flex items-center justify-between shrink-0">
             <div>
-              <Image src="/logo.png" alt="Nutry Bites" width={100} height={40} className="h-10 w-auto brightness-0 invert" />
-              <p className="text-[#E6A15A] text-[0.65rem] tracking-[0.2em] uppercase mt-2 font-bold font-jost">Healthy Snacks Anytime</p>
+              <Image src="/logo.png" alt="Nutry Bites" width={100} height={40} className="h-16 w-auto brightness-0 invert" />
+
             </div>
             <button
               onClick={() => setIsMenuOpen(false)}

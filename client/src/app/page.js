@@ -242,16 +242,16 @@ const HeroCarousel = () => {
 
         {/* Floating Arrows */}
         <div className="absolute inset-y-0 left-4 md:left-8 flex items-center z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <CarouselPrevious className="relative left-0 translate-x-0 pointer-events-auto h-12 w-12 border-none bg-black/20 hover:bg-black/40 backdrop-blur-xl text-white rounded-full transition-all duration-300 hover:scale-110 active:scale-95" />
+          <CarouselPrevious className="relative left-0 translate-x-0 pointer-events-auto h-8 w-8 md:h-12 md:w-12 border-none bg-black/20 hover:bg-black/40 backdrop-blur-xl text-white rounded-full transition-all duration-300 hover:scale-110 active:scale-95" />
         </div>
         <div className="absolute inset-y-0 right-4 md:right-8 flex items-center z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <CarouselNext className="relative right-0 translate-x-0 pointer-events-auto h-12 w-12 border-none bg-black/20 hover:bg-black/40 backdrop-blur-xl text-white rounded-full transition-all duration-300 hover:scale-110 active:scale-95" />
+          <CarouselNext className="relative right-0 translate-x-0 pointer-events-auto h-8 w-8 md:h-12 md:w-12 border-none bg-black/20 hover:bg-black/40 backdrop-blur-xl text-white rounded-full transition-all duration-300 hover:scale-110 active:scale-95" />
         </div>
 
         {/* Corner Controls */}
-        <div className="absolute top-6 right-6 z-20 flex gap-2">
+        <div className="absolute  top-2 md:top-6 right-2 md:right-6 z-20 flex gap-2">
           <button
-            className="h-10 w-10 flex items-center justify-center bg-black/20 hover:bg-black/40 border border-white/10 text-white backdrop-blur-xl rounded-full transition-all duration-300 hover:rotate-12"
+            className="h-8 w-8 md:h-10 md:w-10 flex items-center justify-center bg-black/20 hover:bg-black/40 border border-white/10 text-white backdrop-blur-xl rounded-full transition-all duration-300 hover:rotate-12"
             onClick={() => setAutoplay(!autoplay)}
             aria-label={autoplay ? "Pause Slideshow" : "Play Slideshow"}
           >

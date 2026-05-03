@@ -1,0 +1,28 @@
+name: Deploy Client (Nutry Bites)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "client/**"
+      - ".github/workflows/deploy-client.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Nutry Bites (client) to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            cd ${{ secrets.REPO_PATH || '~/nutry-bites' }}
+            git fetch origin main
+            git reset --hard origin/main
+            cd client
+            npm install --legacy-peer-deps
+            npm run build
+            pm2 restart nutry-client --update-env

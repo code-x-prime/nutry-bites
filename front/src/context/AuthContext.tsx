@@ -8,7 +8,7 @@ import {
 import axios from "axios";
 import { Admin } from "@/types/admin";
 
-// Auth context interface
+// Auth context interface 
 interface AuthContextType {
   admin: Admin | null;
   token: string | null;

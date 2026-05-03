@@ -5,7 +5,7 @@ import { fetchApi } from "./utils";
 
 const AuthContext = createContext();
 
-// Create a persistent verification token tracker using localStorage
+// Create a persistent verification token tracker using localStorage 
 const getVerifiedTokens = () => {
   if (typeof window === "undefined") return new Set();
 

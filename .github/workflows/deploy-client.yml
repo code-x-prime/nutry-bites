@@ -35,5 +35,5 @@ jobs:
             npm run build
             
             echo "🔄 Restarting PM2 process..."
-            pm2 restart nutry-client --update-env || pm2 start server.js --name nutry-client
+            pm2 restart nutry-client --update-env || pm2 start npm --name "nutry-client" -- start
             echo "✅ Deployment successful!"

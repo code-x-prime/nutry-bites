@@ -16,7 +16,7 @@ const pendingRequests = {};
 export async function fetchApi(endpoint, options = {}) {
   // Ensure endpoint doesn't duplicate /api if it's already in API_URL
   const fixedEndpoint =
-    API_URL.endsWith("/api") && endpoint?.startsWith("/api")
+    API_URL?.endsWith("/api") && endpoint?.startsWith("/api")
       ? endpoint.replace("/api", "")
       : endpoint;
 

@@ -232,7 +232,7 @@ function ProductsContent() {
             "featured",
           ];
           let sortField = filters.sort;
-          if (!validSortFields.includes(sortField)) {
+          if (!validSortFields?.includes(sortField)) {
             sortField = "createdAt";
           }
 
@@ -473,7 +473,7 @@ function ProductsContent() {
   const handleAttributeValueChange = (attributeName, attributeValueId) => {
     const attrKey = attributeName.toLowerCase();
     const currentSelected = selectedAttributes[attrKey] || [];
-    const isAlreadySelected = currentSelected.includes(attributeValueId);
+    const isAlreadySelected = currentSelected?.includes(attributeValueId);
 
     let updatedSelected = [];
     if (isAlreadySelected) {

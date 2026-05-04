@@ -75,9 +75,15 @@ const SectionHeading = ({
 // Normalise banner image paths — handles Next.js static imports, full URLs, and CDN-relative paths
 const normaliseBannerSrc = (src) => {
   if (!src) return null;
-  if (typeof src === "object") return src; // Next.js static import (StaticImageData)
-  if (src?.startsWith("http")) return src;
-  return `https://desirediv-storage.blr1.digitaloceanspaces.com/${src}`;
+  if (typeof src === "object" && src.src) return src; // Next.js static import
+  
+  const url = typeof src === "string" ? src : src?.url || src?.path;
+  if (!url) return null;
+  
+  if (typeof url === "string" && url.startsWith("http")) return url;
+  
+  const cleanPath = typeof url === "string" && url.startsWith("/") ? url.slice(1) : url;
+  return `https://desirediv-storage.blr1.digitaloceanspaces.com/${cleanPath}`;
 };
 
 const HeroCarousel = () => {

@@ -11,9 +11,12 @@ import ProducCard from "@/components/ProducCard";
 
 // Helper function to format image URLs correctly
 const getImageUrl = (image) => {
-  if (!image) return "/images/blog-placeholder.png";
-  if (image?.startsWith("http")) return image;
-  return `https://desirediv-storage.blr1.digitaloceanspaces.com/${image}`;
+  if (!image) return "/placeholder.png";
+  const url = typeof image === "string" ? image : image?.url || image?.path;
+  if (!url) return "/placeholder.png";
+  if (typeof url === "string" && url.startsWith("http")) return url;
+  const cleanPath = typeof url === "string" && url.startsWith("/") ? url.slice(1) : url;
+  return `https://desirediv-storage.blr1.digitaloceanspaces.com/${cleanPath}`;
 };
 
 export default function CategoryPage() {

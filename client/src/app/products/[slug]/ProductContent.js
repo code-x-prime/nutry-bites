@@ -374,7 +374,7 @@ export default function ProductContent({ slug }) {
       return (
         <div className="relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden">
           <Image
-            src="/images/product-placeholder.png"
+            src="/placeholder.png"
             alt={product?.name || "Product"}
             fill
             className="object-contain"
@@ -445,9 +445,12 @@ export default function ProductContent({ slug }) {
 
   // Get image URL helper
   const getImageUrl = (image) => {
-    if (!image) return "/images/product-placeholder.png";
-    if (image?.startsWith("http")) return image;
-    return `https://desirediv-storage.blr1.cdn.digitaloceanspaces.com/${image}`;
+    if (!image) return "/placeholder.png";
+    const url = typeof image === "string" ? image : image?.url || image?.path;
+    if (!url) return "/placeholder.png";
+    if (typeof url === "string" && url.startsWith("http")) return url;
+    const cleanPath = typeof url === "string" && url.startsWith("/") ? url.slice(1) : url;
+    return `https://desirediv-storage.blr1.digitaloceanspaces.com/${cleanPath}`;
   };
 
   // Calculate discount percentage
@@ -965,7 +968,7 @@ export default function ProductContent({ slug }) {
             {selectedVariant && (selectedVariant.stock > 0 || selectedVariant.quantity > 0) && (
               <div className="p-2 bg-green-50 border border-green-200 rounded-md text-green-700 text-sm flex items-center">
                 <CheckCircle className="h-4 w-4 mr-2 flex-shrink-0" />
-                In Stock ({(selectedVariant.stock || selectedVariant.quantity)} available)
+                In Stock
               </div>
             )}
             {selectedVariant && (selectedVariant.stock === 0 || selectedVariant.quantity === 0) && (

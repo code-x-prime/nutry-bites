@@ -6,6 +6,15 @@ import Image from "next/image";
 import { fetchApi } from "@/lib/utils";
 import { RiLeafLine } from "react-icons/ri";
 
+const getImageUrl = (image) => {
+  if (!image) return "/placeholder.png";
+  const url = typeof image === "string" ? image : image?.url || image?.path;
+  if (!url) return "/placeholder.png";
+  if (typeof url === "string" && url.startsWith("http")) return url;
+  const cleanPath = typeof url === "string" && url.startsWith("/") ? url.slice(1) : url;
+  return `https://desirediv-storage.blr1.digitaloceanspaces.com/${cleanPath}`;
+};
+
 const CategoryCard = ({ category }) => {
   const isOffers =
     category.name?.toLowerCase().includes("offer") ||
@@ -22,7 +31,7 @@ const CategoryCard = ({ category }) => {
           </div>
         ) : (
           <Image
-            src={category.image || "/placeholder.png"}
+            src={getImageUrl(category.image)}
             alt={category.name || "Category"}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"

@@ -262,7 +262,7 @@ export default function ShoppableVideoCarousel() {
                     )}
 
                     {/* Play button overlay (for video) */}
-                    {item.mediaType === "UPLOAD" && item.mediaUrl?.match(/\.(mp4|webm)/i) && (
+                    {item.mediaType === "UPLOAD" && typeof item.mediaUrl === "string" && item.mediaUrl?.match(/\.(mp4|webm)/i) && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center">
                           <Play className="h-6 w-6 text-gray-900 fill-gray-900 ml-1" />

@@ -28,7 +28,7 @@ export function Footer() {
   const [contactInfo, setContactInfo] = useState({});
   const [expandedSection, setExpandedSection] = useState(null);
 
-  const isAuthPage = ["/auth", "/forgot-password", "/verify-otp", "/reset-password", "/verify-email"].some(path => pathname?.startsWith(path));
+  const isAuthPage = ["/auth", "/forgot-password", "/verify-otp", "/reset-password", "/verify-email"].some(path => typeof pathname === "string" && pathname.startsWith(path));
 
   useEffect(() => {
     const fetchSettings = async () => {

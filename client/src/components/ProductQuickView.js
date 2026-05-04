@@ -22,8 +22,14 @@ import { useAddVariantToCart } from "@/lib/cart-utils";
 // Helper function to format image URLs correctly
 const getImageUrl = (image) => {
   if (!image) return "/placeholder.png";
-  if (typeof image === "string" && image.startsWith("http")) return image;
-  return `https://desirediv-storage.blr1.digitaloceanspaces.com/${image}`;
+  
+  const url = typeof image === "string" ? image : image.url;
+  if (!url) return "/placeholder.png";
+  
+  if (typeof url === "string" && url.startsWith("http")) return url;
+  
+  const cleanPath = typeof url === "string" && url.startsWith("/") ? url.slice(1) : url;
+  return `https://desirediv-storage.blr1.digitaloceanspaces.com/${cleanPath}`;
 };
 
 export default function ProductQuickView({ product, open, onOpenChange }) {

@@ -451,7 +451,7 @@ export function Navbar() {
                       href={item.href}
                       className={cn(
                         "flex items-center gap-1 px-4 py-2.5 text-sm font-medium tracking-wide transition-all relative hover:bg-nyxis-50 rounded-lg",
-                        pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href))
+                        pathname === item.href || (item.href !== "/" && typeof pathname === "string" && pathname.startsWith(item.href))
                           ? "text-[#1F6F78] font-bold"
                           : "text-gray-700 hover:text-[#1F6F78]",
                         activeMenu === item.name && "text-[#1F6F78]"
@@ -468,7 +468,7 @@ export function Navbar() {
                       <span
                         className={cn(
                           "absolute bottom-0 left-4 right-4 h-[2px] bg-[#1F6F78] transform origin-left transition-transform duration-200 rounded-full",
-                          (pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href)) || activeMenu === item.name)
+                          (pathname === item.href || (item.href !== "/" && typeof pathname === "string" && pathname.startsWith(item.href)) || activeMenu === item.name)
                             ? "scale-x-100"
                             : "scale-x-0 group-hover:scale-x-100"
                         )}

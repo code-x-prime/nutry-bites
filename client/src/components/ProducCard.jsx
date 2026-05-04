@@ -14,8 +14,16 @@ import ProductQuickView from "./ProductQuickView";
 // Helper function to format image URLs correctly
 const getImageUrl = (image) => {
   if (!image) return "/placeholder.png";
-  if (typeof image === "string" && image.startsWith("http")) return image;
-  return `https://desirediv-storage.blr1.digitaloceanspaces.com/${image}`;
+  
+  // Extract URL if it's an object
+  const url = typeof image === "string" ? image : image.url;
+  if (!url) return "/placeholder.png";
+  
+  if (typeof url === "string" && url.startsWith("http")) return url;
+  
+  // Clean the path if it starts with a slash
+  const cleanPath = typeof url === "string" && url.startsWith("/") ? url.slice(1) : url;
+  return `https://desirediv-storage.blr1.digitaloceanspaces.com/${cleanPath}`;
 };
 
 // Helper function to calculate discount percentage

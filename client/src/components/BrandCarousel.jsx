@@ -82,9 +82,11 @@ export default function BrandCarousel({ tag, title }) {
                         <Image
                           fill
                           src={
-                            brand.image?.startsWith("http")
+                            (typeof brand.image === "string" && brand.image.startsWith("http"))
                               ? brand.image
-                              : `https://desirediv-storage.blr1.digitaloceanspaces.com/${brand.image}`
+                              : (typeof brand.image === "object" && brand.image?.url)
+                                ? (brand.image.url.startsWith("http") ? brand.image.url : `https://desirediv-storage.blr1.digitaloceanspaces.com/${brand.image.url}`)
+                                : `https://desirediv-storage.blr1.digitaloceanspaces.com/${brand.image}`
                           }
                           alt={brand.name}
                           className="object-contain group-hover:scale-105 transition-transform duration-500 p-2"

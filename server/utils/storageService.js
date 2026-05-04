@@ -191,12 +191,14 @@ export async function deleteFile(fileUrlOrKey) {
  */
 export function getFileUrl(keyOrFilename) {
     if (!keyOrFilename) return null;
-    // If already full URL, return as-is (backward compat with existing data)
+    if (typeof keyOrFilename !== "string") return null;
+
+    // If already full URL, return as-is
     if (keyOrFilename.startsWith("http")) return keyOrFilename;
 
     const key = keyOrFilename.startsWith("/") ? keyOrFilename.slice(1) : keyOrFilename;
 
-    // Fallback: when DB config not set, use env vars for backward compat
+    // Fallback to env vars if DB config not yet loaded or provider not set
     if (!_cachedConfig || !_cachedConfig.activeProvider) {
         if (process.env.SPACES_BUCKET && process.env.SPACES_REGION) {
             const cdn = process.env.SPACES_CDN_URL;
@@ -209,17 +211,18 @@ export function getFileUrl(keyOrFilename) {
     const config = _cachedConfig;
 
     if (config.activeProvider === "DIGITAL_OCEAN") {
-        if (config.spacesCdnUrl) {
-            return `${config.spacesCdnUrl.replace(/\/$/, "")}/${key}`;
-        }
-        return `https://${config.spacesBucket}.${config.spacesRegion || "blr1"}.digitaloceanspaces.com/${key}`;
+        const baseUrl = config.spacesCdnUrl || `https://${config.spacesBucket}.${config.spacesRegion || "blr1"}.digitaloceanspaces.com`;
+        return `${baseUrl.replace(/\/$/, "")}/${key}`;
     }
 
     if (config.activeProvider === "CLOUDFLARE_R2") {
         if (config.r2PublicUrl) {
             return `${config.r2PublicUrl.replace(/\/$/, "")}/${key}`;
         }
-        return `https://${config.r2BucketName}.r2.cloudflarestorage.com/${key}`;
+        // Fallback for R2 if no public URL set
+        if (config.r2BucketName && config.r2AccountId) {
+            return `https://${config.r2BucketName}.r2.cloudflarestorage.com/${key}`;
+        }
     }
 
     if (config.activeProvider === "AWS_S3") {
@@ -227,6 +230,11 @@ export function getFileUrl(keyOrFilename) {
             return `${config.s3PublicUrl.replace(/\/$/, "")}/${key}`;
         }
         return `https://${config.s3BucketName}.s3.${config.s3Region}.amazonaws.com/${key}`;
+    }
+
+    // Last resort fallback to DO if key exists but provider logic failed
+    if (process.env.SPACES_BUCKET) {
+        return `https://${process.env.SPACES_BUCKET}.${process.env.SPACES_REGION || "blr1"}.digitaloceanspaces.com/${key}`;
     }
 
     return null;

@@ -82,7 +82,7 @@ export function CartProvider({ children }) {
       if (
         cart.items.length > 0 &&
         cart.items[0]?.id &&
-        !cart.items[0]?.id.startsWith("guest_")
+        !cart.items[0]?.id?.startsWith("guest_")
       ) {
         setCart({ items: [], subtotal: 0, itemCount: 0, totalQuantity: 0 });
         setCoupon(null);

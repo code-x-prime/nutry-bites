@@ -17,7 +17,7 @@ function getYouTubeEmbedUrl(url) {
   if (shortMatch) return `https://www.youtube.com/embed/${shortMatch[1]}`;
   const watchMatch = u.match(/[?&]v=([a-zA-Z0-9_-]+)/);
   if (watchMatch) return `https://www.youtube.com/embed/${watchMatch[1]}`;
-  if (u.includes("youtube.com/embed/")) return u;
+  if (u?.includes("youtube.com/embed/")) return u;
   return null;
 }
 

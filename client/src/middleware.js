@@ -22,11 +22,11 @@ export function middleware(request) {
 
   // Check if the path is a private route
   const isPrivateRoute = privateRoutes.some((route) =>
-    pathname.startsWith(route)
+    pathname?.startsWith(route)
   );
 
   // Check if the path is an auth route (login, register, etc.)
-  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
+  const isAuthRoute = authRoutes.some((route) => pathname?.startsWith(route));
 
   // If accessing a private route without authentication, redirect to login
   if (isPrivateRoute && !isAuthenticated) {

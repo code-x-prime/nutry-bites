@@ -20,9 +20,20 @@ jobs:
           script: |
             set -e
             cd ${{ secrets.REPO_PATH || '~/nutry-bites' }}
+            echo "📥 Fetching latest code..."
             git fetch origin main
             git reset --hard origin/main
+            
             cd client
+            echo "🧹 Cleaning old build and cache..."
+            rm -rf .next
+            
+            echo "📦 Installing dependencies..."
             npm install --legacy-peer-deps
+            
+            echo "🏗 Building application..."
             npm run build
-            pm2 restart nutry-client --update-env
+            
+            echo "🔄 Restarting PM2 process..."
+            pm2 restart nutry-client --update-env || pm2 start server.js --name nutry-client
+            echo "✅ Deployment successful!"

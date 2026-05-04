@@ -12,7 +12,7 @@ import useEmblaCarousel from "embla-carousel-react";
 
 // Helper function to format image URLs correctly
 const getImageUrl = (image) => {
-  if (!image) return "/product-placeholder.png";
+  if (!image) return "/placeholder.png";
   if (image?.startsWith("http")) return image;
   return `https://desirediv-storage.blr1.digitaloceanspaces.com/${image}`;
 };
@@ -203,8 +203,8 @@ export default function ProductCarousel({
                   <div
                     key={index}
                     className={`relative flex-shrink-0 cursor-pointer overflow-hidden rounded-md border-2 transition-all hover:shadow-md ${selectedSlide === index
-                        ? "border-primary"
-                        : "border-transparent hover:border-gray-300"
+                      ? "border-primary"
+                      : "border-transparent hover:border-gray-300"
                       }`}
                     onClick={() => onThumbClick(index)}
                   >

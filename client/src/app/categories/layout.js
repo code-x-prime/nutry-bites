@@ -7,7 +7,7 @@ export default function CategoriesLayout({ children }) {
 
   // Check if we're on a category detail page (has slug parameter)
   const isCategoryDetailPage =
-    pathname.includes("/category/") && pathname.split("/").length > 2;
+    pathname?.includes("/category/") && pathname?.split("/").length > 2;
 
   return (
     <div className="min-h-screen bg-gray-50">

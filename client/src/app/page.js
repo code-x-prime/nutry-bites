@@ -76,7 +76,7 @@ const SectionHeading = ({
 const normaliseBannerSrc = (src) => {
   if (!src) return null;
   if (typeof src === "object") return src; // Next.js static import (StaticImageData)
-  if (src.startsWith("http")) return src;
+  if (src?.startsWith("http")) return src;
   return `https://desirediv-storage.blr1.digitaloceanspaces.com/${src}`;
 };
 

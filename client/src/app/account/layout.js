@@ -44,7 +44,7 @@ export default function AccountLayout({ children }) {
 
   // Check if current path is a special page where we don't show the sidebar
   const isSpecialPage = specialPages.some(
-    (path) => pathname.startsWith(path) && pathname !== "/account/orders"
+    (path) => pathname?.startsWith(path) && pathname !== "/account/orders"
   );
 
   return (

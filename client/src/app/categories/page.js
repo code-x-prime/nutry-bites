@@ -13,7 +13,7 @@ const CategoryCard = ({ category, index }) => {
   // Function to get image URL
   const getImageUrl = (image) => {
     if (!image) return "/placeholder.png";
-    if (image.startsWith("http")) return image;
+    if (image?.startsWith("http")) return image;
     return `https://desirediv-storage.blr1.digitaloceanspaces.com/${image}`;
   };
 

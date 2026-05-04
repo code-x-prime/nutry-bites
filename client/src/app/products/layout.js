@@ -7,7 +7,7 @@ export default function ProductsLayout({ children }) {
 
   // Check if we're on a product detail page (has slug parameter)
   const isProductDetailPage =
-    pathname.includes("/products/") && pathname.split("/").length > 2;
+    pathname?.includes("/products/") && pathname?.split("/").length > 2;
 
   return (
     <div className="min-h-screen bg-gray-50">

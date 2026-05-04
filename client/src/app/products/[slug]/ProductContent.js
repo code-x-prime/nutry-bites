@@ -446,7 +446,7 @@ export default function ProductContent({ slug }) {
   // Get image URL helper
   const getImageUrl = (image) => {
     if (!image) return "/images/product-placeholder.png";
-    if (image.startsWith("http")) return image;
+    if (image?.startsWith("http")) return image;
     return `https://desirediv-storage.blr1.cdn.digitaloceanspaces.com/${image}`;
   };
 

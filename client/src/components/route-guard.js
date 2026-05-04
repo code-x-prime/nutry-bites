@@ -24,14 +24,14 @@ export function RouteGuard({ children }) {
     const authCheck = () => {
       // Skip verification for verification endpoints and public pages
       if (
-        pathname.startsWith("/verify-email") ||
+        pathname?.startsWith("/verify-email") ||
         pathname === "/" ||
-        pathname.startsWith("/products") ||
-        pathname.startsWith("/category") ||
-        pathname.startsWith("/blog") ||
-        pathname.startsWith("/about") ||
-        pathname.startsWith("/contact") ||
-        pathname.startsWith("/faqs")
+        pathname?.startsWith("/products") ||
+        pathname?.startsWith("/category") ||
+        pathname?.startsWith("/blog") ||
+        pathname?.startsWith("/about") ||
+        pathname?.startsWith("/contact") ||
+        pathname?.startsWith("/faqs")
       ) {
         setAuthorized(true);
         return;
@@ -39,12 +39,12 @@ export function RouteGuard({ children }) {
 
       // Check if route requires auth
       const isPrivateRoute = privateRoutes.some((route) =>
-        pathname.startsWith(route)
+        pathname?.startsWith(route)
       );
 
       // Check if route is an auth route (login, register, etc.)
       const isAuthRoute = authRoutes.some((route) =>
-        pathname.startsWith(route)
+        pathname?.startsWith(route)
       );
 
       if (isPrivateRoute && !isAuthenticated) {

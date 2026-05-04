@@ -7,7 +7,7 @@ export default function CategoryLayout({ children }) {
 
   // Check if we're on a category page (has slug parameter)
   const isCategoryPage =
-    pathname.includes("/category/") && pathname.split("/").length > 2;
+    pathname?.includes("/category/") && pathname?.split("/").length > 2;
 
   return (
     <div className="min-h-screen bg-gray-50">

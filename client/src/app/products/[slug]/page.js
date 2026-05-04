@@ -4,7 +4,7 @@ import ProductContent from "./ProductContent";
 // Helper function to format image URLs correctly
 const getImageUrl = (image) => {
   if (!image) return null;
-  if (image.startsWith("http")) return image;
+  if (image?.startsWith("http")) return image;
   return `https://desirediv-storage.blr1.digitaloceanspaces.com/${image}`;
 };
 

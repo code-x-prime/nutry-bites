@@ -27,9 +27,53 @@ const jost = Jost({
 });
 
 export const metadata = {
-  title: "Nutry Bites — Healthy Snacks Anytime, Anywhere",
+  title: {
+    default: "Nutry Bites — Healthy Snacks Anytime, Anywhere",
+    template: "%s | Nutry Bites",
+  },
   description:
     "Discover Nutry Bites, your destination for premium roasted Makhana (fox nuts) and healthy snacks. Crunchy, light, and wholesome goodness delivered to your door.",
+  keywords: ["roasted makhana", "healthy snacks", "fox nuts", "oil-free snacks", "nutry bites", "diet snacks", "indian snacks"],
+  authors: [{ name: "Nutry Bites" }],
+  creator: "Nutry Bites",
+  publisher: "Nutry Bites",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL("https://nutrybites.co.in"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Nutry Bites — Healthy Snacks Anytime, Anywhere",
+    description: "Discover Nutry Bites, your destination for premium roasted Makhana (fox nuts) and healthy snacks.",
+    url: "https://nutrybites.co.in",
+    siteName: "Nutry Bites",
+    locale: "en_IN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nutry Bites — Healthy Snacks Anytime, Anywhere",
+    description: "Premium roasted Makhana and healthy snacks.",
+    creator: "@nutrybites",
+  },
+  verification: {
+    google: "kSD3cECTpb-8xGj_SuDQEHWLUVE_nGhVYL5ncVln_GQ",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({ children }) {

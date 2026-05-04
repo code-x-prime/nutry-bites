@@ -10,9 +10,10 @@ const getImageUrl = (image) => {
 
 export async function generateMetadata({ params }) {
   const { slug } = params;
-  let title = "Product Details | nutrybites";
+  let title = "Product Details | Nutry Bites";
   let description =
-    "Premium quality fitness supplements with lab-tested ingredients for maximum effectiveness. Shop for ₹999+ and receive a scratch card with exciting rewards!.";
+    "Premium quality roasted Makhana and healthy snacks from Nutry Bites. Crunchy, light, and wholesome goodness delivered to your door.";
+
   let image = null;
 
   try {
@@ -21,7 +22,8 @@ export async function generateMetadata({ params }) {
     const product = response.data.product;
 
     if (product) {
-      title = product.metaTitle || `${product.name} | nutrybites`;
+      title = product.metaTitle || `${product.name} | Nutry Bites`;
+
       description =
         product.metaDescription || product.description || description;
 
@@ -37,6 +39,9 @@ export async function generateMetadata({ params }) {
   return {
     title,
     description,
+    alternates: {
+      canonical: `/products/${slug}`,
+    },
     openGraph: {
       title,
       description,

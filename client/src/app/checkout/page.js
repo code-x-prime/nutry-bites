@@ -631,7 +631,7 @@ export default function CheckoutPage() {
   if (orderCreated) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <div className="max-w-lg mx-auto bg-white p-8 rounded-lg border shadow-lg relative overflow-hidden">
+      <div className="max-w-lg mx-auto bg-white p-10 rounded-[32px] border-0 shadow-2xl relative overflow-hidden text-center">
           {/* Background pattern for festive feel */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#1F6F78]/5 to-transparent z-0"></div>
 
@@ -753,7 +753,7 @@ export default function CheckoutPage() {
         </div>
       )}
 
-      <h1 className="text-2xl font-bold mb-6">Checkout</h1>
+      <h1 className="font-jost text-3xl font-bold text-[#144D53] mb-8 text-center lg:text-left">Checkout</h1>
 
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md flex items-start">
@@ -767,12 +767,12 @@ export default function CheckoutPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main checkout area */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
           {/* Shipping Addresses */}
-          <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="bg-white rounded-[32px] shadow-sm border border-nyxis-gray-100 p-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold flex items-center">
-                <MapPin className="h-5 w-5 mr-2 text-[#1F6F78]" />
+              <h2 className="font-jost text-xl font-bold text-[#144D53] flex items-center">
+                <MapPin className="h-6 w-6 mr-3 text-[#1F6F78]" />
                 Shipping Address
               </h2>
               <Button
@@ -815,9 +815,9 @@ export default function CheckoutPage() {
                 {addresses.map((address) => (
                   <div
                     key={address.id}
-                    className={`border rounded-md p-4 cursor-pointer transition-all ${selectedAddressId === address.id
-                      ? "border-[#1F6F78] bg-[#1F6F78]/5"
-                      : "hover:border-gray-400"
+                    className={`border-2 rounded-2xl p-5 cursor-pointer transition-all duration-300 ${selectedAddressId === address.id
+                      ? "border-[#1F6F78] bg-[#1F6F78]/5 ring-4 ring-[#1F6F78]/5"
+                      : "border-nyxis-gray-100 hover:border-[#1F6F78]/30"
                       }`}
                     onClick={() => handleAddressSelect(address.id)}
                   >
@@ -861,9 +861,9 @@ export default function CheckoutPage() {
           </div>
 
           {/* ── Courier / Delivery Partner Selection ── */}
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h2 className="text-lg font-semibold flex items-center mb-4">
-              <span className="mr-2 text-[#1F6F78]">🚚</span>
+          <div className="bg-white rounded-[32px] shadow-sm border border-nyxis-gray-100 p-8">
+            <h2 className="font-jost text-xl font-bold text-[#144D53] flex items-center mb-6">
+              <span className="mr-3 text-[#1F6F78] text-2xl">🚚</span>
               Delivery Partner
             </h2>
 
@@ -939,9 +939,9 @@ export default function CheckoutPage() {
           </div>
 
           {/* Payment Method */}
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h2 className="text-lg font-semibold flex items-center mb-4">
-              <CreditCard className="h-5 w-5 mr-2 text-[#1F6F78]" />
+          <div className="bg-white rounded-[32px] shadow-sm border border-nyxis-gray-100 p-8">
+            <h2 className="font-jost text-xl font-bold text-[#144D53] flex items-center mb-6">
+              <CreditCard className="h-6 w-6 mr-3 text-[#1F6F78]" />
               Payment Method
             </h2>
 
@@ -956,9 +956,9 @@ export default function CheckoutPage() {
                 {/* Cash on Delivery Option - Only show if enabled */}
                 {paymentSettings.cashEnabled && (
                   <div
-                    className={`border rounded-md p-4 transition-all ${paymentMethod === "CASH"
-                      ? "border-[#1F6F78] bg-[#1F6F78]/5 cursor-pointer"
-                      : "hover:border-gray-400 cursor-pointer"
+                    className={`border-2 rounded-2xl p-5 transition-all duration-300 ${paymentMethod === "CASH"
+                      ? "border-[#1F6F78] bg-[#1F6F78]/5 cursor-pointer ring-4 ring-[#1F6F78]/5"
+                      : "border-nyxis-gray-100 hover:border-[#1F6F78]/30 cursor-pointer"
                       }`}
                     onClick={() => {
                       handlePaymentMethodSelect("CASH");
@@ -1004,9 +1004,9 @@ export default function CheckoutPage() {
                 {/* Razorpay Option */}
                 {paymentSettings.razorpayEnabled && (
                   <div
-                    className={`border rounded-md p-4 transition-all ${paymentMethod === "RAZORPAY"
-                      ? "border-[#1F6F78] bg-[#1F6F78]/5 cursor-pointer"
-                      : "hover:border-gray-400 cursor-pointer"
+                    className={`border-2 rounded-2xl p-5 transition-all duration-300 ${paymentMethod === "RAZORPAY"
+                      ? "border-[#1F6F78] bg-[#1F6F78]/5 cursor-pointer ring-4 ring-[#1F6F78]/5"
+                      : "border-nyxis-gray-100 hover:border-[#1F6F78]/30 cursor-pointer"
                       }`}
                     onClick={() => {
                       handlePaymentMethodSelect("RAZORPAY");
@@ -1051,8 +1051,8 @@ export default function CheckoutPage() {
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-20">
-            <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
+          <div className="bg-[#144D53] rounded-[32px] p-8 sticky top-24 shadow-2xl text-white">
+            <h2 className="font-jost text-xl font-bold mb-6">Order Summary</h2>
 
             <div className="divide-y">
               <div className="pb-4">
@@ -1150,39 +1150,39 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div className="py-4 space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span>{formatCurrency(totals.subtotal)}</span>
+              <div className="py-6 space-y-3 text-sm">
+                <div className="flex justify-between border-b border-white/10 pb-3">
+                  <span className="text-white/60 font-jost">Subtotal</span>
+                  <span className="font-bold">{formatCurrency(totals.subtotal)}</span>
                 </div>
 
                 {coupon && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Discount</span>
-                    <span>-{formatCurrency(totals.discount)}</span>
+                  <div className="flex justify-between text-emerald-400 border-b border-white/10 pb-3">
+                    <span className="font-jost">Discount</span>
+                    <span className="font-bold">-{formatCurrency(totals.discount)}</span>
                   </div>
                 )}
 
                 {/* Shipping row — uses live selectedCourier rate */}
-                <div className="flex justify-between">
-                  <span className="text-gray-600">
+                <div className="flex justify-between border-b border-white/10 pb-3">
+                  <span className="text-white/60 font-jost">
                     Shipping
                     {selectedCourier && (
-                      <span className="block text-xs text-gray-400">{selectedCourier.courierName}</span>
+                      <span className="block text-[10px] text-white/40">{selectedCourier.courierName}</span>
                     )}
                   </span>
                   {isFreeShipping || shippingRate === 0 ? (
-                    <span className="text-green-600 font-medium">FREE</span>
+                    <span className="text-emerald-400 font-bold">FREE</span>
                   ) : (
-                    <span className="font-medium">{formatCurrency(shippingRate)}</span>
+                    <span className="font-bold">{formatCurrency(shippingRate)}</span>
                   )}
                 </div>
 
                 {/* COD Charge */}
                 {paymentMethod === "CASH" && (selectedCourier?.codCharges > 0 || paymentSettings.codCharge > 0) && (
-                  <div className="flex justify-between text-gray-600">
-                    <span>COD Surcharge</span>
-                    <span className="font-medium">{formatCurrency(selectedCourier?.codCharges || paymentSettings.codCharge)}</span>
+                  <div className="flex justify-between text-amber-400 border-b border-white/10 pb-3">
+                    <span className="font-jost">COD Surcharge</span>
+                    <span className="font-bold">{formatCurrency(selectedCourier?.codCharges || paymentSettings.codCharge)}</span>
                   </div>
                 )}
 
@@ -1193,10 +1193,10 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                <div className="pt-4">
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
-                    <span>
+                <div className="pt-6">
+                  <div className="flex justify-between font-bold text-xl">
+                    <span className="font-jost">Total</span>
+                    <span className="text-[#E6A15A]">
                       {formatCurrency(
                         totals.subtotal
                         - (coupon ? parseFloat(coupon.discountAmount || 0) : 0)
@@ -1209,8 +1209,7 @@ export default function CheckoutPage() {
               </div>
 
               <Button
-                className={`w-full mt-6 bg-[#1F6F78] hover:bg-[#144D53] text-white transition-all duration-200 ${processing ? "shadow-lg" : "hover:shadow-lg"
-                  }`}
+                className={`w-full mt-8 bg-[#E6A15A] hover:bg-[#d8934a] text-[#144D53] font-jost font-bold py-6 rounded-2xl text-lg transition-all duration-300 shadow-[0_8px_25px_rgba(230,161,90,0.3)] hover:shadow-[0_12px_30px_rgba(230,161,90,0.4)] active:scale-[0.98] border-0`}
                 size="lg"
                 onClick={handleCheckout}
                 disabled={

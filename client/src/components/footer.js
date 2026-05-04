@@ -19,12 +19,16 @@ import {
   FaPinterestP,
 } from "react-icons/fa";
 import { fetchApi } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 
 export function Footer() {
+  const pathname = usePathname();
   const [socialLinks, setSocialLinks] = useState({});
   const [contactInfo, setContactInfo] = useState({});
   const [expandedSection, setExpandedSection] = useState(null);
+
+  const isAuthPage = ["/auth", "/forgot-password", "/verify-otp", "/reset-password", "/verify-email"].some(path => pathname.startsWith(path));
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -125,6 +129,8 @@ export function Footer() {
       </ul>
     </div>
   );
+
+  if (isAuthPage) return null;
 
   return (
     <footer className="mt-auto mb-14 lg:mb-0">

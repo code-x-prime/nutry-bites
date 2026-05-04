@@ -193,10 +193,12 @@ export default function ShoppableVideoCarousel() {
                           playsInline
                         />
                       ) : (
-                        <img
+                        <Image
                           src={item.mediaUrl}
                           alt={item.product?.name || "Product"}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          className="object-cover"
                         />
                       )
                     ) : item.mediaType === "YOUTUBE" && item.mediaUrl ? (

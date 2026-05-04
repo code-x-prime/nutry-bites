@@ -117,16 +117,16 @@ export default function AddressForm({
   };
 
   return (
-    <div className={isInline ? "p-4 border rounded-lg mb-4" : ""}>
+    <div className={isInline ? "p-8 bg-nyxis-gray-50/50 rounded-[24px] border border-nyxis-gray-100 mb-8" : ""}>
       {isInline && (
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold">Add New Address</h3>
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="font-jost text-lg font-bold text-[#144D53]">Add New Shipping Address</h3>
           <button
             onClick={onCancel}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-nyxis-gray-400 hover:text-red-500 transition-colors"
             aria-label="Close form"
           >
-            <XCircle className="h-5 w-5" />
+            <XCircle className="h-6 w-6" />
           </button>
         </div>
       )}
@@ -141,7 +141,7 @@ export default function AddressForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Full Name - Full width */}
           <div className="sm:col-span-2 lg:col-span-3">
-            <Label htmlFor="name">Full Name*</Label>
+            <Label htmlFor="name" className="text-nyxis-gray-600 mb-1.5 block">Full Name*</Label>
             <Input
               id="name"
               name="name"
@@ -282,7 +282,7 @@ export default function AddressForm({
               Cancel
             </Button>
           )}
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading} className="rounded-2xl px-8 py-6 h-auto bg-[#1F6F78] hover:bg-[#144D53] transition-all">
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {existingAddress ? "Update Address" : "Save Address"}
           </Button>

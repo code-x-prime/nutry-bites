@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FiMail as Mail, FiArrowLeft as ArrowLeft, FiLoader as Loader2 } from "react-icons/fi";
+import Image from "next/image";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -31,56 +32,99 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 py-8 px-4">
+    <div className="fixed inset-0 z-[100] flex bg-white overflow-hidden">
       <Toaster position="top-center" richColors />
-      <div className="w-full max-w-md">
-        <div className="bg-white/90 backdrop-blur rounded-2xl shadow-xl border border-slate-200/80 overflow-hidden">
-          <div className="bg-gradient-to-r from-[#1F6F78] to-[#1a7a68] px-8 py-6 text-white">
-            <h1 className="text-2xl font-bold tracking-tight">Forgot Password</h1>
-            <p className="text-emerald-100/90 text-sm mt-1">
-              Enter your email and we&apos;ll send you a link to reset your password
+
+      {/* Left Column: Visual Banner */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-[#144D53] overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/auth-banner.png"
+            alt="Healthy Food"
+            width={1920}
+            height={1080}
+            priority
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
+            className="object-cover opacity-80 scale-105 animate-subtle-zoom"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#144D53] via-[#144D53]/20 to-transparent" />
+        </div>
+
+
+      </div>
+
+      {/* Right Column: Form */}
+      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 lg:p-20 bg-white overflow-y-auto">
+        <div className="w-full max-w-md">
+          {/* Logo/Header */}
+          <div className="mb-10 text-center lg:text-left">
+            <Link href="/" className="inline-block mb-6">
+              <h1 className="font-jost text-4xl font-black text-[#144D53] tracking-tight">
+                NUTRY<span className="text-[#E6A15A]">BITES</span>
+              </h1>
+            </Link>
+            <h2 className="text-2xl font-jost font-bold text-slate-800">
+              Recover Password
+            </h2>
+            <p className="text-slate-500 mt-2">
+              Enter your email and we&apos;ll send you a link to reset your password.
             </p>
           </div>
 
-          <div className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <Input
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 h-11"
-                    required
-                  />
-                </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                <Input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-12 h-14 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-2xl"
+                  required
+                />
               </div>
-
-              <Button
-                type="submit"
-                disabled={submitting || loading}
-                className="w-full h-11 bg-[#1F6F78] hover:bg-[#125043]"
-              >
-                {submitting || loading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  "Send reset link"
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4 text-slate-500" />
-              <Link href="/auth" className="text-sm text-[#1F6F78] font-medium hover:underline">
-                Back to login
-              </Link>
             </div>
+
+            <Button
+              type="submit"
+              disabled={submitting || loading}
+              className="w-full h-14 bg-[#1F6F78] hover:bg-[#144D53] text-white font-bold text-lg rounded-2xl shadow-lg shadow-[#1F6F78]/20 transition-all active:scale-[0.98]"
+            >
+              {submitting || loading ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                "Send Reset Link"
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-8 flex items-center justify-center lg:justify-start gap-2">
+            <ArrowLeft className="h-4 w-4 text-slate-500" />
+            <Link href="/auth" className="text-sm text-[#1F6F78] font-bold hover:text-[#144D53] transition-colors">
+              Back to Sign In
+            </Link>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-20 text-center">
+            <p className="text-slate-400 text-xs">
+              Need more help? <Link href="/contact" className="text-slate-600 underline font-medium">Contact Support</Link>
+            </p>
           </div>
         </div>
       </div>
+
+      <style jsx global>{`
+        @keyframes subtle-zoom {
+          0% { transform: scale(1); }
+          100% { transform: scale(1.05); }
+        }
+        .animate-subtle-zoom {
+          animation: subtle-zoom 20s infinite alternate ease-in-out;
+        }
+      `}</style>
     </div>
   );
 }

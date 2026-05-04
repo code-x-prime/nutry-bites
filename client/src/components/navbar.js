@@ -28,6 +28,11 @@ import { toast, Toaster } from "sonner";
 import Image from "next/image";
 
 export function Navbar() {
+  const pathname = usePathname();
+  const isAuthPage = ["/auth", "/forgot-password", "/verify-otp", "/reset-password", "/verify-email"].some(path => pathname.startsWith(path));
+
+  // Hide navbar on auth pages
+
   const { user, isAuthenticated, logout } = useAuth();
   const { getCartItemCount } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,7 +47,6 @@ export function Navbar() {
   const searchInputRef = useRef(null);
   const navbarRef = useRef(null);
   const router = useRouter();
-  const pathname = usePathname();
 
   // Track scroll position for transparent/solid header
   useEffect(() => {
@@ -181,6 +185,8 @@ export function Navbar() {
     toast.success("Logged out successfully");
     window.location.href = "/";
   };
+
+  if (isAuthPage) return null;
 
   return (
     <>
@@ -715,7 +721,7 @@ export function Navbar() {
                                       <span className="font-medium">{cat.name}</span>
                                       <FiChevronDown className={cn("h-3.5 w-3.5 text-nyxis-gray-400 transition-transform", expandedCategory === cat.slug && "rotate-180")} />
                                     </button>
-                                    
+
                                     <div className={cn(
                                       "bg-nyxis-50 overflow-hidden transition-all duration-300",
                                       expandedCategory === cat.slug ? "max-h-[500px]" : "max-h-0"

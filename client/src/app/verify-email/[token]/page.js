@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ClientOnly } from "@/components/client-only";
 import { DynamicIcon } from "@/components/dynamic-icon";
+import Image from "next/image";
 
 // Helper function to check if token was already verified in this session
 const wasTokenVerifiedInSession = (token) => {
@@ -130,7 +131,7 @@ export default function VerifyEmailPage({ params }) {
           setStatus("error");
           setMessage(
             error.message ||
-              "Unable to verify email. The token may be invalid or expired."
+            "Unable to verify email. The token may be invalid or expired."
           );
         }
       }
@@ -166,101 +167,137 @@ export default function VerifyEmailPage({ params }) {
   };
 
   return (
-    <div className="container max-w-lg mx-auto p-8">
-      <div className="bg-white rounded-lg shadow-md p-8 text-center">
-        <h1 className="text-2xl font-bold mb-4">Email Verification</h1>
+    <div className="fixed inset-0 z-[100] flex bg-white overflow-hidden">
+      {/* Left Column: Visual Banner */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-[#144D53] overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/auth-banner.png"
+            alt="Healthy Food"
+            width={1920}
+            height={1080}
+            priority
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
+            className="object-cover opacity-80 scale-105 animate-subtle-zoom"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#144D53] via-[#144D53]/20 to-transparent" />
+        </div>
 
-        <ClientOnly fallback={<div className="py-8">Loading...</div>}>
-          {(status === "initial" || status === "verifying") && (
-            <div className="flex flex-col items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-              <p className="mt-4 text-gray-600">Verifying your email...</p>
-            </div>
-          )}
 
-          {status === "success" && (
-            <div className="flex flex-col items-center justify-center py-8">
-              <div className="rounded-full bg-green-100 p-3">
-                <DynamicIcon
-                  name="Check"
-                  className="h-12 w-12 text-green-500"
-                />
-              </div>
-              <p className="mt-4 text-green-600 font-medium">{message}</p>
-              <p className="mt-2 text-gray-600">
-                Your email has been verified successfully.
-              </p>
-              <p className="mt-2 text-sm text-gray-500">
-                Redirecting to login in {redirectCountdown} seconds...
-              </p>
-              <Link
-                href="/auth"
-                className="mt-6 inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-              >
-                Continue to Login{" "}
-                <DynamicIcon name="ArrowRight" className="ml-2 h-4 w-4" />
-              </Link>
-            </div>
-          )}
-
-          {status === "error" && (
-            <div className="flex flex-col items-center justify-center py-8">
-              <div className="rounded-full bg-red-100 p-3">
-                <DynamicIcon
-                  name="XCircle"
-                  className="h-12 w-12 text-red-500"
-                />
-              </div>
-              <p className="mt-4 text-red-600 font-medium">{message}</p>
-              <p className="mt-2 text-gray-600">
-                Please check if you clicked the correct link or try resending
-                the verification email.
-              </p>
-
-              <div className="mt-6 w-full max-w-xs">
-                <form onSubmit={handleResendVerification} className="space-y-3">
-                  <div>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email"
-                      className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      required
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={resending || !email}
-                    className="w-full px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 disabled:bg-gray-400"
-                  >
-                    {resending ? "Sending..." : "Resend Verification Email"}
-                  </button>
-                </form>
-              </div>
-
-              <Link href="/auth" className="mt-4 text-primary hover:underline">
-                Back to Registration
-              </Link>
-            </div>
-          )}
-
-          {status === "resent" && (
-            <div className="flex flex-col items-center justify-center py-8">
-              <div className="rounded-full bg-green-100 p-3">
-                <DynamicIcon name="Mail" className="h-12 w-12 text-green-500" />
-              </div>
-              <p className="mt-4 text-green-600 font-medium">{message}</p>
-              <p className="mt-2 text-gray-600">
-                Please check your email for the verification link.
-              </p>
-              <Link href="/auth" className="mt-6 text-primary hover:underline">
-                Back to Login
-              </Link>
-            </div>
-          )}
-        </ClientOnly>
       </div>
+
+      {/* Right Column: Status Content */}
+      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 lg:p-20 bg-white overflow-y-auto">
+        <div className="w-full max-w-md text-center">
+          <Link href="/" className="inline-block mb-12">
+            <h1 className="font-jost text-4xl font-black text-[#144D53] tracking-tight">
+              NUTRY<span className="text-[#E6A15A]">BITES</span>
+            </h1>
+          </Link>
+
+          <ClientOnly fallback={<div className="py-8 text-slate-400 font-medium">Loading...</div>}>
+            {(status === "initial" || status === "verifying") && (
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="relative w-20 h-20 mb-6">
+                  <div className="absolute inset-0 border-4 border-[#1F6F78]/20 rounded-full"></div>
+                  <div className="absolute inset-0 border-4 border-[#1F6F78] border-t-transparent rounded-full animate-spin"></div>
+                </div>
+                <h2 className="text-2xl font-jost font-bold text-slate-800 mb-2">Verifying Email</h2>
+                <p className="text-slate-500">Please wait while we confirm your email address...</p>
+              </div>
+            )}
+
+            {status === "success" && (
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="w-20 h-20 bg-emerald-100 rounded-3xl flex items-center justify-center mb-6 scale-up-animation">
+                  <DynamicIcon name="Check" className="h-10 w-10 text-emerald-600" />
+                </div>
+                <h2 className="text-3xl font-jost font-bold text-slate-800 mb-2">Success!</h2>
+                <p className="text-slate-600 font-medium mb-4">{message}</p>
+                <p className="text-sm text-slate-400 mb-8">
+                  Redirecting to login in <span className="font-bold text-[#1F6F78]">{redirectCountdown}s</span>
+                </p>
+                <Link
+                  href="/auth"
+                  className="w-full h-14 bg-[#1F6F78] hover:bg-[#144D53] text-white font-bold text-lg rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all"
+                >
+                  Go to Login <DynamicIcon name="ArrowRight" className="h-5 w-5" />
+                </Link>
+              </div>
+            )}
+
+            {status === "error" && (
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="w-20 h-20 bg-red-100 rounded-3xl flex items-center justify-center mb-6">
+                  <DynamicIcon name="XCircle" className="h-10 w-10 text-red-500" />
+                </div>
+                <h2 className="text-2xl font-jost font-bold text-slate-800 mb-2">Verification Failed</h2>
+                <p className="text-slate-600 mb-8">{message}</p>
+
+                <div className="w-full space-y-4">
+                  <form onSubmit={handleResendVerification} className="space-y-4 text-left">
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-slate-700 ml-1">Try again with your email</label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        className="w-full h-14 px-5 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-[#1F6F78] focus:bg-white outline-none transition-all"
+                        required
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={resending || !email}
+                      className="w-full h-14 bg-[#1F6F78] text-white font-bold rounded-2xl hover:bg-[#144D53] disabled:bg-slate-300 transition-all shadow-md"
+                    >
+                      {resending ? "Sending..." : "Resend Verification Link"}
+                    </button>
+                  </form>
+
+                  <Link href="/auth" className="block text-sm font-bold text-[#1F6F78] hover:underline">
+                    Back to Registration
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {status === "resent" && (
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="w-20 h-20 bg-emerald-100 rounded-3xl flex items-center justify-center mb-6">
+                  <DynamicIcon name="Mail" className="h-10 w-10 text-emerald-600" />
+                </div>
+                <h2 className="text-2xl font-jost font-bold text-slate-800 mb-2">Email Sent!</h2>
+                <p className="text-slate-600 mb-8">{message}</p>
+                <Link
+                  href="/auth"
+                  className="w-full h-14 border-2 border-[#1F6F78] text-[#1F6F78] font-bold rounded-2xl hover:bg-[#1F6F78]/5 transition-all flex items-center justify-center"
+                >
+                  Back to Login
+                </Link>
+              </div>
+            )}
+          </ClientOnly>
+        </div>
+      </div>
+
+      <style jsx global>{`
+        @keyframes subtle-zoom {
+          0% { transform: scale(1); }
+          100% { transform: scale(1.05); }
+        }
+        .animate-subtle-zoom {
+          animation: subtle-zoom 20s infinite alternate ease-in-out;
+        }
+        @keyframes scale-up {
+          0% { transform: scale(0.8); opacity: 0; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        .scale-up-animation {
+          animation: scale-up 0.4s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 }

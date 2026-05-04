@@ -12,7 +12,7 @@ import useEmblaCarousel from "embla-carousel-react";
 
 // Helper function to format image URLs correctly
 const getImageUrl = (image) => {
-  if (!image) return "/product-placeholder.jpg";
+  if (!image) return "/product-placeholder.png";
   if (image.startsWith("http")) return image;
   return `https://desirediv-storage.blr1.digitaloceanspaces.com/${image}`;
 };
@@ -125,7 +125,7 @@ export default function ProductCarousel({
     return (
       <div className="relative h-[450px] w-full bg-gray-100 flex items-center justify-center border rounded-md mb-6">
         <Image
-          src="/product-placeholder.jpg"
+          src="/product-placeholder.png"
           alt={productName}
           fill
           className="object-contain p-4"
@@ -202,11 +202,10 @@ export default function ProductCarousel({
                 {images.map((image, index) => (
                   <div
                     key={index}
-                    className={`relative flex-shrink-0 cursor-pointer overflow-hidden rounded-md border-2 transition-all hover:shadow-md ${
-                      selectedSlide === index
+                    className={`relative flex-shrink-0 cursor-pointer overflow-hidden rounded-md border-2 transition-all hover:shadow-md ${selectedSlide === index
                         ? "border-primary"
                         : "border-transparent hover:border-gray-300"
-                    }`}
+                      }`}
                     onClick={() => onThumbClick(index)}
                   >
                     <div className="relative w-20 h-20">

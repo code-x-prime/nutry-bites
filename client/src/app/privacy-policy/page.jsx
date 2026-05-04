@@ -68,8 +68,8 @@ const sections = [
         </ul>
         <p className="mt-3">
           To exercise your rights, contact us at{" "}
-          <a href="mailto:nutrybites@gmail.com" className="text-[#1F6F78] font-semibold hover:text-[#E6A15A] transition-colors">
-            nutrybites@gmail.com
+          <a href="mailto:nutrybitesstore@gmail.com" className="text-[#1F6F78] font-semibold hover:text-[#E6A15A] transition-colors">
+            nutrybitesstore@gmail.com
           </a>
         </p>
       </>

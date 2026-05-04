@@ -22,7 +22,7 @@ const CategoryCard = ({ category }) => {
           </div>
         ) : (
           <Image
-            src={category.image || "/placeholder.jpg"}
+            src={category.image || "/placeholder.png"}
             alt={category.name || "Category"}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"

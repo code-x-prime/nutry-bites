@@ -35,7 +35,7 @@ export function Footer() {
         if (res?.success) {
           setSocialLinks(res.data?.socialLinks || {});
           setContactInfo({
-            email: res.data?.contactEmail || "support@nutrybites.com",
+            email: res.data?.contactEmail || "nutrybitesstore@gmail.com",
             phone: res.data?.contactPhone || "+91 93150 71969",
             address: res.data?.contactAddress || "India",
           });

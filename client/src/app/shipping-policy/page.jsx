@@ -133,8 +133,8 @@ export default function ShippingPolicy() {
           {/* Footer CTA */}
           <div className="p-8 md:p-10 bg-[#f0f9f8] border-t border-gray-100 text-center">
             <p className="text-gray-600 font-lato mb-1">For any shipping-related queries, contact us at</p>
-            <a href="mailto:nutrybites@gmail.com" className="text-[#1F6F78] font-bold hover:text-[#E6A15A] transition-colors">
-              nutrybites@gmail.com
+            <a href="mailto:nutrybitesstore@gmail.com" className="text-[#1F6F78] font-bold hover:text-[#E6A15A] transition-colors">
+              nutrybitesstore@gmail.com
             </a>
             <div className="mt-5">
               <Link

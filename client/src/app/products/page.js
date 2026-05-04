@@ -605,18 +605,7 @@ function ProductsContent() {
             className="object-cover object-center"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent flex flex-col justify-center px-6 md:pl-16">
-            <span className="inline-block px-3 py-1 bg-[#E6A15A] text-white text-[10px] font-bold tracking-widest uppercase rounded-full mb-3 w-fit">
-              Premium Collection
-            </span>
-            <h1 className="text-2xl md:text-6xl font-bold text-white mb-2 md:mb-4 font-jost tracking-tight">
-              HEALTHY <span className="text-[#E6A15A]">SNACKS</span>
-            </h1>
-            <p className="text-xs md:text-xl text-white/90 max-w-xl font-lato leading-relaxed">
-              Discover our range of roasted Makhana and wholesome munchies.
-              Pure goodness, oil-free, and perfectly crunchy.
-            </p>
-          </div>
+
         </div>
 
         {/* Mobile filter toggle */}
@@ -636,8 +625,8 @@ function ProductsContent() {
           {/* Filters Sidebar */}
           <div
             className={`md:w-1/4 lg:w-1/5 ${mobileFiltersOpen
-                ? "block fixed inset-0 z-50 bg-white p-4 overflow-auto"
-                : "hidden"
+              ? "block fixed inset-0 z-50 bg-white p-4 overflow-auto"
+              : "hidden"
               } md:block md:static md:z-auto md:bg-transparent md:p-0`}
           >
             <div className="bg-white rounded-lg shadow-sm border sticky top-28">
@@ -674,8 +663,8 @@ function ProductsContent() {
                 </div>
                 <div
                   className={`overflow-hidden transition-all duration-300 ease-in-out ${activeFilterSection === "search"
-                      ? "max-h-[500px] opacity-100"
-                      : "max-h-0 opacity-0"
+                    ? "max-h-[500px] opacity-100"
+                    : "max-h-0 opacity-0"
                     }`}
                 >
                   <form
@@ -717,8 +706,8 @@ function ProductsContent() {
                 </div>
                 <div
                   className={`overflow-hidden transition-all duration-300 ease-in-out ${activeFilterSection === "categories"
-                      ? "max-h-[500px] opacity-100"
-                      : "max-h-0 opacity-0"
+                    ? "max-h-[500px] opacity-100"
+                    : "max-h-0 opacity-0"
                     }`}
                 >
                   <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -726,8 +715,8 @@ function ProductsContent() {
                       <div key={category.id} className="ml-2">
                         <div
                           className={`cursor-pointer hover:text-nyxis-500 flex items-center ${filters.category === category.slug
-                              ? "font-medium text-nyxis-500"
-                              : ""
+                            ? "font-medium text-nyxis-500"
+                            : ""
                             }`}
                           onClick={() =>
                             handleFilterChange("category", category.slug)
@@ -742,8 +731,8 @@ function ProductsContent() {
                               <div
                                 key={child.id}
                                 className={`cursor-pointer hover:text-nyxis-500 text-sm ${filters.category === child.slug
-                                    ? "font-medium text-nyxis-500"
-                                    : ""
+                                  ? "font-medium text-nyxis-500"
+                                  : ""
                                   }`}
                                 onClick={() =>
                                   handleFilterChange("category", child.slug)
@@ -791,8 +780,8 @@ function ProductsContent() {
                       </div>
                       <div
                         className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen
-                            ? "max-h-[500px] opacity-100"
-                            : "max-h-0 opacity-0"
+                          ? "max-h-[500px] opacity-100"
+                          : "max-h-0 opacity-0"
                           }`}
                       >
                         <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -800,8 +789,8 @@ function ProductsContent() {
                             <div
                               key={value.id}
                               className={`cursor-pointer hover:text-nyxis-500 ml-2 flex items-center ${displaySelectedValues.includes(value.id)
-                                  ? "font-medium text-nyxis-500"
-                                  : ""
+                                ? "font-medium text-nyxis-500"
+                                : ""
                                 }`}
                               onClick={() => handleColorChange(value.id)}
                             >
@@ -857,8 +846,8 @@ function ProductsContent() {
                       </div>
                       <div
                         className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen
-                            ? "max-h-[500px] opacity-100"
-                            : "max-h-0 opacity-0"
+                          ? "max-h-[500px] opacity-100"
+                          : "max-h-0 opacity-0"
                           }`}
                       >
                         <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -866,8 +855,8 @@ function ProductsContent() {
                             <div
                               key={value.id}
                               className={`cursor-pointer hover:text-nyxis-500 ml-2 flex items-center ${displaySelectedValues.includes(value.id)
-                                  ? "font-medium text-nyxis-500"
-                                  : ""
+                                ? "font-medium text-nyxis-500"
+                                : ""
                                 }`}
                               onClick={() => handleSizeChange(value.id)}
                             >
@@ -906,8 +895,8 @@ function ProductsContent() {
                     </div>
                     <div
                       className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen
-                          ? "max-h-[500px] opacity-100"
-                          : "max-h-0 opacity-0"
+                        ? "max-h-[500px] opacity-100"
+                        : "max-h-0 opacity-0"
                         }`}
                     >
                       <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -915,8 +904,8 @@ function ProductsContent() {
                           <div
                             key={value.id}
                             className={`cursor-pointer hover:text-nyxis-500 ml-2 flex items-center ${selectedValues.includes(value.id)
-                                ? "font-medium text-nyxis-500"
-                                : ""
+                              ? "font-medium text-nyxis-500"
+                              : ""
                               }`}
                             onClick={() =>
                               handleAttributeValueChange(
@@ -1244,8 +1233,8 @@ function ProductsContent() {
                           onClick={() => handlePageChange(page)}
                           disabled={loading}
                           className={`px-3 py-2 text-sm ${pagination.page === page
-                              ? "bg-nyxis-500 text-white"
-                              : "hover:bg-gray-100"
+                            ? "bg-nyxis-500 text-white"
+                            : "hover:bg-gray-100"
                             }`}
                         >
                           {page}

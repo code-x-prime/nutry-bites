@@ -1,11 +1,11 @@
 import { getStoreConfig } from "../../utils/storeConfig.js";
 
 export const getVerificationTemplate = (
-  verificationLink,
-  storeConfig = null
+    verificationLink,
+    storeConfig = null
 ) => {
-  const store = storeConfig || getStoreConfig();
-  return `
+    const store = storeConfig || getStoreConfig();
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,16 +106,14 @@ export const getVerificationTemplate = (
         <div class="content">
             <h2>Verify Your Email</h2>
             <p>Dear Valued Customer,</p>
-            <p>Welcome to ${store.storeName} - ${
-    store.storeDescription
-  }. Please verify your email address to access your account:</p>
+            <p>Welcome to ${store.storeName} - ${store.storeDescription
+        }. Please verify your email address to access your account:</p>
             <div class="button-container">
                 <a href="${verificationLink}" class="button">Verify Email Now</a>
             </div>
             <p>If you can't click the button, copy and paste this link in your browser: <br>${verificationLink}</p>
-            <p>If you didn't create an account with ${
-              store.storeName
-            }, please disregard this email.</p>
+            <p>If you didn't create an account with ${store.storeName
+        }, please disregard this email.</p>
             
             <div class="features">
                 <h3>What you can do after verification:</h3>
@@ -126,9 +124,8 @@ export const getVerificationTemplate = (
             </div>
         </div>
         <div class="footer">
-            © ${new Date().getFullYear()} ${store.storeName} | ${
-    store.storeTagline
-  }<br>
+            © ${new Date().getFullYear()} ${store.storeName} | ${store.storeTagline
+        }<br>
             This is an automated message. Please do not reply to this email.
         </div>
     </div>
@@ -138,12 +135,12 @@ export const getVerificationTemplate = (
 };
 
 export const getEmailOtpTemplate = (
-  otp,
-  expiresInMinutes = 10,
-  storeConfig = null
+    otp,
+    expiresInMinutes = 10,
+    storeConfig = null
 ) => {
-  const store = storeConfig || getStoreConfig();
-  return `
+    const store = storeConfig || getStoreConfig();
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -169,18 +166,16 @@ export const getEmailOtpTemplate = (
             </div>
             <div class="content">
                 <p>Dear Valued Customer,</p>
-                <p>Use the following One-Time Password (OTP) to verify your email for ${
-                  store.storeName
-                }:</p>
+                <p>Use the following One-Time Password (OTP) to verify your email for ${store.storeName
+        }:</p>
                 <p style="text-align:center; margin: 24px 0;">
                     <span class="otp">${otp}</span>
                 </p>
                 <p class="note">This OTP will expire in ${expiresInMinutes} minutes. If you did not request this, please ignore this email.</p>
             </div>
             <div class="footer">
-                © ${new Date().getFullYear()} ${store.storeName} | ${
-    store.storeTagline
-  }<br/>
+                © ${new Date().getFullYear()} ${store.storeName} | ${store.storeTagline
+        }<br/>
                 This is an automated message. Please do not reply.
             </div>
         </div>
@@ -190,8 +185,8 @@ export const getEmailOtpTemplate = (
 };
 
 export const getDeleteTemplate = (deletionLink, storeConfig = null) => {
-  const store = storeConfig || getStoreConfig();
-  return `
+    const store = storeConfig || getStoreConfig();
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -320,7 +315,7 @@ export const getDeleteTemplate = (deletionLink, storeConfig = null) => {
                     Contact our support team for assistance
                 </div>
             </div>
-            <p>If you didn't request this deletion, please contact our support team immediately at support@nutrybites.com.</p>
+            <p>If you didn't request this deletion, please contact our support team immediately at nutrybitesstore@gmail.com.</p>
         </div>
         <div class="footer">
             © ${new Date().getFullYear()} Nutry Bites | Healthy Snacks Anytime<br>
@@ -333,8 +328,8 @@ export const getDeleteTemplate = (deletionLink, storeConfig = null) => {
 };
 
 export const getResetTemplate = (resetLink, storeConfig = null) => {
-  const store = storeConfig || getStoreConfig();
-  return `
+    const store = storeConfig || getStoreConfig();
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -417,19 +412,16 @@ export const getResetTemplate = (resetLink, storeConfig = null) => {
         <div class="content">
             <h2>Password Reset Request</h2>
             <p>Dear Valued Customer,</p>
-            <p>We received a request to reset the password for your ${
-              store.storeName
-            } account. Click the button below to create a new password:</p>
+            <p>We received a request to reset the password for your ${store.storeName
+        } account. Click the button below to create a new password:</p>
             <a href="${resetLink}" class="button">Reset Password</a>
-            <p>If you didn't request this password reset, please contact our support team immediately at ${
-              store.supportEmail || store.storeEmail
-            }</p>
+            <p>If you didn't request this password reset, please contact our support team immediately at ${store.supportEmail || store.storeEmail
+        }</p>
             <p>This link will expire in 15 minutes for security reasons.</p>
         </div>
         <div class="footer">
-            © ${new Date().getFullYear()} ${store.storeName} | ${
-    store.storeTagline
-  }<br>
+            © ${new Date().getFullYear()} ${store.storeName} | ${store.storeTagline
+        }<br>
             This is an automated message. Please do not reply to this email.
         </div>
     </div>
@@ -440,8 +432,8 @@ export const getResetTemplate = (resetLink, storeConfig = null) => {
 
 /** Admin Dashboard password reset template */
 export const getAdminResetTemplate = (resetLink, storeConfig = null) => {
-  const store = storeConfig || getStoreConfig();
-  return `
+    const store = storeConfig || getStoreConfig();
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -565,8 +557,8 @@ export const getFeeReceiptTemplate = (data) => `
                 <p><strong>Amount Paid:</strong> ₹${data.amount}</p>
                 <p><strong>Payment ID:</strong> ${data.paymentId}</p>
                 <p><strong>Date:</strong> ${new Date(
-                  data.date
-                ).toLocaleDateString()}</p>
+    data.date
+).toLocaleDateString()}</p>
             </div>
             <p>Please find your receipt attached to this email. We look forward to snacking healthy with us.</p>
         </div>
@@ -665,46 +657,42 @@ export const getFeeNotificationTemplate = (data) => `
                 <div class="fee-item">
                     <strong>Due Date:</strong>
                     <span class="important">${new Date(
-                      data.dueDate
-                    ).toLocaleDateString()}</span>
+    data.dueDate
+).toLocaleDateString()}</span>
                 </div>
-                ${
-                  data.description
-                    ? `
+                ${data.description
+        ? `
                 <div class="fee-item">
                     <strong>Description:</strong>
                     <span>${data.description}</span>
                 </div>
                 `
-                    : ""
-                }
-                ${
-                  data.lateFeeDate
-                    ? `
+        : ""
+    }
+                ${data.lateFeeDate
+        ? `
                 <div class="fee-item">
                     <strong>Late Fee After:</strong>
                     <span class="important">${new Date(
-                      data.lateFeeDate
-                    ).toLocaleDateString()}</span>
+            data.lateFeeDate
+        ).toLocaleDateString()}</span>
                 </div>
                 `
-                    : ""
-                }
-                ${
-                  data.lateFeeAmount
-                    ? `
+        : ""
+    }
+                ${data.lateFeeAmount
+        ? `
                 <div class="fee-item">
                     <strong>Late Fee Amount:</strong>
                     <span class="important">₹${data.lateFeeAmount}</span>
                 </div>
                 `
-                    : ""
-                }
+        : ""
+    }
             </div>
             <p>Please ensure timely payment to continue your healthy snacking habit with us.</p>
-            <a href="${
-              process.env.FRONTEND_URL
-            }/dashboard/fees" class="btn">View Fee Details</a>
+            <a href="${process.env.FRONTEND_URL
+    }/dashboard/fees" class="btn">View Fee Details</a>
         </div>
         <div class="footer">
             <p>© ${new Date().getFullYear()} Nutry Bites | Healthy Snacks Anytime</p>
@@ -808,12 +796,12 @@ export const getPaymentSuccessTemplate = (data) => `
                 <div class="detail-row">
                     <strong>Date:</strong>
                     <span>${new Date(data.date).toLocaleString("en-IN", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}</span>
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+})}</span>
                 </div>
                 <div class="detail-row">
                     <strong>Fee Type:</strong>
@@ -826,7 +814,7 @@ export const getPaymentSuccessTemplate = (data) => `
         </div>
         <div class="footer">
             <p>© ${new Date().getFullYear()} Nutry Bites | Healthy Snacks Anytime</p>
-            <p>For any queries, please contact our support team at support@nutrybites.com</p>
+            <p>For any queries, please contact our support team at nutrybitesstore@gmail.com</p>
         </div>
     </div>
 </body>
@@ -909,12 +897,11 @@ export const getPaymentFailureTemplate = (data) => `
                 <h3>Transaction Details:</h3>
                 <p><strong>Amount:</strong> ₹${data.amount}</p>
                 <p><strong>Date:</strong> ${new Date(data.date).toLocaleString(
-                  "en-IN"
-                )}</p>
+    "en-IN"
+)}</p>
                 <p><strong>Fee Type:</strong> ${data.feeTitle}</p>
-                <p><strong>Error:</strong> ${
-                  data.error || "Transaction could not be completed"
-                }</p>
+                <p><strong>Error:</strong> ${data.error || "Transaction could not be completed"
+    }</p>
             </div>
 
             <p>Possible reasons for payment failure:</p>
@@ -927,15 +914,14 @@ export const getPaymentFailureTemplate = (data) => `
 
             <p>Please try again or contact your bank if the issue persists.</p>
             
-            <a href="${
-              process.env.FRONTEND_URL
-            }/dashboard/fees" class="retry-button">
+            <a href="${process.env.FRONTEND_URL
+    }/dashboard/fees" class="retry-button">
                 Retry Payment
             </a>
         </div>
         <div class="footer">
             <p>© ${new Date().getFullYear()} Nutry Bites | Healthy Snacks Anytime</p>
-            <p>Need help? Contact our support team at support@nutrybites.com</p>
+            <p>Need help? Contact our support team at nutrybitesstore@gmail.com</p>
         </div>
     </div>
 </body>
@@ -943,13 +929,13 @@ export const getPaymentFailureTemplate = (data) => `
 `;
 
 export const getFeeUpdateTemplate = ({
-  name,
-  feeTitle,
-  oldAmount,
-  newAmount,
-  oldDate,
-  newDate,
-  reason,
+    name,
+    feeTitle,
+    oldAmount,
+    newAmount,
+    oldDate,
+    newDate,
+    reason,
 }) => `
 <!DOCTYPE html>
 <html>
@@ -1094,16 +1080,14 @@ export const getCertificateGeneratedTemplate = (data) => `
             
             <div class="certificate-info">
                 <p><strong>Your certificate of healthy snacking excellence has been generated!</strong></p>
-                <p>Certificate ID: <span class="certificate-id">${
-                  data.certificateId
-                }</span></p>
+                <p>Certificate ID: <span class="certificate-id">${data.certificateId
+    }</span></p>
                 <p>You can now access and download your certificate from your profile. This marks an important milestone in your snacking journey with us.</p>
             </div>
 
             <center>
-                <a href="${
-                  process.env.FRONTEND_URL
-                }/user-profile" class="button">View Certificate</a>
+                <a href="${process.env.FRONTEND_URL
+    }/user-profile" class="button">View Certificate</a>
             </center>
 
             <p>This certificate validates your dedication to healthy snacking and your commitment to learning. Continue on the path of healthy snacking excellence!</p>
@@ -1229,8 +1213,8 @@ export const getContactFormTemplate = (data) => `
 `;
 
 export const getOrderConfirmationTemplate = (data, storeConfig = null) => {
-  const store = storeConfig || getStoreConfig();
-  return `
+    const store = storeConfig || getStoreConfig();
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1353,8 +1337,8 @@ export const getOrderConfirmationTemplate = (data, storeConfig = null) => {
                 <div class="detail-row">
                     <span class="detail-label">Order Date:</span>
                     <span>${new Date(
-                      data.orderDate
-                    ).toLocaleDateString()}</span>
+        data.orderDate
+    ).toLocaleDateString()}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Payment Method:</span>
@@ -1372,16 +1356,16 @@ export const getOrderConfirmationTemplate = (data, storeConfig = null) => {
                 </thead>
                 <tbody>
                     ${data.items
-                      .map(
-                        (item) => `
+            .map(
+                (item) => `
                     <tr>
                         <td>${item.name} ${item.variant}</td>
                         <td>${item.quantity}</td>
                         <td>₹${item.price}</td>
                     </tr>
                     `
-                      )
-                      .join("")}
+            )
+            .join("")}
                     <tr class="total-row">
                         <td colspan="2">Subtotal</td>
                         <td>₹${data.subtotal}</td>
@@ -1406,30 +1390,25 @@ export const getOrderConfirmationTemplate = (data, storeConfig = null) => {
                 <p>
                     ${data.shippingAddress.name}<br>
                     ${data.shippingAddress.street}<br>
-                    ${data.shippingAddress.city}, ${
-    data.shippingAddress.state
-  } ${data.shippingAddress.postalCode}<br>
+                    ${data.shippingAddress.city}, ${data.shippingAddress.state
+        } ${data.shippingAddress.postalCode}<br>
                     ${data.shippingAddress.country}
                 </p>
             </div>
             
             <p>You can track your order status in your account dashboard:</p>
             <div class="button-container">
-                <a href="${
-                  process.env.FRONTEND_URL
-                }/account/orders" class="button">Track Your Order</a>
+                <a href="${process.env.FRONTEND_URL
+        }/account/orders" class="button">Track Your Order</a>
             </div>
-            <p>If you can't click the button, copy and paste this link in your browser: <br>${
-              process.env.FRONTEND_URL
-            }/account/orders</p>
+            <p>If you can't click the button, copy and paste this link in your browser: <br>${process.env.FRONTEND_URL
+        }/account/orders</p>
         </div>
         <div class="footer">
-            © ${new Date().getFullYear()} ${store.storeName} | ${
-    store.storeTagline
-  }<br>
-            Questions? Contact our customer support at ${
-              store.supportEmail || store.storeEmail
-            }
+            © ${new Date().getFullYear()} ${store.storeName} | ${store.storeTagline
+        }<br>
+            Questions? Contact our customer support at ${store.supportEmail || store.storeEmail
+        }
             ${store.orderEmailFooter ? `<br><br>${store.orderEmailFooter}` : ""}
         </div>
     </div>
@@ -1439,8 +1418,8 @@ export const getOrderConfirmationTemplate = (data, storeConfig = null) => {
 };
 
 export const getPartnerResetTemplate = (resetLink, storeConfig = null) => {
-  const store = storeConfig || getStoreConfig();
-  return `
+    const store = storeConfig || getStoreConfig();
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1531,9 +1510,8 @@ export const getPartnerResetTemplate = (resetLink, storeConfig = null) => {
         <div class="content">
             <h2>Password Reset Request</h2>
             <p>Dear Partner,</p>
-            <p>We received a request to reset the password for your ${
-              store.storeName
-            } Partner account. Click the button below to create a new password:</p>
+            <p>We received a request to reset the password for your ${store.storeName
+        } Partner account. Click the button below to create a new password:</p>
             
             <div style="text-align: center; margin: 30px 0;">
                 <a href="${resetLink}" class="button">Reset Partner Password</a>
@@ -1548,9 +1526,8 @@ export const getPartnerResetTemplate = (resetLink, storeConfig = null) => {
             <p>If you didn't request this password reset, please ignore this email or contact our partner support team.</p>
         </div>
         <div class="footer">
-            © ${new Date().getFullYear()} ${store.storeName} | ${
-    store.storeTagline
-  }<br>
+            © ${new Date().getFullYear()} ${store.storeName} | ${store.storeTagline
+        }<br>
             This is an automated message. Please do not reply to this email.
         </div>
     </div>

@@ -374,7 +374,7 @@ export default function ProductContent({ slug }) {
       return (
         <div className="relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden">
           <Image
-            src="/images/product-placeholder.jpg"
+            src="/images/product-placeholder.png"
             alt={product?.name || "Product"}
             fill
             className="object-contain"
@@ -445,7 +445,7 @@ export default function ProductContent({ slug }) {
 
   // Get image URL helper
   const getImageUrl = (image) => {
-    if (!image) return "/images/product-placeholder.jpg";
+    if (!image) return "/images/product-placeholder.png";
     if (image.startsWith("http")) return image;
     return `https://desirediv-storage.blr1.cdn.digitaloceanspaces.com/${image}`;
   };
@@ -1246,7 +1246,7 @@ export default function ProductContent({ slug }) {
                     }
                   }
                   if (product.image) return getImageUrl(product.image);
-                  return "/product-placeholder.jpg";
+                  return "/product-placeholder.png";
                 };
                 return (
                   <Link

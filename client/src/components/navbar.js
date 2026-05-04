@@ -38,6 +38,7 @@ export function Navbar() {
   const [activeMenu, setActiveMenu] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [expandedMobileMenu, setExpandedMobileMenu] = useState(null);
+  const [expandedCategory, setExpandedCategory] = useState(null);
   const searchInputRef = useRef(null);
   const navbarRef = useRef(null);
   const router = useRouter();
@@ -86,7 +87,7 @@ export function Navbar() {
       { name: "ALL PRODUCTS", href: "/products", isStatic: true },
       { name: "CATEGORIES", href: "/categories", isStatic: true },
       { name: "NEW ARRIVALS", href: "/products?productType=new", highlight: true },
-      { name: "SALE", href: "/products?sale=true", highlight: true, isSale: true },
+
       { name: "ABOUT", href: "/about", isStatic: true },
       { name: "CONTACT", href: "/contact", isStatic: true },
     ];
@@ -107,31 +108,21 @@ export function Navbar() {
             },
           ];
 
-          // Add categories with sub-categories
-          response.data.categories.forEach((category) => {
-            const menuItem = {
-              name: category.name.toUpperCase(),
-              href: `/products?category=${category.slug}`,
-            };
-
-            // Add mega menu if category has sub-categories
-            if (category.subCategories && category.subCategories.length > 0) {
-              menuItem.megaMenu = {
-                categories: [
-                  {
-                    name: `Shop All ${category.name}`,
-                    href: `/products?category=${category.slug}`
-                  },
-                  ...category.subCategories.map((subCat) => ({
-                    name: subCat.name,
-                    href: `/products?category=${category.slug}&subCategory=${subCat.slug}`,
-                  })),
-                ],
-              };
-            }
-
-            dynamicMenuItems.push(menuItem);
-          });
+          // Add a single "CATEGORIES" menu item that contains all categories
+          if (response.data.categories.length > 0) {
+            dynamicMenuItems.push({
+              name: "CATEGORIES",
+              href: "/categories",
+              isCategories: true,
+              megaMenu: {
+                categories: response.data.categories.map((cat) => ({
+                  name: cat.name,
+                  slug: cat.slug,
+                  subCategories: cat.subCategories || [],
+                })),
+              },
+            });
+          }
 
           // Add static tail links
           dynamicMenuItems.push({
@@ -141,7 +132,11 @@ export function Navbar() {
             isSale: true,
           });
           dynamicMenuItems.push({ name: "ABOUT", href: "/about", isStatic: true });
-          dynamicMenuItems.push({ name: "CONTACT", href: "/contact", isStatic: true });
+          dynamicMenuItems.push({
+            name: "CONTACT",
+            href: "/contact",
+            isStatic: true,
+          });
 
           setMenuItems(dynamicMenuItems);
         } else {
@@ -429,7 +424,7 @@ export function Navbar() {
               {menuItems.map((item) => (
                 <li
                   key={item.name}
-                  className="relative"
+                  className="relative group"
                   onMouseEnter={() => item.megaMenu && setActiveMenu(item.name)}
                   onMouseLeave={() => setActiveMenu(null)}
                 >
@@ -443,20 +438,26 @@ export function Navbar() {
                           : "text-nyxis-500 hover:text-nyxis-600"
                       )}
                     >
-                      {item.isSale ? `🔥 ${item.name}` : `🍃 ${item.name}`}
+                      {item.isSale ? ` ${item.name}` : `🍃 ${item.name}`}
                     </Link>
                   ) : (
                     <Link
                       href={item.href}
                       className={cn(
-                        "block px-4 py-2.5 text-sm font-medium tracking-wide transition-colors relative",
+                        "flex items-center gap-1 px-4 py-2.5 text-sm font-medium tracking-wide transition-all relative hover:bg-nyxis-50 rounded-lg",
                         pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
-                          ? "text-[#1F6F78] font-semibold"
+                          ? "text-[#1F6F78] font-bold"
                           : "text-gray-700 hover:text-[#1F6F78]",
                         activeMenu === item.name && "text-[#1F6F78]"
                       )}
                     >
-                      {item.name}
+                      <span>{item.name}</span>
+                      {item.megaMenu && (
+                        <FiChevronDown className={cn(
+                          "h-3.5 w-3.5 transition-transform duration-300 opacity-60 group-hover:opacity-100",
+                          activeMenu === item.name && "rotate-180"
+                        )} />
+                      )}
                       {/* Bottom active indicator */}
                       <span
                         className={cn(
@@ -473,30 +474,76 @@ export function Navbar() {
                   {item.megaMenu && (
                     <div
                       className={cn(
-                        "absolute left-1/2 -translate-x-1/2 top-full w-[280px] bg-white rounded-xl shadow-dropdown border border-nyxis-gray-200 transition-all duration-200 origin-top z-50",
+                        "absolute top-full bg-white rounded-xl shadow-dropdown border border-nyxis-gray-200 transition-all duration-200 origin-top z-50",
+                        item.isCategories
+                          ? "left-1/2 -translate-x-1/2 w-[800px] max-w-[95vw]"
+                          : "left-1/2 -translate-x-1/2 w-[280px]",
                         activeMenu === item.name
                           ? "opacity-100 scale-100 visible"
                           : "opacity-0 scale-95 invisible pointer-events-none"
                       )}
                     >
-                      <div className="p-5">
-                        <h3 className="text-xs font-bold text-nyxis-500 tracking-widest mb-3 uppercase">
-                          Shop by Category
-                        </h3>
-                        <ul className="space-y-1">
-                          {item.megaMenu.categories.map((cat) => (
-                            <li key={cat.href}>
-                              <Link
-                                href={cat.href}
-                                className="flex items-center gap-2 text-sm text-gray-600 hover:text-nyxis-500 hover:bg-nyxis-50 px-3 py-2 rounded-lg transition-all duration-150"
-                                onClick={() => setActiveMenu(null)}
-                              >
-                                <FiChevronRight className="h-3 w-3 opacity-40" />
-                                {cat.name}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
+                      <div className="p-6">
+                        {item.isCategories ? (
+                          <div className="grid grid-cols-3 gap-10">
+                            {item.megaMenu.categories.map((cat) => (
+                              <div key={cat.slug} className="space-y-4">
+                                <Link
+                                  href={`/products?category=${cat.slug}`}
+                                  className="block font-bold text-[#1F6F78] border-b border-nyxis-gray-100 pb-2 hover:text-nyxis-500 transition-colors uppercase tracking-wider text-xs"
+                                  onClick={() => setActiveMenu(null)}
+                                >
+                                  {cat.name}
+                                </Link>
+                                {cat.subCategories && cat.subCategories.length > 0 && (
+                                  <ul className="space-y-2">
+                                    <li>
+                                      <Link
+                                        href={`/products?category=${cat.slug}`}
+                                        className="text-[11px] font-bold text-nyxis-gray-400 hover:text-nyxis-500 uppercase tracking-tight"
+                                        onClick={() => setActiveMenu(null)}
+                                      >
+                                        View All
+                                      </Link>
+                                    </li>
+                                    {cat.subCategories.map((sub) => (
+                                      <li key={sub.slug}>
+                                        <Link
+                                          href={`/products?category=${cat.slug}&subCategory=${sub.slug}`}
+                                          className="text-sm text-gray-600 hover:text-nyxis-500 hover:translate-x-1 transition-all flex items-center gap-2 group"
+                                          onClick={() => setActiveMenu(null)}
+                                        >
+                                          <div className="w-1 h-1 rounded-full bg-nyxis-gray-300 group-hover:bg-nyxis-500 transition-colors" />
+                                          {sub.name}
+                                        </Link>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <>
+                            <h3 className="text-xs font-bold text-nyxis-500 tracking-widest mb-3 uppercase">
+                              Shop by Category
+                            </h3>
+                            <ul className="space-y-1">
+                              {item.megaMenu.categories.map((cat) => (
+                                <li key={cat.href || cat.slug}>
+                                  <Link
+                                    href={cat.href || `/products?category=${cat.slug}`}
+                                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-nyxis-500 hover:bg-nyxis-50 px-3 py-2 rounded-lg transition-all duration-150"
+                                    onClick={() => setActiveMenu(null)}
+                                  >
+                                    <FiChevronRight className="h-3 w-3 opacity-40" />
+                                    {cat.name}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </>
+                        )}
                       </div>
                     </div>
                   )}
@@ -634,7 +681,10 @@ export function Navbar() {
                         }
                         className="flex items-center justify-between w-full px-5 py-3.5 text-nyxis-dark hover:bg-nyxis-50 transition-colors"
                       >
-                        <span className="font-medium text-sm">{item.name}</span>
+                        <span className={cn(
+                          "font-medium text-sm",
+                          item.isCategories && "font-bold text-[#1F6F78]"
+                        )}>{item.name}</span>
                         <FiChevronDown
                           className={cn(
                             "h-4 w-4 text-nyxis-gray-400 transition-transform duration-200",
@@ -646,30 +696,82 @@ export function Navbar() {
                       {/* Submenu */}
                       <div
                         className={cn(
-                          "bg-nyxis-50 overflow-hidden transition-all duration-300",
+                          "bg-white overflow-hidden transition-all duration-300",
                           expandedMobileMenu === item.name
-                            ? "max-h-[500px] opacity-100"
+                            ? "max-h-[2000px] opacity-100"
                             : "max-h-0 opacity-0"
                         )}
                       >
                         <div className="py-1">
-                          <Link
-                            href={item.href}
-                            className="block px-7 py-2.5 text-nyxis-500 font-semibold text-sm hover:bg-nyxis-100"
-                            onClick={() => setIsMenuOpen(false)}
-                          >
-                            Shop All {item.name}
-                          </Link>
-                          {item.megaMenu.categories.slice(1).map((cat) => (
-                            <Link
-                              key={cat.href}
-                              href={cat.href}
-                              className="block px-7 py-2.5 text-gray-600 text-sm hover:bg-nyxis-100 hover:text-nyxis-500"
-                              onClick={() => setIsMenuOpen(false)}
-                            >
-                              {cat.name}
-                            </Link>
-                          ))}
+                          {item.isCategories ? (
+                            <div className="divide-y divide-nyxis-gray-50">
+                              {item.megaMenu.categories.map((cat) => (
+                                cat.subCategories && cat.subCategories.length > 0 ? (
+                                  <div key={cat.slug} className="bg-white">
+                                    <button
+                                      onClick={() => setExpandedCategory(expandedCategory === cat.slug ? null : cat.slug)}
+                                      className="flex items-center justify-between w-full px-8 py-3 text-sm text-gray-700 hover:bg-nyxis-50 transition-colors"
+                                    >
+                                      <span className="font-medium">{cat.name}</span>
+                                      <FiChevronDown className={cn("h-3.5 w-3.5 text-nyxis-gray-400 transition-transform", expandedCategory === cat.slug && "rotate-180")} />
+                                    </button>
+                                    
+                                    <div className={cn(
+                                      "bg-nyxis-50 overflow-hidden transition-all duration-300",
+                                      expandedCategory === cat.slug ? "max-h-[500px]" : "max-h-0"
+                                    )}>
+                                      <Link
+                                        href={`/products?category=${cat.slug}`}
+                                        className="block px-12 py-2.5 text-xs font-bold text-nyxis-500 uppercase tracking-wide border-b border-nyxis-gray-100/50"
+                                        onClick={() => setIsMenuOpen(false)}
+                                      >
+                                        Shop All {cat.name}
+                                      </Link>
+                                      {cat.subCategories.map((sub) => (
+                                        <Link
+                                          key={sub.slug}
+                                          href={`/products?category=${cat.slug}&subCategory=${sub.slug}`}
+                                          className="block px-12 py-2.5 text-sm text-gray-600 hover:text-nyxis-500 active:bg-nyxis-100 transition-colors"
+                                          onClick={() => setIsMenuOpen(false)}
+                                        >
+                                          {sub.name}
+                                        </Link>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <Link
+                                    key={cat.slug}
+                                    href={`/products?category=${cat.slug}`}
+                                    className="block px-8 py-3 text-sm text-gray-700 hover:bg-nyxis-50 transition-colors font-medium"
+                                    onClick={() => setIsMenuOpen(false)}
+                                  >
+                                    {cat.name}
+                                  </Link>
+                                )
+                              ))}
+                            </div>
+                          ) : (
+                            <>
+                              <Link
+                                href={item.href}
+                                className="block px-7 py-2.5 text-nyxis-500 font-semibold text-sm hover:bg-nyxis-100"
+                                onClick={() => setIsMenuOpen(false)}
+                              >
+                                Shop All {item.name}
+                              </Link>
+                              {item.megaMenu.categories.map((cat) => (
+                                <Link
+                                  key={cat.href || cat.slug}
+                                  href={cat.href || `/products?category=${cat.slug}`}
+                                  className="block px-7 py-2.5 text-gray-600 text-sm hover:bg-nyxis-100 hover:text-nyxis-500"
+                                  onClick={() => setIsMenuOpen(false)}
+                                >
+                                  {cat.name}
+                                </Link>
+                              ))}
+                            </>
+                          )}
                         </div>
                       </div>
                     </>
@@ -686,17 +788,7 @@ export function Navbar() {
                 </div>
               ))}
 
-            {/* SALE */}
-            <div className="bg-gradient-to-r from-nyxis-gold-dark to-nyxis-gold">
-              <Link
-                href="/products?sale=true"
-                className="flex items-center justify-between px-5 py-3.5 hover:opacity-90 transition-opacity"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <span className="font-jost font-bold text-nyxis-dark text-sm tracking-wide">🔥 CLEARANCE SALE</span>
-                <FiChevronRight className="h-4 w-4 text-nyxis-dark/60" />
-              </Link>
-            </div>
+
 
             {/* Additional Links */}
             <div className="py-3 border-t border-nyxis-gray-200 mt-1">

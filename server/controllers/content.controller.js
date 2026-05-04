@@ -381,7 +381,7 @@ const getContactInfo = asyncHandler(async (req, res) => {
     const contactInfo = {
       address: "89/2 Sector 39, Gurugram, Haryana",
       phone: "+91 8053210008",
-      email: "connect.nutrybites@gmail.com",
+      email: "connect.nutrybitesstore@gmail.com",
       hours: "Monday - Saturday: 10:00 AM - 7:00 PM",
       mapCoordinates: {
         lat: 19.076,

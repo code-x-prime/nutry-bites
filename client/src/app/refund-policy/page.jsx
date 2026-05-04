@@ -69,7 +69,7 @@ const sections = [
       <>
         <p>To raise a refund or replacement request:</p>
         <ul className="list-disc ml-6 mt-3 space-y-2 text-gray-600">
-          <li>Email us at <a href="mailto:nutrybites@gmail.com" className="text-[#1F6F78] font-semibold hover:text-[#E6A15A] transition-colors">nutrybites@gmail.com</a> with your order number</li>
+          <li>Email us at <a href="mailto:nutrybitesstore@gmail.com" className="text-[#1F6F78] font-semibold hover:text-[#E6A15A] transition-colors">nutrybitesstore@gmail.com</a> with your order number</li>
           <li>Attach clear photos or a video of the issue</li>
           <li>Our team will respond within 24–48 business hours</li>
         </ul>

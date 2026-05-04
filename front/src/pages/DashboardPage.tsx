@@ -45,18 +45,18 @@ import {
 
 // Helper function to get proper image URL
 const getImageUrl = (image: string | string[] | undefined | null): string => {
-  if (!image) return "/images/blog-placeholder.jpg";
+  if (!image) return "/images/blog-placeholder.png";
 
   // Handle array of images (take first one)
   if (Array.isArray(image)) {
-    if (image.length === 0) return "/images/blog-placeholder.jpg";
+    if (image.length === 0) return "/images/blog-placeholder.png";
     const firstImage = image[0];
     if (typeof firstImage === "string") {
       return firstImage.startsWith("http")
         ? firstImage
         : `https://desirediv-storage.blr1.digitaloceanspaces.com/${firstImage}`;
     }
-    return "/images/blog-placeholder.jpg";
+    return "/images/blog-placeholder.png";
   }
 
   // Handle single image string
@@ -66,7 +66,7 @@ const getImageUrl = (image: string | string[] | undefined | null): string => {
       : `https://desirediv-storage.blr1.digitaloceanspaces.com/${image}`;
   }
 
-  return "/images/blog-placeholder.jpg";
+  return "/images/blog-placeholder.png";
 };
 
 // Define types for API data

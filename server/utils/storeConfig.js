@@ -10,7 +10,7 @@ export const getStoreConfig = () => {
   return {
     // Store Information
     storeName: process.env.STORE_NAME || "Nutry Bites",
-    storeEmail: process.env.STORE_EMAIL || "support@nutrybites.com",
+    storeEmail: process.env.STORE_EMAIL || "nutrybitesstore@gmail.com",
     storePhone: process.env.STORE_PHONE || "+91 93150 71969",
     storeAddress:
       process.env.STORE_ADDRESS || "89/2 Sector 39, Gurugram, Haryana - 122001",
@@ -27,14 +27,14 @@ export const getStoreConfig = () => {
       process.env.FROM_EMAIL ||
       process.env.STORE_EMAIL ||
       process.env.SMTP_USER ||
-      "support@nutrybites.com",
+      "nutrybitesstore@gmail.com",
 
     // Website Information
     websiteUrl: process.env.WEBSITE_URL || "https://nutrybites.com",
     supportEmail:
       process.env.SUPPORT_EMAIL ||
       process.env.STORE_EMAIL ||
-      "support@nutrybites.com",
+      "nutrybitesstore@gmail.com",
 
     // Social Media (optional)
     socialFacebook: process.env.SOCIAL_FACEBOOK || "",
@@ -107,15 +107,15 @@ export async function getStoreConfigFromDb() {
     if (siteSettings) {
       return {
         storeName: siteSettings.siteName || process.env.STORE_NAME || "Nutry Bites",
-        storeEmail: siteSettings.siteEmail || process.env.STORE_EMAIL || "support@nutrybites.com",
+        storeEmail: siteSettings.siteEmail || process.env.STORE_EMAIL || "nutrybitesstore@gmail.com",
         storePhone: siteSettings.sitePhone || process.env.STORE_PHONE || "+91 93150 71969",
         storeAddress: siteSettings.siteAddress || process.env.STORE_ADDRESS || "89/2 Sector 39, Gurugram, Haryana - 122001",
         storeTagline: siteSettings.siteDescription || process.env.STORE_TAGLINE || "Healthy Snacks Anytime",
         storeDescription: siteSettings.siteDescription || process.env.STORE_DESCRIPTION || "Your trusted partner for healthy makhana snacks",
         fromName: siteSettings.siteName || process.env.FROM_NAME || "Nutry Bites",
-        fromEmail: siteSettings.siteEmail || process.env.FROM_EMAIL || "support@nutrybites.com",
+        fromEmail: siteSettings.siteEmail || process.env.FROM_EMAIL || "nutrybitesstore@gmail.com",
         websiteUrl: process.env.WEBSITE_URL || "https://nutrybites.com",
-        supportEmail: siteSettings.siteEmail || process.env.SUPPORT_EMAIL || "support@nutrybites.com",
+        supportEmail: siteSettings.siteEmail || process.env.SUPPORT_EMAIL || "nutrybitesstore@gmail.com",
         orderEmailFooter: siteSettings.orderEmailFooter || "",
         siteGSTIN: siteSettings.siteGSTIN || "",
       };

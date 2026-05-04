@@ -371,18 +371,18 @@ export default function OrderDetailsPage() {
 
   // Get image URL helper
   const getImageUrl = (image: string | string[] | undefined | null): string => {
-    if (!image) return "/images/product-placeholder.jpg";
+    if (!image) return "/images/product-placeholder.png";
 
     // Handle array of images (take first one)
     if (Array.isArray(image)) {
-      if (image.length === 0) return "/images/product-placeholder.jpg";
+      if (image.length === 0) return "/images/product-placeholder.png";
       const firstImage = image[0];
       if (typeof firstImage === "string") {
         return firstImage.startsWith("http")
           ? firstImage
           : `https://desirediv-storage.blr1.digitaloceanspaces.com/${firstImage}`;
       }
-      return "/images/product-placeholder.jpg";
+      return "/images/product-placeholder.png";
     }
 
     // Handle single image string
@@ -392,7 +392,7 @@ export default function OrderDetailsPage() {
         : `https://desirediv-storage.blr1.digitaloceanspaces.com/${image}`;
     }
 
-    return "/images/product-placeholder.jpg";
+    return "/images/product-placeholder.png";
   };
 
   // Loading state
@@ -640,7 +640,7 @@ export default function OrderDetailsPage() {
                         className="h-full w-full object-contain"
                         onError={(e) => {
                           e.currentTarget.src =
-                            "/images/product-placeholder.jpg";
+                            "/images/product-placeholder.png";
                         }}
                       />
                     </div>

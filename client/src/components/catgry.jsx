@@ -95,7 +95,7 @@ const CategoriesCarousel = () => {
           ) : (
             <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-gray-50 to-white rounded-xl flex items-center justify-center group-hover:bg-gradient-to-br group-hover:from-[#136C5B]/5 group-hover:to-white transition-all duration-300">
               <Image
-                src={category.image || "/placeholder.jpg"}
+                src={category.image || "/placeholder.png"}
                 alt={category.name || "Category"}
                 width={200}
                 height={200}

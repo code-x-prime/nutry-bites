@@ -194,7 +194,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-bold text-gray-900">Email Us</p>
-                      <p className="text-gray-600 text-sm">nutrybites@gmail.com</p>
+                      <p className="text-gray-600 text-sm">nutrybitesstore@gmail.com</p>
                     </div>
                   </div>
 
@@ -213,7 +213,7 @@ export default function ContactPage() {
               <div className="bg-[#1F6F78] p-8 rounded-3xl shadow-xl shadow-[#1F6F78]/20 text-white">
                 <h3 className="text-xl font-bold mb-6 font-jost">Join Our Community</h3>
                 <p className="text-white/70 text-sm mb-6 font-lato leading-relaxed">
-                  Follow us on social media for healthy snacking tips, new flavor launches, 
+                  Follow us on social media for healthy snacking tips, new flavor launches,
                   and exclusive community offers.
                 </p>
                 <div className="flex space-x-4">

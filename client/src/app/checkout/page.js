@@ -26,7 +26,7 @@ import Image from "next/image";
 
 // Helper function to format image URLs correctly
 const getImageUrl = (image) => {
-  if (!image) return "/placeholder.jpg";
+  if (!image) return "/placeholder.png";
   if (image.startsWith("http")) return image;
   return `https://desirediv-storage.blr1.digitaloceanspaces.com/${image}`;
 };
@@ -236,7 +236,7 @@ export default function CheckoutPage() {
     if (selectedAddressId && isAuthenticated) {
       fetchShippingRates(selectedAddressId, paymentMethod === "CASH");
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAddressId]);
 
   // Add countdown for redirect
@@ -886,11 +886,10 @@ export default function CheckoutPage() {
                   <div
                     key={c.courierId}
                     onClick={() => { setSelectedCourier(c); setShippingRate(c.rate); }}
-                    className={`flex items-center justify-between border rounded-xl p-4 cursor-pointer transition-all ${
-                      selectedCourier?.courierId === c.courierId
+                    className={`flex items-center justify-between border rounded-xl p-4 cursor-pointer transition-all ${selectedCourier?.courierId === c.courierId
                         ? "border-[#1F6F78] bg-[#1F6F78]/5 shadow-sm"
                         : "hover:border-gray-300"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <input
@@ -910,8 +909,8 @@ export default function CheckoutPage() {
                           {c.estimatedDays
                             ? `Estimated: ${c.estimatedDays}`
                             : c.etd
-                            ? `By ${c.etd}`
-                            : "Delivery time varies"}
+                              ? `By ${c.etd}`
+                              : "Delivery time varies"}
                           {c.deliveryPerformance ? ` · ${c.deliveryPerformance}% on-time` : ""}
                         </p>
                       </div>

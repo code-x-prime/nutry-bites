@@ -21,7 +21,7 @@ import { useAddVariantToCart } from "@/lib/cart-utils";
 
 // Helper function to format image URLs correctly
 const getImageUrl = (image) => {
-  if (!image) return "/placeholder.jpg";
+  if (!image) return "/placeholder.png";
   if (image.startsWith("http")) return image;
   return `https://desirediv-storage.blr1.digitaloceanspaces.com/${image}`;
 };
@@ -64,7 +64,7 @@ export default function ProductQuickView({ product, open, onOpenChange }) {
     }
 
     if (product) {
-      setImgSrc(product.image || "/placeholder.jpg");
+      setImgSrc(product.image || "/placeholder.png");
     }
   }, [product, open]);
 
@@ -142,9 +142,9 @@ export default function ProductQuickView({ product, open, onOpenChange }) {
             const firstImage =
               productData.images.find((img) => img.isPrimary) ||
               productData.images[0];
-            setImgSrc(getImageUrl(firstImage.url) || "/placeholder.jpg");
+            setImgSrc(getImageUrl(firstImage.url) || "/placeholder.png");
           } else if (productData.image) {
-            setImgSrc(getImageUrl(productData.image) || "/placeholder.jpg");
+            setImgSrc(getImageUrl(productData.image) || "/placeholder.png");
           }
 
           // Extract all available combinations from variants using attributes
@@ -708,7 +708,7 @@ export default function ProductQuickView({ product, open, onOpenChange }) {
       } else if (imgSrc) {
         images.push(imgSrc);
       } else {
-        images.push("/placeholder.jpg");
+        images.push("/placeholder.png");
       }
     }
 
@@ -789,7 +789,7 @@ export default function ProductQuickView({ product, open, onOpenChange }) {
               <div className="relative flex-1 flex items-center justify-center bg-white">
                 <div className="relative w-full h-full min-h-[400px] ">
                   <Image
-                    src={allImages[currentImageIndex] || "/placeholder.jpg"}
+                    src={allImages[currentImageIndex] || "/placeholder.png"}
                     alt={displayProduct.name}
                     fill
                     className="object-contain p-4"

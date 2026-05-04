@@ -12,7 +12,7 @@ import CategoriesCarousel from "@/components/catgry";
 const CategoryCard = ({ category, index }) => {
   // Function to get image URL
   const getImageUrl = (image) => {
-    if (!image) return "/placeholder.jpg";
+    if (!image) return "/placeholder.png";
     if (image.startsWith("http")) return image;
     return `https://desirediv-storage.blr1.digitaloceanspaces.com/${image}`;
   };
@@ -33,7 +33,7 @@ const CategoryCard = ({ category, index }) => {
               src={
                 category.image
                   ? getImageUrl(category.image)
-                  : "/placeholder.jpg"
+                  : "/placeholder.png"
               }
               alt={category.name}
               fill

@@ -22,7 +22,7 @@ import { useAddVariantToCart } from "@/lib/cart-utils";
 // Helper function to format image URLs correctly
 const getImageUrl = (image) => {
   if (!image) return "/placeholder.png";
-  if (image?.startsWith("http")) return image;
+  if (typeof image === "string" && image.startsWith("http")) return image;
   return `https://desirediv-storage.blr1.digitaloceanspaces.com/${image}`;
 };
 

@@ -9,7 +9,7 @@ import { toast } from "sonner";
 const privateRoutes = ["/account", "/checkout", "/wishlist", "/orders"];
 
 // Define auth routes that should redirect to dashboard if already logged in
-const authRoutes = ["/auth", "/auth", "/forgot-password", "/reset-password"];
+const authRoutes = ["/auth", "/forgot-password", "/verify-otp", "/reset-password", "/verify-email"];
 
 export function RouteGuard({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -24,14 +24,14 @@ export function RouteGuard({ children }) {
     const authCheck = () => {
       // Skip verification for verification endpoints and public pages
       if (
-        pathname?.startsWith("/verify-email") ||
+        (typeof pathname === "string" && pathname.startsWith("/verify-email")) ||
         pathname === "/" ||
-        pathname?.startsWith("/products") ||
-        pathname?.startsWith("/category") ||
-        pathname?.startsWith("/blog") ||
-        pathname?.startsWith("/about") ||
-        pathname?.startsWith("/contact") ||
-        pathname?.startsWith("/faqs")
+        (typeof pathname === "string" && pathname.startsWith("/products")) ||
+        (typeof pathname === "string" && pathname.startsWith("/category")) ||
+        (typeof pathname === "string" && pathname.startsWith("/blog")) ||
+        (typeof pathname === "string" && pathname.startsWith("/about")) ||
+        (typeof pathname === "string" && pathname.startsWith("/contact")) ||
+        (typeof pathname === "string" && pathname.startsWith("/faqs"))
       ) {
         setAuthorized(true);
         return;
@@ -39,12 +39,12 @@ export function RouteGuard({ children }) {
 
       // Check if route requires auth
       const isPrivateRoute = privateRoutes.some((route) =>
-        pathname?.startsWith(route)
+        typeof pathname === "string" && pathname.startsWith(route)
       );
 
       // Check if route is an auth route (login, register, etc.)
       const isAuthRoute = authRoutes.some((route) =>
-        pathname?.startsWith(route)
+        typeof pathname === "string" && pathname.startsWith(route)
       );
 
       if (isPrivateRoute && !isAuthenticated) {

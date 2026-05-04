@@ -29,7 +29,7 @@ import Image from "next/image";
 
 export function Navbar() {
   const pathname = usePathname();
-  const isAuthPage = ["/auth", "/forgot-password", "/verify-otp", "/reset-password", "/verify-email"].some(path => pathname?.startsWith(path));
+  const isAuthPage = ["/auth", "/forgot-password", "/verify-otp", "/reset-password", "/verify-email"].some(path => typeof pathname === "string" && pathname.startsWith(path));
 
   // Hide navbar on auth pages
 

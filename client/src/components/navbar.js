@@ -29,7 +29,7 @@ import Image from "next/image";
 
 export function Navbar() {
   const pathname = usePathname();
-  const isAuthPage = ["/auth", "/forgot-password", "/verify-otp", "/reset-password", "/verify-email"].some(path => pathname.startsWith(path));
+  const isAuthPage = ["/auth", "/forgot-password", "/verify-otp", "/reset-password", "/verify-email"].some(path => pathname?.startsWith(path));
 
   // Hide navbar on auth pages
 
@@ -186,7 +186,7 @@ export function Navbar() {
     window.location.href = "/";
   };
 
-  if (isAuthPage) return null;
+  if (pathname && isAuthPage) return null;
 
   return (
     <>
@@ -451,7 +451,7 @@ export function Navbar() {
                       href={item.href}
                       className={cn(
                         "flex items-center gap-1 px-4 py-2.5 text-sm font-medium tracking-wide transition-all relative hover:bg-nyxis-50 rounded-lg",
-                        pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
+                        pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href))
                           ? "text-[#1F6F78] font-bold"
                           : "text-gray-700 hover:text-[#1F6F78]",
                         activeMenu === item.name && "text-[#1F6F78]"
@@ -468,7 +468,7 @@ export function Navbar() {
                       <span
                         className={cn(
                           "absolute bottom-0 left-4 right-4 h-[2px] bg-[#1F6F78] transform origin-left transition-transform duration-200 rounded-full",
-                          (pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href)) || activeMenu === item.name)
+                          (pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href)) || activeMenu === item.name)
                             ? "scale-x-100"
                             : "scale-x-0 group-hover:scale-x-100"
                         )}
@@ -855,7 +855,7 @@ export function Navbar() {
             href="/products"
             className={cn(
               "flex flex-col items-center justify-center py-2.5 transition-colors",
-              pathname.includes("/products")
+              pathname?.includes("/products")
                 ? "text-nyxis-500"
                 : "text-nyxis-gray-400"
             )}

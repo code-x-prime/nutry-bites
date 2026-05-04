@@ -28,7 +28,7 @@ export function Footer() {
   const [contactInfo, setContactInfo] = useState({});
   const [expandedSection, setExpandedSection] = useState(null);
 
-  const isAuthPage = ["/auth", "/forgot-password", "/verify-otp", "/reset-password", "/verify-email"].some(path => pathname.startsWith(path));
+  const isAuthPage = ["/auth", "/forgot-password", "/verify-otp", "/reset-password", "/verify-email"].some(path => pathname?.startsWith(path));
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -130,7 +130,7 @@ export function Footer() {
     </div>
   );
 
-  if (isAuthPage) return null;
+  if (pathname && isAuthPage) return null;
 
   return (
     <footer className="mt-auto mb-14 lg:mb-0">

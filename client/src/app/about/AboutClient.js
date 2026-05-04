@@ -60,37 +60,37 @@ export default function AboutPage() {
                       Founded in 2024
                     </strong>
                     , Nutry Bites was born from a simple desire: to make healthy snacking
-                    exciting. Our founder, after noticing a gap in truly oil-free,
-                    nutritious snacks in the Indian market, decided to elevate the humble
-                    Makhana into a gourmet superfood.
+                    exciting. Our mission is to transform the humble fox nut (Makhana) into 
+                    a gourmet superfood that fits seamlessly into your modern lifestyle.
                   </p>
                   <p>
-                    What started as a kitchen experiment with unique seasonings has now grown
-                    into
+                    We realized that most snacks in the market were either unhealthy or 
+                    uninspiring. That&apos;s why we perfected our 
                     <strong className="text-[#E6A15A]">
                       {" "}
-                      Nutry Bites
+                      Oil-Free Roasting Process
                     </strong>
-                    , serving health-conscious snackers nationwide who refuse to compromise
-                    on quality or flavor.
+                    . By slow-roasting each nut to perfection, we preserve the natural 
+                    crunch and nutrients without adding a single drop of palm oil or harmful fats.
                   </p>
                   <p>
-                    Today, we source the finest fox nuts, roast them to perfection without a
-                    drop of oil, and season them with handpicked spices to bring you
-                    guilt-free munchies.
+                    Our Makhana is sourced directly from sustainable farms, ensuring that 
+                    every pack you open is fresh, protein-rich, and packed with antioxidants. 
+                    From spicy Peri-Peri to classic Himalayan Salt, we offer flavors that 
+                    delight your taste buds while nourishing your body.
                   </p>
                 </div>
                 <div className="mt-8 grid grid-cols-2 gap-4">
                   <div className="bg-[#f0faf7] p-4 rounded-lg border-l-4 border-[#1F6F78]">
                     <div className="text-[#1F6F78] font-bold text-xl">
-                      2024
+                      100%
                     </div>
-                    <div className="text-sm text-gray-600">Brand Inception</div>
+                    <div className="text-sm text-gray-600">Oil-Free Roasted</div>
                   </div>
                   <div className="bg-[#fff9e6] p-4 rounded-lg border-l-4 border-[#E6A15A]">
-                    <div className="text-[#E6A15A] font-bold text-xl">10+</div>
+                    <div className="text-[#E6A15A] font-bold text-xl">Zero</div>
                     <div className="text-sm text-gray-600">
-                      Unique Flavors
+                      Preservatives
                     </div>
                   </div>
                 </div>
@@ -98,15 +98,17 @@ export default function AboutPage() {
               <div className="order-1 lg:order-2 relative">
                 <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl">
                   <Image
-                    src="/banner1.png"
-                    alt="Nutry Bites roasted makhana process"
+                    src="/makhana-about.png"
+                    alt="Nutry Bites premium roasted makhana"
                     fill
                     sizes="(max-width: 768px) 100vw, 600px"
                     className="object-cover"
+                    priority
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -124,18 +126,20 @@ export default function AboutPage() {
                 <div className="text-4xl mb-4">🍃</div>
                 <h3 className="text-2xl font-bold mb-4 font-jost">Our Mission</h3>
                 <p className="text-lg opacity-90 leading-relaxed font-lato">
-                  To replace junk food culture with wholesome, roasted superfoods that
-                  nourish the body and delight the senses, one bite at a time.
+                  To replace junk food culture with wholesome, oil-free roasted superfoods that
+                  nourish the body and delight the senses, making healthy snacking accessible 
+                  to every household.
                 </p>
               </div>
               <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20">
                 <div className="text-4xl mb-4">🌟</div>
                 <h3 className="text-2xl font-bold mb-4 font-jost">Our Vision</h3>
                 <p className="text-lg opacity-90 leading-relaxed font-lato">
-                  To be the global benchmark for healthy snacking, making Nutry Bites
-                  synonymous with quality, transparency, and &quot;Power Beneath the Surface.&quot;
+                  To become India&apos;s most trusted brand for healthy snacks, recognized 
+                  globally for our commitment to quality, transparency, and the &quot;Power of Pure Roasting.&quot;
                 </p>
               </div>
+
             </div>
           </div>
         </div>

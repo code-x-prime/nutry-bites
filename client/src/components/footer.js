@@ -222,7 +222,7 @@ export function Footer() {
       <div className="bg-[#0d3538] border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 py-5 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="text-gray-500 text-xs text-center">
-            © {new Date().getFullYear()} <strong className="text-gray-400">Nutry Bites</strong> · Healthy Snacks Anytime · All rights reserved.
+            © {new Date().getFullYear()} <strong className="text-gray-400">Nutry Bites</strong> · All rights reserved. | Developed by <a href="https://groxmedia.in" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors font-medium">Grox Media</a>
           </p>
 
           {/* Social Icons */}

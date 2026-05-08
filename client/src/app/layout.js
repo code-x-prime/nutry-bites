@@ -53,12 +53,21 @@ export const metadata = {
     siteName: "Nutry Bites",
     locale: "en_IN",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Nutry Bites — Healthy Snacks Anytime, Anywhere",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Nutry Bites — Healthy Snacks Anytime, Anywhere",
     description: "Premium roasted Makhana and healthy snacks.",
     creator: "@nutrybites",
+    images: ["/og-image.png"],
   },
   verification: {
     google: "kSD3cECTpb-8xGj_SuDQEHWLUVE_nGhVYL5ncVln_GQ",

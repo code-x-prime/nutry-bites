@@ -175,7 +175,7 @@ export const getBrandBySlug = asyncHandler(async (req, res) => {
         },
       },
     },
-    orderBy: [{ [sort]: order }],
+    orderBy: [{ ourProduct: "desc" }, { [sort]: order }],
     skip: (parseInt(page) - 1) * parseInt(limit),
     take: parseInt(limit),
   });
@@ -217,6 +217,7 @@ export const getBrandBySlug = asyncHandler(async (req, res) => {
         name: product.name,
         slug: product.slug,
         featured: product.featured,
+        ourProduct: product.ourProduct,
         description: product.description,
         category: primaryCategory
           ? {
@@ -461,10 +462,17 @@ export const getActiveProductSections = asyncHandler(async (req, res) => {
               price: fs.hasFlashSale ? fs.price : basePrice,
               salePrice: fs.hasFlashSale ? fs.price : (variant?.salePrice ? parseFloat(variant.salePrice) : null),
               hasSale: fs.hasFlashSale || variant?.salePrice !== null,
+              ourProduct: product.ourProduct,
               reviewCount: product._count.reviews,
             };
           })
         );
+
+        // Sort products: ourProduct=true comes first
+        const sortedProducts = [
+          ...products.filter(p => p.ourProduct === true),
+          ...products.filter(p => p.ourProduct !== true),
+        ];
 
         return {
           id: section.id,
@@ -475,7 +483,7 @@ export const getActiveProductSections = asyncHandler(async (req, res) => {
           color: section.color,
           displayOrder: section.displayOrder,
           maxProducts: section.maxProducts,
-          products: products.slice(0, section.maxProducts),
+          products: sortedProducts.slice(0, section.maxProducts),
         };
       })
   );

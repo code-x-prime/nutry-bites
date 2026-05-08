@@ -213,7 +213,13 @@ function ProductsContent() {
           const endIndex = startIndex + pagination.limit;
           const paginatedProducts = allProducts.slice(startIndex, endIndex);
 
-          setProducts(paginatedProducts);
+          // Sort: ourProduct=true wale pehle aayenge
+          const sortedProducts = [
+            ...paginatedProducts.filter(p => p.ourProduct === true),
+            ...paginatedProducts.filter(p => p.ourProduct !== true),
+          ];
+
+          setProducts(sortedProducts);
           setPagination({
             page: pagination.page,
             limit: pagination.limit,
@@ -289,7 +295,12 @@ function ProductsContent() {
           );
 
           const filteredProducts = response.data.products || [];
-          setProducts(filteredProducts);
+          // Sort: ourProduct=true wale pehle aayenge
+          const sortedProducts = [
+            ...filteredProducts.filter(p => p.ourProduct === true),
+            ...filteredProducts.filter(p => p.ourProduct !== true),
+          ];
+          setProducts(sortedProducts);
           setPagination(response.data.pagination || {});
         }
       } catch (err) {

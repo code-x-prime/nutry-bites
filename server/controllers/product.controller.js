@@ -211,7 +211,7 @@ export const getAllProducts = asyncHandler(async (req, res) => {
         },
       },
     },
-    orderBy: [{ [sort]: order }],
+    orderBy: [{ ourProduct: "desc" }, { [sort]: order }],
     skip: (parseInt(page) - 1) * parseInt(limit),
     take: parseInt(limit),
   });
@@ -256,6 +256,7 @@ export const getAllProducts = asyncHandler(async (req, res) => {
         name: product.name,
         slug: product.slug,
         featured: product.featured,
+        ourProduct: product.ourProduct,
         description: product.description,
         category: primaryCategory
           ? {
@@ -968,7 +969,7 @@ export const getProductsByType = asyncHandler(async (req, res) => {
         },
       },
     },
-    orderBy: [{ [sort]: order }],
+    orderBy: [{ ourProduct: "desc" }, { [sort]: order }],
     skip,
     take: parseInt(limit),
   });
@@ -1007,6 +1008,7 @@ export const getProductsByType = asyncHandler(async (req, res) => {
       name: product.name,
       slug: product.slug,
       featured: product.featured,
+      ourProduct: product.ourProduct,
       description: product.description,
       category: primaryCategory
         ? {

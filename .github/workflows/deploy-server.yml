@@ -31,9 +31,15 @@ jobs:
             echo "🏗 Generating Prisma Client..."
             npx prisma generate
             
-            echo "🗄 Applying Database Migrations (Safe Mode)..."
-            # prisma migrate deploy is safe for production; it applies migrations without resetting data
-            npx prisma migrate deploy
+            echo "🗄 Syncing Database Schema (Safe Mode)..."
+            # db push is used here to ensure the database schema matches the prisma schema 
+            # without resetting data or requiring a clean migration history.
+            # It will automatically fail if it detects potential data loss.
+            npx prisma db push --skip-generate
+
+            echo "⚙️ Synchronizing Site Settings Content..."
+            # This ensures your new contact details and FSSAI are updated in the DB
+            node -r dotenv/config --experimental-json-modules scripts/sync-site-settings.js
             
             echo "🔄 Restarting PM2 process..."
             # Adjust the name 'nutry-server' if your PM2 process has a different name

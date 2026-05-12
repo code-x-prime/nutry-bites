@@ -195,7 +195,7 @@ export function Footer() {
                   <FiMapPin className="h-4 w-4 flex-shrink-0" />
                   {contactInfo.address}
                 </p>
-                <div className="pt-2 text-gray-300 text-[11px] font-medium uppercase tracking-wider">
+                <div className="pt-2 text-white text-[12px] font-bold uppercase tracking-wider">
                   <p>GST NO: 19ASGPY5969C1Z1</p>
                   <p>FSSAI LIC NO: 22826039000129</p>
                 </div>

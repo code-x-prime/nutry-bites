@@ -29,7 +29,7 @@ export default function TermsAndConditions() {
           </span>
           <h1 className="text-4xl md:text-5xl font-bold font-jost mb-3">Terms & Conditions</h1>
           <p className="text-white/70 font-lato">
-            Last updated: <strong className="text-white">July 14, 2025</strong>
+            Last updated: <strong className="text-white">May 12, 2026</strong>
           </p>
         </div>
       </section>
@@ -43,7 +43,7 @@ export default function TermsAndConditions() {
               For the purpose of these Terms and Conditions, the terms{" "}
               <strong>&quot;we&quot;, &quot;us&quot;, &quot;our&quot;</strong> refer to{" "}
               <strong className="text-[#1F6F78]">Nutry Bites</strong>, whose registered office is located at{" "}
-              <strong>89/2 Sector 39, Gurugram, Haryana, India – 122001.</strong>{" "}
+              <strong>-6/7 A, ACHARYYA JADADISH CHANDRA BOSE ROAD, KOLKATA -700017.</strong>{" "}
               <strong>&quot;you&quot;, &quot;your&quot;, &quot;user&quot;</strong> refers to any natural or legal
               person who visits our website and/or purchases from us.
             </p>
@@ -72,7 +72,7 @@ export default function TermsAndConditions() {
             <p className="text-gray-700 font-lato leading-relaxed text-[15px]">
               These Terms and Conditions are governed by and construed in accordance with the laws of India.
               Any disputes relating to these terms and conditions shall be subject to the exclusive jurisdiction
-              of the courts of Gurugram, Haryana, India.
+              of the courts of Kolkata, West Bengal, India.
             </p>
           </div>
 

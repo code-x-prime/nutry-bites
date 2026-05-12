@@ -51,6 +51,47 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default function ProductDetailPage({ params }) {
-  return <ProductContent slug={params.slug} />;
+export default async function ProductDetailPage({ params }) {
+  const { slug } = params;
+  let product = null;
+
+  try {
+    const response = await fetchApi(`/public/products/${slug}`);
+    product = response.data.product;
+  } catch (error) {
+    console.error("Error fetching product for schema:", error);
+  }
+
+  const jsonLd = product ? {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "image": product.images?.map(img => getImageUrl(img.url)) || [],
+    "description": product.description || product.metaDescription,
+    "sku": product.sku || product.id,
+    "brand": {
+      "@type": "Brand",
+      "name": "Nutry Bites"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": `https://nutrybites.co.in/products/${slug}`,
+      "priceCurrency": "INR",
+      "price": product.salePrice || product.price,
+      "itemCondition": "https://schema.org/NewCondition",
+      "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+    }
+  } : null;
+
+  return (
+    <>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      <ProductContent slug={slug} />
+    </>
+  );
 }

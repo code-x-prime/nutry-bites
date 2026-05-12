@@ -86,8 +86,48 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Nutry Bites",
+    "url": "https://nutrybites.co.in",
+    "logo": "https://nutrybites.co.in/logo.png",
+    "description": "Discover Nutry Bites, your destination for premium roasted Makhana (fox nuts) and healthy snacks.",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "-6/7 A, ACHARYYA JADADISH CHANDRA BOSE ROAD",
+      "addressLocality": "KOLKATA",
+      "addressRegion": "West Bengal",
+      "postalCode": "700017",
+      "addressCountry": "IN"
+    },
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "telephone": "+91 8910072220",
+        "contactType": "customer service"
+      },
+      {
+        "@type": "ContactPoint",
+        "telephone": "+91 6290958664",
+        "contactType": "sales"
+      }
+    ],
+    "sameAs": [
+      "https://facebook.com/nutrybites",
+      "https://instagram.com/nutrybites",
+      "https://twitter.com/nutrybites"
+    ]
+  };
+
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${lato.variable} ${jost.variable} font-lato antialiased`}
       >

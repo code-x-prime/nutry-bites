@@ -379,9 +379,9 @@ const getContactInfo = asyncHandler(async (req, res) => {
 
     // Default fallback contact info
     const contactInfo = {
-      address: "89/2 Sector 39, Gurugram, Haryana",
-      phone: "+91 8053210008",
-      email: "connect.nutrybitesstore@gmail.com",
+      address: "-6/7 A, ACHARYYA JADADISH CHANDRA BOSE ROAD, KOLKATA -700017",
+      phone: "8910072220, 6290958664",
+      email: "nutrybitesstore@gmail.com",
       hours: "Monday - Saturday: 10:00 AM - 7:00 PM",
       mapCoordinates: {
         lat: 19.076,

@@ -183,7 +183,7 @@ export default function ContactPage() {
                     <div>
                       <p className="font-bold text-gray-900">Our Office</p>
                       <p className="text-gray-600 text-sm leading-relaxed">
-                        89/2 Sector 39, Gurugram,<br />Haryana, India - 122001
+                        -6/7 A, ACHARYYA JADADISH CHANDRA BOSE ROAD,<br />KOLKATA -700017
                       </p>
                     </div>
                   </div>
@@ -204,7 +204,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-bold text-gray-900">Call Us</p>
-                      <p className="text-gray-600 text-sm">+91 93150 71969</p>
+                      <p className="text-gray-600 text-sm">8910072220, 6290958664</p>
                     </div>
                   </div>
                 </div>

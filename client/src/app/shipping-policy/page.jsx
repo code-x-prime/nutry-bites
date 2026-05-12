@@ -89,7 +89,7 @@ export default function ShippingPolicy() {
           </span>
           <h1 className="text-4xl md:text-5xl font-bold font-jost mb-3">Shipping Policy</h1>
           <p className="text-white/70 font-lato">
-            Last updated: <strong className="text-white">July 14, 2025</strong>
+            Last updated: <strong className="text-white">May 12, 2026</strong>
           </p>
         </div>
       </section>

@@ -1321,6 +1321,7 @@ model SiteSettings {
   sitePincode         String?
   siteCountry         String    @default("India")
   siteGSTIN           String?
+  siteFSSAI           String?
   sitePAN             String?
   siteLogo            String?
   siteFavicon         String?

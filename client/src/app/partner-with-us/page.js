@@ -183,7 +183,7 @@ export default function PartnerWithUsPage() {
                   <Label htmlFor="city" className="text-sm font-semibold text-gray-700">City</Label>
                   <Input
                     id="city" name="city"
-                    placeholder="Gurugram"
+                    placeholder="Kolkata"
                     value={formData.city}
                     onChange={handleChange}
                     required
@@ -196,7 +196,7 @@ export default function PartnerWithUsPage() {
                 <Label htmlFor="state" className="text-sm font-semibold text-gray-700">State</Label>
                 <Input
                   id="state" name="state"
-                  placeholder="Haryana"
+                  placeholder="West Bengal"
                   value={formData.state}
                   onChange={handleChange}
                   required

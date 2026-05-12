@@ -10,5 +10,25 @@ export const metadata = {
 };
 
 export default function HomePage() {
-  return <HomeClient />;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Nutry Bites",
+    "url": "https://nutrybites.co.in",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://nutrybites.co.in/products?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <HomeClient />
+    </>
+  );
 }

@@ -11,15 +11,19 @@ export const getStoreConfig = () => {
     // Store Information
     storeName: process.env.STORE_NAME || "Nutry Bites",
     storeEmail: process.env.STORE_EMAIL || "nutrybitesstore@gmail.com",
-    storePhone: process.env.STORE_PHONE || "+91 93150 71969",
+    storePhone: process.env.STORE_PHONE || "8910072220, 6290958664",
     storeAddress:
-      process.env.STORE_ADDRESS || "89/2 Sector 39, Gurugram, Haryana - 122001",
+      process.env.STORE_ADDRESS || "-6/7 A, ACHARYYA JADADISH CHANDRA BOSE ROAD, KOLKATA -700017",
 
     // Store Description/Tagline
     storeTagline: process.env.STORE_TAGLINE || "Healthy Snacks Anytime",
     storeDescription:
       process.env.STORE_DESCRIPTION ||
       "Your trusted partner for healthy makhana snacks",
+
+    // Registration Info
+    gstNo: "19ASGPY5969C1Z1",
+    fssaiLicNo: "22826039000129",
 
     // Email Configuration
     fromName: process.env.FROM_NAME || process.env.STORE_NAME || "Nutry Bites",
@@ -88,6 +92,8 @@ export const getFullStoreInfo = () => {
     supportEmail: config.supportEmail,
     fromName: config.fromName,
     fromEmail: config.fromEmail,
+    gstNo: config.gstNo,
+    fssaiLicNo: config.fssaiLicNo,
     social: {
       facebook: config.socialFacebook,
       twitter: config.socialTwitter,
@@ -108,8 +114,8 @@ export async function getStoreConfigFromDb() {
       return {
         storeName: siteSettings.siteName || process.env.STORE_NAME || "Nutry Bites",
         storeEmail: siteSettings.siteEmail || process.env.STORE_EMAIL || "nutrybitesstore@gmail.com",
-        storePhone: siteSettings.sitePhone || process.env.STORE_PHONE || "+91 93150 71969",
-        storeAddress: siteSettings.siteAddress || process.env.STORE_ADDRESS || "89/2 Sector 39, Gurugram, Haryana - 122001",
+        storePhone: siteSettings.sitePhone || process.env.STORE_PHONE || "8910072220, 6290958664",
+        storeAddress: siteSettings.siteAddress || process.env.STORE_ADDRESS || "-6/7 A, ACHARYYA JADADISH CHANDRA BOSE ROAD, KOLKATA -700017",
         storeTagline: siteSettings.siteDescription || process.env.STORE_TAGLINE || "Healthy Snacks Anytime",
         storeDescription: siteSettings.siteDescription || process.env.STORE_DESCRIPTION || "Your trusted partner for healthy makhana snacks",
         fromName: siteSettings.siteName || process.env.FROM_NAME || "Nutry Bites",
@@ -117,7 +123,8 @@ export async function getStoreConfigFromDb() {
         websiteUrl: process.env.WEBSITE_URL || "https://nutrybites.com",
         supportEmail: siteSettings.siteEmail || process.env.SUPPORT_EMAIL || "nutrybitesstore@gmail.com",
         orderEmailFooter: siteSettings.orderEmailFooter || "",
-        siteGSTIN: siteSettings.siteGSTIN || "",
+        siteGSTIN: siteSettings.siteGSTIN || "19ASGPY5969C1Z1",
+        siteFSSAI: siteSettings.siteFSSAI || "22826039000129",
       };
     }
   } catch (err) {

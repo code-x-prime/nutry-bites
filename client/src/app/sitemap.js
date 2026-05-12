@@ -10,6 +10,7 @@ export default async function sitemap() {
     "/contact",
     "/products",
     "/categories",
+    "/partner-with-us",
     "/privacy-policy",
     "/terms-conditions",
     "/refund-policy",
@@ -18,13 +19,14 @@ export default async function sitemap() {
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
-    changeFrequency: "monthly",
+    changeFrequency: route === "" ? "daily" : "monthly",
     priority: route === "" ? 1.0 : 0.8,
   }));
 
   // Dynamic routes
   let productRoutes = [];
   let categoryRoutes = [];
+  let brandRoutes = [];
 
   try {
     // Fetch products (limit to 1000 for sitemap)
@@ -32,7 +34,7 @@ export default async function sitemap() {
     if (productsRes?.success && productsRes?.data?.products) {
       productRoutes = productsRes.data.products.map((product) => ({
         url: `${baseUrl}/products/${product.slug}`,
-        lastModified: new Date(product.updatedAt || new Date()),
+        lastModified: new Date(product.updatedAt || product.createdAt || new Date()),
         changeFrequency: "weekly",
         priority: 0.9,
       }));
@@ -43,14 +45,25 @@ export default async function sitemap() {
     if (categoriesRes?.success && categoriesRes?.data?.categories) {
       categoryRoutes = categoriesRes.data.categories.map((category) => ({
         url: `${baseUrl}/category/${category.slug}`,
-        lastModified: new Date(category.updatedAt || new Date()),
+        lastModified: new Date(category.updatedAt || category.createdAt || new Date()),
         changeFrequency: "weekly",
         priority: 0.7,
+      }));
+    }
+
+    // Fetch brands (if any)
+    const brandsRes = await fetchApi("/public/brands-by-tag");
+    if (brandsRes?.success && Array.isArray(brandsRes.data)) {
+      brandRoutes = brandsRes.data.map((brand) => ({
+        url: `${baseUrl}/brand/${brand.slug}`,
+        lastModified: new Date(brand.updatedAt || brand.createdAt || new Date()),
+        changeFrequency: "weekly",
+        priority: 0.6,
       }));
     }
   } catch (error) {
     console.error("Error generating sitemap:", error);
   }
 
-  return [...staticRoutes, ...productRoutes, ...categoryRoutes];
+  return [...staticRoutes, ...productRoutes, ...categoryRoutes, ...brandRoutes];
 }

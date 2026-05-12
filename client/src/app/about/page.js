@@ -10,5 +10,21 @@ export const metadata = {
 };
 
 export default function AboutPage() {
-  return <AboutClient />;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "name": "About Us | Nutry Bites",
+    "description": "Learn about Nutry Bites' journey to bring premium, oil-free roasted Makhana to India.",
+    "url": "https://nutrybites.co.in/about"
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <AboutClient />
+    </>
+  );
 }

@@ -40,8 +40,8 @@ export function Footer() {
           setSocialLinks(res.data?.socialLinks || {});
           setContactInfo({
             email: res.data?.contactEmail || "nutrybitesstore@gmail.com",
-            phone: res.data?.contactPhone || "+91 93150 71969",
-            address: res.data?.contactAddress || "India",
+            phone: res.data?.contactPhone || "8910072220, 6290958664",
+            address: res.data?.contactAddress || "-6/7 A, ACHARYYA JADADISH CHANDRA BOSE ROAD, KOLKATA -700017",
           });
         }
       } catch (error) {
@@ -195,6 +195,10 @@ export function Footer() {
                   <FiMapPin className="h-4 w-4 flex-shrink-0" />
                   {contactInfo.address}
                 </p>
+                <div className="pt-2 text-gray-400 text-[11px] font-medium opacity-80 uppercase tracking-wider">
+                  <p>GST NO: 19ASGPY5969C1Z1</p>
+                  <p>FSSAI LIC NO: 22826039000129</p>
+                </div>
               </div>
             </div>
 

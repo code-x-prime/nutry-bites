@@ -124,8 +124,8 @@ export default function AboutPage() {
             <div className="grid md:grid-cols-2 gap-12">
               <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20">
                 <div className="text-4xl mb-4">🍃</div>
-                <h3 className="text-2xl font-bold mb-4 font-jost">Our Mission</h3>
-                <p className="text-lg opacity-90 leading-relaxed font-lato">
+                <h3 className="text-2xl font-bold mb-4 font-jost text-white">Our Mission</h3>
+                <p className="text-lg text-white/90 leading-relaxed font-lato">
                   To replace junk food culture with wholesome, oil-free roasted superfoods that
                   nourish the body and delight the senses, making healthy snacking accessible 
                   to every household.
@@ -133,8 +133,8 @@ export default function AboutPage() {
               </div>
               <div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20">
                 <div className="text-4xl mb-4">🌟</div>
-                <h3 className="text-2xl font-bold mb-4 font-jost">Our Vision</h3>
-                <p className="text-lg opacity-90 leading-relaxed font-lato">
+                <h3 className="text-2xl font-bold mb-4 font-jost text-white">Our Vision</h3>
+                <p className="text-lg text-white/90 leading-relaxed font-lato">
                   To become India&apos;s most trusted brand for healthy snacks, recognized 
                   globally for our commitment to quality, transparency, and the &quot;Power of Pure Roasting.&quot;
                 </p>

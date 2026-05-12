@@ -185,6 +185,10 @@ export default function ContactPage() {
                       <p className="text-gray-600 text-sm leading-relaxed">
                         -6/7 A, ACHARYYA JADADISH CHANDRA BOSE ROAD,<br />KOLKATA -700017
                       </p>
+                      <div className="mt-2 space-y-0.5">
+                        <p className="text-[#1F6F78] text-[10px] font-bold uppercase tracking-wide">GST: 19ASGPY5969C1Z1</p>
+                        <p className="text-[#1F6F78] text-[10px] font-bold uppercase tracking-wide">FSSAI: 22826039000129</p>
+                      </div>
                     </div>
                   </div>
 
@@ -210,9 +214,9 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="bg-[#1F6F78] p-8 rounded-3xl shadow-xl shadow-[#1F6F78]/20 text-white">
-                <h3 className="text-xl font-bold mb-6 font-jost">Join Our Community</h3>
-                <p className="text-white/70 text-sm mb-6 font-lato leading-relaxed">
+              <div className="bg-[#1F6F78] p-8 rounded-3xl shadow-xl shadow-[#1F6F78]/20">
+                <h3 className="text-xl font-bold mb-6 font-jost text-white">Join Our Community</h3>
+                <p className="text-white/80 text-sm mb-6 font-lato leading-relaxed">
                   Follow us on social media for healthy snacking tips, new flavor launches,
                   and exclusive community offers.
                 </p>

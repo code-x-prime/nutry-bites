@@ -8,10 +8,40 @@ on:
       - ".github/workflows/deploy-client.yml"
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy Nutry Bites (client) to VPS
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install dependencies
+        working-directory: client
+        run: npm ci --legacy-peer-deps
+
+      - name: Build
+        working-directory: client
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: npm run build
+
+      - name: Deploy build to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "client/.next,client/public,client/package.json,client/next.config.*"
+          target: "~/nutry-bites/"
+          strip_components: 0
+
+      - name: Restart PM2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -19,22 +49,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
-            cd ${{ secrets.REPO_PATH || '~/nutry-bites' }}
-            echo "📥 Fetching latest code..."
-            git fetch --prune origin
-            git reset --hard origin/main
-
-            cd client
-            echo "🧹 Cleaning old build and cache..."
-            rm -rf .next
-
-            echo "📦 Installing dependencies..."
-            npm install --legacy-peer-deps
-
-            echo "🏗 Building application..."
-            export NODE_OPTIONS=--max-old-space-size=512
-            npm run build
-            
-            echo "🔄 Restarting PM2 process..."
+            cd ~/nutry-bites/client
+            npm install --legacy-peer-deps --omit=dev
             pm2 restart nutry-client --update-env || pm2 start npm --name "nutry-client" -- start
-            echo "✅ Deployment successful!"
+            echo "✅ Client deployed!"

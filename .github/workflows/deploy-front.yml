@@ -8,10 +8,40 @@ on:
       - ".github/workflows/deploy-front.yml"
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy Nutry Bites (front) to VPS
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: front/package-lock.json
+
+      - name: Install dependencies
+        working-directory: front
+        run: npm ci --legacy-peer-deps
+
+      - name: Build
+        working-directory: front
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: npm run build
+
+      - name: Deploy build to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "front/dist"
+          target: "~/nutry-bites/"
+          strip_components: 0
+
+      - name: Restart PM2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -19,11 +49,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
-            cd ${{ secrets.REPO_PATH || '~/nutry-bites' }}
-            git fetch --prune origin
-            git reset --hard origin/main
-            cd front
-            npm install --legacy-peer-deps
-            export NODE_OPTIONS=--max-old-space-size=512
-            npm run build
             pm2 restart nutry-front --update-env
+            echo "✅ Front deployed!"

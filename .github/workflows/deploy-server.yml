@@ -11,28 +11,22 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy Nutry Bites (server) to VPS
+      - name: Deploy server to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command_timeout: 10m
           script: |
             set -e
-            cd ${{ secrets.REPO_PATH || '~/nutry-bites' }}
-            echo "📥 Fetching latest code..."
+            cd ~/nutry-bites
             git fetch --prune origin
             git reset --hard origin/main
-            
+
             cd server
-            echo "📦 Installing dependencies..."
-            npm install --legacy-peer-deps
-            
-            echo "🏗 Generating Prisma Client..."
+            npm ci --legacy-peer-deps
             npx prisma generate
-            
-            echo "🔄 Restarting PM2 process..."
-            # Adjust the name 'nutry-server' if your PM2 process has a different name
+
             pm2 restart nutry-server --update-env || pm2 start index.js --name "nutry-server"
-            
-            echo "✅ Server Deployment successful!"
+            echo "✅ Server deployed!"

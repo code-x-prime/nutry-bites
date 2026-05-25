@@ -13,8 +13,6 @@ import {
   FiEyeOff as EyeOff,
   FiMail as Mail,
   FiLock as Lock,
-  FiUser as User,
-  FiPhone as Phone,
   FiLoader as Loader2,
 } from "react-icons/fi";
 import Image from "next/image";

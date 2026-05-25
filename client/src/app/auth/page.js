@@ -191,9 +191,18 @@ export default function AuthPage() {
     if (!/^\d{6}$/.test(otpString)) return toast.error("Enter 6-digit OTP");
     setVerifySubmitting(true);
     try {
-      await verifyOtp(pendingEmail, otpString);
-      toast.success("Email verified. Please login.");
-      setActiveTab("login");
+      const res = await verifyOtp(pendingEmail, otpString);
+      localStorage.removeItem("pendingEmail");
+      localStorage.removeItem("registeredEmail");
+      toast.success("Email verified! Welcome to Nutry Bites.");
+      if (res?.data?.user) {
+        sessionStorage.setItem("justLoggedIn", "true");
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
+      } else {
+        setActiveTab("login");
+      }
     } catch (err) {
       toast.error(err.message || "Failed to verify OTP");
     } finally {
@@ -225,9 +234,16 @@ export default function AuthPage() {
       if (/^\d{6}$/.test(fullOtp) && pendingEmail && !verifySubmitting) {
         setVerifySubmitting(true);
         verifyOtp(pendingEmail, fullOtp)
-          .then(() => {
-            toast.success("Email verified. Please login.");
-            setActiveTab("login");
+          .then((res) => {
+            localStorage.removeItem("pendingEmail");
+            localStorage.removeItem("registeredEmail");
+            toast.success("Email verified! Welcome to Nutry Bites.");
+            if (res?.data?.user) {
+              sessionStorage.setItem("justLoggedIn", "true");
+              setTimeout(() => { window.location.href = "/"; }, 500);
+            } else {
+              setActiveTab("login");
+            }
           })
           .catch((err) => toast.error(err.message || "Failed to verify OTP"))
           .finally(() => setVerifySubmitting(false));

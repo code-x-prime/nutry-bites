@@ -281,6 +281,9 @@ export function AuthProvider({ children }) {
         method: "POST",
         body: JSON.stringify({ email, otp }),
       });
+      if (res?.data?.user) {
+        setUser(res.data.user);
+      }
       return res;
     } catch (err) {
       setError(err.message || "Failed to verify OTP");

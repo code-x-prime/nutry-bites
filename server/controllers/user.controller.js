@@ -1577,9 +1577,9 @@ export const resendVerificationEmail = asyncHandler(async (req, res, next) => {
     throw new ApiError(400, "Email is required");
   }
 
-  // Find user by email
-  const user = await prisma.user.findUnique({
-    where: { email },
+  // Find user by email (email alone is not unique — use findFirst)
+  const user = await prisma.user.findFirst({
+    where: { email, signupSource: "credentials" },
   });
 
   if (!user) {

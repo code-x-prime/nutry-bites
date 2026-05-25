@@ -9,6 +9,7 @@ import { ClientOnly } from "@/components/client-only";
 import { DynamicIcon } from "@/components/dynamic-icon";
 import { fetchApi, formatCurrency, formatDate } from "@/lib/utils";
 import Image from "next/image";
+import { toast, Toaster } from "sonner";
 
 export default function OrderDetailsPage({ params }) {
   const { orderId } = params;
@@ -105,11 +106,10 @@ export default function OrderDetailsPage({ params }) {
           images: returnForm.images,
         }),
       });
-      alert("Return request submitted successfully!");
+      toast.success("Return request submitted successfully!");
       setShowReturnForm(false);
       setSelectedItem(null);
       setReturnForm({ reason: "", customReason: "", images: [] });
-      // Refresh order details to get updated return request data
       setLoadingOrder(true);
       try {
         const response = await fetchApi(`/payment/orders/${orderId}`, {
@@ -122,7 +122,7 @@ export default function OrderDetailsPage({ params }) {
         setLoadingOrder(false);
       }
     } catch (error) {
-      alert(error.message || "Failed to submit return request");
+      toast.error(error.message || "Failed to submit return request");
     } finally {
       setSubmittingReturn(false);
     }
@@ -197,6 +197,7 @@ export default function OrderDetailsPage({ params }) {
 
   return (
     <ClientOnly>
+      <Toaster position="top-center" richColors />
       <div className="container mx-auto py-10 px-4">
         <div className="flex items-center justify-between mb-8">
           <div>

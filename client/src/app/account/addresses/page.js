@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { FiMapPin as MapPin, FiPlus as Plus, FiEdit as Edit, FiTrash2 as Trash2, FiHome as Home, FiCheck as Check, FiLoader as Loader2 } from "react-icons/fi";
-import { toast } from "sonner";
+import { FiMapPin as MapPin, FiPlus as Plus, FiEdit as Edit, FiTrash2 as Trash2, FiHome as Home, FiCheck as Check, FiLoader as Loader2, FiAlertTriangle as AlertTriangle, FiX as X } from "react-icons/fi";
+import { toast, Toaster } from "sonner";
 import AddressForm from "@/components/AddressForm";
 
 export default function AddressesPage() {
@@ -13,6 +13,7 @@ export default function AddressesPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   // Fetch addresses
   const fetchAddresses = async () => {
@@ -46,11 +47,8 @@ export default function AddressesPage() {
 
   // Handle delete address
   const handleDeleteAddress = async (id) => {
-    if (!confirm("Are you sure you want to delete this address?")) {
-      return;
-    }
-
     setDeletingId(id);
+    setConfirmDeleteId(null);
     try {
       const response = await fetchApi(`/users/addresses/${id}`, {
         method: "DELETE",
@@ -102,6 +100,7 @@ export default function AddressesPage() {
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
+      <Toaster position="top-center" richColors />
       <div className="flex justify-between gap-2 items-center mb-8">
         <h1 className=" text-xl lg:text-2xl font-semibold">My Addresses</h1>
         {!showAddForm && !editingAddress && (
@@ -201,7 +200,7 @@ export default function AddressesPage() {
                   variant="outline"
                   size="sm"
                   className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
-                  onClick={() => handleDeleteAddress(address.id)}
+                  onClick={() => setConfirmDeleteId(address.id)}
                   disabled={deletingId === address.id}
                 >
                   {deletingId === address.id ? (
@@ -214,6 +213,36 @@ export default function AddressesPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-red-500" />
+                Delete Address
+              </h3>
+              <button onClick={() => setConfirmDeleteId(null)} className="text-gray-400 hover:text-gray-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 mb-5">Are you sure you want to delete this address? This cannot be undone.</p>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setConfirmDeleteId(null)}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white"
+                onClick={() => handleDeleteAddress(confirmDeleteId)}
+                disabled={deletingId === confirmDeleteId}
+              >
+                {deletingId === confirmDeleteId ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -433,8 +433,7 @@ export default function OrderDetailsPage() {
     try {
       const response = await orders.updateOrderStatus(id, {
         status: "CANCELLED",
-        cancelReason: cancelReason.trim(),
-        cancelledBy: "ADMIN",
+        notes: cancelReason.trim(),
       });
       if (response?.data?.success) {
         toast.success("Order cancelled successfully");

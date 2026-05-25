@@ -21,17 +21,18 @@ jobs:
             set -e
             cd ${{ secrets.REPO_PATH || '~/nutry-bites' }}
             echo "📥 Fetching latest code..."
-            git fetch origin main
+            git fetch --prune origin
             git reset --hard origin/main
-            
+
             cd client
             echo "🧹 Cleaning old build and cache..."
             rm -rf .next
-            
+
             echo "📦 Installing dependencies..."
             npm install --legacy-peer-deps
-            
+
             echo "🏗 Building application..."
+            export NODE_OPTIONS=--max-old-space-size=512
             npm run build
             
             echo "🔄 Restarting PM2 process..."

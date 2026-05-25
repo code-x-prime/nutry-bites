@@ -21,7 +21,7 @@ jobs:
             set -e
             cd ${{ secrets.REPO_PATH || '~/nutry-bites' }}
             echo "📥 Fetching latest code..."
-            git fetch origin main
+            git fetch --prune origin
             git reset --hard origin/main
             
             cd server

@@ -20,9 +20,10 @@ jobs:
           script: |
             set -e
             cd ${{ secrets.REPO_PATH || '~/nutry-bites' }}
-            git fetch origin main
+            git fetch --prune origin
             git reset --hard origin/main
             cd front
-            npm ci || npm install --legacy-peer-deps
+            npm install --legacy-peer-deps
+            export NODE_OPTIONS=--max-old-space-size=512
             npm run build
             pm2 restart nutry-front --update-env

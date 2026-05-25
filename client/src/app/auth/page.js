@@ -470,7 +470,7 @@ export default function AuthPage() {
                           value={otp[i]}
                           onChange={(e) => handleOtpChange(i, e.target.value)}
                           onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                          className="w-12 h-14 text-center text-xl font-bold border-2 border-slate-100 bg-slate-50 rounded-2xl focus:border-[#1F6F78] focus:bg-white outline-none transition-all"
+                          className="w-12 h-14 text-center text-xl font-bold border-2 border-slate-300 bg-slate-100 rounded-2xl focus:border-[#1F6F78] focus:bg-white outline-none transition-all"
                         />
                       ))}
                     </div>

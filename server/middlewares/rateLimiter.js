@@ -1,9 +1,9 @@
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
-// Rate limiter for OTP and sensitive email actions (1 request per minute per email or IP)
+// Rate limiter for OTP and sensitive email actions (3 requests per minute per email or IP)
 export const otpRateLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    max: 1,
+    max: 3,
     message: {
         success: false,
         message: "Too many requests. Please try again after a minute.",

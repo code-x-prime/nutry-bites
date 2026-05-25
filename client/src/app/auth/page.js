@@ -506,7 +506,7 @@ export default function AuthPage() {
             <div className="mt-10 text-center">
               <p className="text-slate-400 text-xs">
                 By continuing, you agree to our <br />
-                <Link href="/terms" className="text-slate-600 underline font-medium">Terms of Service</Link> and <Link href="/privacy" className="text-slate-600 underline font-medium">Privacy Policy</Link>
+                <Link href="/terms-conditions" className="text-slate-600 underline font-medium">Terms of Service</Link> and <Link href="/privacy-policy" className="text-slate-600 underline font-medium">Privacy Policy</Link>
               </p>
             </div>
           </div>

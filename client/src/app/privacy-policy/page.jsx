@@ -95,7 +95,7 @@ export default function PrivacyPolicy() {
           <span className="inline-block px-3 py-1 bg-white/10 rounded-full text-xs font-bold tracking-widest uppercase mb-4">
             Legal
           </span>
-          <h1 className="text-4xl md:text-5xl font-bold font-jost mb-3">Privacy Policy</h1>
+          <h1 className="text-4xl md:text-5xl font-bold font-jost mb-3 text-white">Privacy Policy</h1>
           <p className="text-white/70 font-lato">
             Last updated: <strong className="text-white">May 12, 2026</strong>
           </p>

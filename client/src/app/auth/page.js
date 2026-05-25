@@ -125,6 +125,21 @@ export default function AuthPage() {
     }
   };
 
+  const getPasswordStrength = (pwd) => {
+    if (!pwd) return { score: 0, label: "", color: "" };
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[a-z]/.test(pwd)) score++;
+    if (/\d/.test(pwd)) score++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) score++;
+    if (score <= 2) return { score, label: "Weak", color: "bg-red-500" };
+    if (score <= 3) return { score, label: "Medium", color: "bg-yellow-400" };
+    return { score, label: "Strong", color: "bg-green-500" };
+  };
+
+  const passwordStrength = getPasswordStrength(form.password);
+
   const isPasswordValid = () =>
     form.password.length >= 8 &&
     /[A-Z]/.test(form.password) &&
@@ -204,7 +219,22 @@ export default function AuthPage() {
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1);
     setOtp(newOtp);
-    if (value && index < 5) otpInputRefs.current[index + 1]?.focus();
+    if (value && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+    if (index === 5 && value && newOtp.every((d) => d !== "")) {
+      const fullOtp = newOtp.join("");
+      if (/^\d{6}$/.test(fullOtp) && pendingEmail && !verifySubmitting) {
+        setVerifySubmitting(true);
+        verifyOtp(pendingEmail, fullOtp)
+          .then(() => {
+            toast.success("Email verified. Please login.");
+            setActiveTab("login");
+          })
+          .catch((err) => toast.error(err.message || "Failed to verify OTP"))
+          .finally(() => setVerifySubmitting(false));
+      }
+    }
   };
 
   const handleOtpKeyDown = (index, e) => {
@@ -379,6 +409,21 @@ export default function AuthPage() {
                           {showRegisterPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                         </button>
                       </div>
+                      {form.password && (
+                        <div className="mt-1.5 space-y-1">
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <div
+                                key={i}
+                                className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i <= passwordStrength.score ? passwordStrength.color : "bg-slate-200"}`}
+                              />
+                            ))}
+                          </div>
+                          <p className={`text-xs font-semibold ml-1 ${passwordStrength.label === "Weak" ? "text-red-500" : passwordStrength.label === "Medium" ? "text-yellow-500" : "text-green-600"}`}>
+                            {passwordStrength.label} — use uppercase, number & special char
+                          </p>
+                        </div>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-slate-700 ml-1">Confirm Password</label>
@@ -433,7 +478,7 @@ export default function AuthPage() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-3">
                     <Button
                       type="submit"
                       className="w-full h-14 bg-[#1F6F78] hover:bg-[#144D53] text-white font-bold text-lg rounded-2xl"
@@ -441,6 +486,19 @@ export default function AuthPage() {
                     >
                       {verifySubmitting ? <Loader2 className="h-6 w-6 animate-spin" /> : "Verify & Continue"}
                     </Button>
+                    <div className="text-center">
+                      {resendCooldown > 0 ? (
+                        <p className="text-sm text-slate-400">Resend OTP in <span className="font-bold text-[#1F6F78]">{resendCooldown}s</span></p>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleResend}
+                          className="text-sm font-bold text-[#1F6F78] hover:text-[#144D53] transition-colors"
+                        >
+                          Didn&apos;t receive code? Resend OTP
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </form>
               )}

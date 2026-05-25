@@ -267,8 +267,8 @@ export default function AuthPage() {
         </div>
 
         {/* Right Column: Auth Form */}
-        <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-5 lg:p-10 bg-white overflow-y-auto">
-          <div className="w-full max-w-md">
+        <div className="w-full lg:w-1/2 flex flex-col items-center p-5 lg:p-10 bg-white overflow-y-auto min-h-0">
+          <div className="w-full max-w-md my-auto py-6">
             {/* Logo/Header */}
             <div className="mb-4 text-center lg:text-left">
               <Link href="/" className="inline-block mb-3">

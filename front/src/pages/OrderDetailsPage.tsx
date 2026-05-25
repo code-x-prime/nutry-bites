@@ -95,6 +95,22 @@ export default function OrderDetailsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  interface Courier {
+    courierId: number;
+    courierName: string;
+    rate: number;
+    estimatedDays?: string | null;
+    etd?: string | null;
+    codCharges: number;
+    isRecommended: boolean;
+    deliveryPerformance?: string | null;
+  }
+
+  const [couriers, setCouriers] = useState<Courier[]>([]);
+  const [loadingCouriers, setLoadingCouriers] = useState(false);
+  const [selectedCourierId, setSelectedCourierId] = useState<number | null>(null);
+  const [assigningCourier, setAssigningCourier] = useState(false);
+
   interface OrderItem {
     id: string;
     productId: string;
@@ -145,6 +161,43 @@ export default function OrderDetailsPage() {
     location?: string;
     description?: string;
   }
+
+  const fetchCouriers = useCallback(async (oid: string) => {
+    setLoadingCouriers(true);
+    setCouriers([]);
+    setSelectedCourierId(null);
+    try {
+      const res = await orders.getOrderCouriers(oid);
+      if (res?.data?.success) {
+        const list: Courier[] = res.data.data?.couriers || [];
+        setCouriers(list);
+        const recommended = list.find(c => c.isRecommended) || list[0];
+        if (recommended) setSelectedCourierId(recommended.courierId);
+      }
+    } catch (err) {
+      console.error("Failed to fetch couriers:", err);
+    } finally {
+      setLoadingCouriers(false);
+    }
+  }, []);
+
+  const handleAssignCourier = async () => {
+    if (!id || !selectedCourierId) return;
+    setAssigningCourier(true);
+    try {
+      const res = await orders.assignCourierToOrder(id, selectedCourierId);
+      if (res?.data?.success) {
+        toast.success("Courier assigned & synced to Shiprocket");
+        fetchOrderDetails();
+      } else {
+        toast.error(res?.data?.message || "Failed to assign courier");
+      }
+    } catch (err: unknown) {
+      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to assign courier");
+    } finally {
+      setAssigningCourier(false);
+    }
+  };
 
   // Define fetchOrderDetails outside of useEffect so it can be reused
   const fetchOrderDetails = useCallback(async () => {
@@ -793,13 +846,21 @@ export default function OrderDetailsPage() {
           {/* Shiprocket Shipping */}
           <Card className="bg-[var(--bg-card)] border-[var(--border-color)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] rounded-xl">
             <CardHeader className="px-6 pt-6 pb-4">
-              <CardTitle className="text-lg font-semibold text-[var(--text-primary)] flex items-center">
-                <Truck className="mr-2 h-5 w-5 text-[var(--accent)]" />
-                Shipping (Shiprocket)
+              <CardTitle className="text-lg font-semibold text-[var(--text-primary)] flex items-center justify-between">
+                <span className="flex items-center">
+                  <Truck className="mr-2 h-5 w-5 text-[var(--accent)]" />
+                  Shipping (Shiprocket)
+                </span>
+                {orderDetails.shiprocket?.awbCode && (
+                  <Badge className="text-xs font-medium border bg-emerald-500/10 text-emerald-600 border-emerald-500/30">
+                    {orderDetails.shiprocket.status || "AWB Assigned"}
+                  </Badge>
+                )}
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-6 pb-6">
-              {orderDetails.shiprocket?.orderId || orderDetails.shiprocket?.awbCode ? (
+            <CardContent className="px-6 pb-6 space-y-4">
+              {/* Already synced — show details */}
+              {orderDetails.shiprocket?.awbCode ? (
                 <div className="space-y-3">
                   {orderDetails.shiprocket.orderId && (
                     <div>
@@ -813,65 +874,126 @@ export default function OrderDetailsPage() {
                       <p className="font-mono text-sm text-[var(--text-primary)]">{orderDetails.shiprocket.shipmentId}</p>
                     </div>
                   )}
-                  {orderDetails.shiprocket.awbCode && (
-                    <div>
-                      <p className="text-xs text-[var(--text-secondary)] mb-1">AWB Number</p>
-                      <p className="font-mono text-sm text-[var(--text-primary)] bg-[var(--bg-secondary)] px-2 py-1 rounded border border-[var(--border-color)]">
-                        {orderDetails.shiprocket.awbCode}
-                      </p>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-xs text-[var(--text-secondary)] mb-1">AWB Number</p>
+                    <p className="font-mono text-sm text-[var(--text-primary)] bg-[var(--bg-secondary)] px-2 py-1 rounded border border-[var(--border-color)]">
+                      {orderDetails.shiprocket.awbCode}
+                    </p>
+                  </div>
                   {orderDetails.shiprocket.courierName && (
                     <div>
                       <p className="text-xs text-[var(--text-secondary)] mb-1">Courier</p>
-                      <p className="font-medium text-[var(--text-primary)]">{orderDetails.shiprocket.courierName}</p>
-                    </div>
-                  )}
-                  {orderDetails.shiprocket.status && (
-                    <div>
-                      <p className="text-xs text-[var(--text-secondary)] mb-1">Status</p>
-                      <Badge className={cn("text-xs font-medium border", getStatusBadgeClass(orderDetails.shiprocket.status))}>
-                        {orderDetails.shiprocket.status}
-                      </Badge>
+                      <p className="font-semibold text-[var(--text-primary)]">{orderDetails.shiprocket.courierName}</p>
                     </div>
                   )}
                   {orderDetails.shiprocket.trackingUrl && (
-                    <div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(orderDetails.shiprocket!.trackingUrl!, "_blank")}
+                    >
+                      Open Tracking
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                /* Not yet assigned — show courier picker */
+                <div className="space-y-3">
+                  <p className="text-sm text-[var(--text-secondary)]">
+                    Select a courier to sync this order to Shiprocket and assign AWB.
+                  </p>
+
+                  {/* Load couriers button */}
+                  {couriers.length === 0 && !loadingCouriers && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-[var(--border-color)]"
+                      onClick={() => fetchCouriers(id!)}
+                    >
+                      <Truck className="mr-2 h-4 w-4" />
+                      Load Available Couriers
+                    </Button>
+                  )}
+
+                  {loadingCouriers && (
+                    <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] py-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Fetching couriers for this pincode…
+                    </div>
+                  )}
+
+                  {couriers.length > 0 && (
+                    <div className="space-y-2">
+                      {couriers.map((c) => (
+                        <div
+                          key={c.courierId}
+                          onClick={() => setSelectedCourierId(c.courierId)}
+                          className={cn(
+                            "flex items-center justify-between border rounded-lg p-3 cursor-pointer transition-all",
+                            selectedCourierId === c.courierId
+                              ? "border-[var(--accent)] bg-[var(--accent)]/5"
+                              : "border-[var(--border-color)] hover:border-[var(--accent)]/40"
+                          )}
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="radio"
+                              checked={selectedCourierId === c.courierId}
+                              onChange={() => setSelectedCourierId(c.courierId)}
+                              className="h-4 w-4 accent-[var(--accent)]"
+                            />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-semibold text-sm text-[var(--text-primary)]">{c.courierName}</p>
+                                {c.isRecommended && (
+                                  <span className="text-[10px] bg-[var(--accent)] text-white px-1.5 py-0.5 rounded font-bold">REC</span>
+                                )}
+                              </div>
+                              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                                {c.etd ? `By ${c.etd}` : c.estimatedDays ? `Est. ${c.estimatedDays}` : "Delivery time varies"}
+                                {c.deliveryPerformance ? ` · ${c.deliveryPerformance}% on-time` : ""}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-[var(--accent)] text-sm">
+                              {c.rate === 0 ? "FREE" : `₹${c.rate}`}
+                            </p>
+                            {c.codCharges > 0 && orderDetails.paymentMethod === "CASH" && (
+                              <p className="text-xs text-amber-600">+₹{c.codCharges} COD</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+
                       <Button
-                        size="sm"
-                        variant="outline"
-                        className="mt-2"
-                        onClick={() => window.open(orderDetails.shiprocket!.trackingUrl!, "_blank")}
+                        className="w-full mt-2"
+                        disabled={!selectedCourierId || assigningCourier}
+                        onClick={handleAssignCourier}
                       >
-                        Open Tracking
+                        {assigningCourier ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Assigning…
+                          </>
+                        ) : (
+                          <>
+                            <Truck className="mr-2 h-4 w-4" />
+                            Assign Courier & Sync to Shiprocket
+                          </>
+                        )}
                       </Button>
                     </div>
                   )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="mt-2"
-                    onClick={async () => {
-                      try {
-                        const res = await orders.syncOrderToShiprocket(id!);
-                        if (res?.data?.success) {
-                          toast.success("Synced with Shiprocket");
-                          fetchOrderDetails();
-                        } else {
-                          toast.error(res?.data?.message || "Sync failed");
-                        }
-                      } catch (err: unknown) {
-                        toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Sync failed");
-                      }
-                    }}
-                  >
-                    Sync with Shiprocket
-                  </Button>
+
+                  {/* Fallback: already created on Shiprocket but no AWB */}
+                  {orderDetails.shiprocket?.orderId && !orderDetails.shiprocket?.awbCode && (
+                    <p className="text-xs text-amber-600">
+                      Order created on Shiprocket (ID: {orderDetails.shiprocket.orderId}) but AWB not yet assigned.
+                    </p>
+                  )}
                 </div>
-              ) : (
-                <p className="text-sm text-[var(--text-secondary)]">
-                  Enable Shiprocket in Site Settings to auto-create shipments for new orders.
-                </p>
               )}
             </CardContent>
           </Card>

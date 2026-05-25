@@ -527,6 +527,12 @@ export const orders = {
   syncOrderToShiprocket: (orderId: string) => {
     return api.post(`/api/admin/shiprocket/orders/${orderId}/sync`);
   },
+  getOrderCouriers: (orderId: string) => {
+    return api.get(`/api/admin/shiprocket/orders/${orderId}/couriers`);
+  },
+  assignCourierToOrder: (orderId: string, courierId: number) => {
+    return api.post(`/api/admin/shiprocket/orders/${orderId}/assign-courier`, { courierId });
+  },
   getOrderStats: async () => {
     try {
       const response = await api.get("/api/admin/orders-stats");

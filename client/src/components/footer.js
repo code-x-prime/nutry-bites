@@ -196,8 +196,8 @@ export function Footer() {
                   {contactInfo.address}
                 </p>
                 <div className="pt-2 text-white text-[12px] font-bold uppercase tracking-wider">
-                  <p>GST NO: 19ASGPY5969C1Z1</p>
-                  <p>FSSAI LIC NO: 22826039000129</p>
+                  <p className="text-white">GST NO: 19ASGPY5969C1Z1</p>
+                  <p className="text-white">FSSAI LIC NO: 22826039000129</p>
                 </div>
               </div>
             </div>

@@ -863,84 +863,6 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          {/* ── Courier / Delivery Partner Selection ── */}
-          <div className="bg-white rounded-[32px] shadow-sm border border-nyxis-gray-100 p-8">
-            <h2 className="font-jost text-xl font-bold text-[#144D53] flex items-center mb-6">
-              <span className="mr-3 text-[#1F6F78] text-2xl">🚚</span>
-              Delivery Partner
-            </h2>
-
-            {loadingRates ? (
-              <div className="flex items-center gap-3 py-6 justify-center text-gray-500">
-                <div className="w-5 h-5 border-2 border-[#1F6F78] border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm">Fetching delivery options for your pincode…</span>
-              </div>
-            ) : isFreeShipping ? (
-              <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-4">
-                <span className="text-2xl">🎉</span>
-                <div>
-                  <p className="font-semibold text-green-700">FREE Delivery!</p>
-                  <p className="text-xs text-green-600">Your order qualifies for free shipping.</p>
-                </div>
-              </div>
-            ) : couriers.length > 0 ? (
-              <div className="space-y-3">
-                {couriers.map((c) => (
-                  <div
-                    key={c.courierId}
-                    onClick={() => { setSelectedCourier(c); setShippingRate(c.rate); }}
-                    className={`flex items-center justify-between border rounded-xl p-4 cursor-pointer transition-all ${selectedCourier?.courierId === c.courierId
-                        ? "border-[#1F6F78] bg-[#1F6F78]/5 shadow-sm"
-                        : "hover:border-gray-300"
-                      }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        checked={selectedCourier?.courierId === c.courierId}
-                        onChange={() => { setSelectedCourier(c); setShippingRate(c.rate); }}
-                        className="h-4 w-4 text-[#1F6F78] border-gray-300 focus:ring-[#1F6F78]"
-                      />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-sm text-gray-800">{c.courierName}</p>
-                          {c.isRecommended && (
-                            <span className="text-[10px] bg-[#1F6F78] text-white px-2 py-0.5 rounded-full font-bold">RECOMMENDED</span>
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          {c.estimatedDays
-                            ? `Estimated: ${c.estimatedDays}`
-                            : c.etd
-                              ? `By ${c.etd}`
-                              : "Delivery time varies"}
-                          {c.deliveryPerformance ? ` · ${c.deliveryPerformance}% on-time` : ""}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-[#1F6F78] text-base">
-                        {c.rate === 0 ? "FREE" : `₹${c.rate}`}
-                      </p>
-                      {c.codCharges > 0 && paymentMethod === "CASH" && (
-                        <p className="text-xs text-amber-600">+₹{c.codCharges} COD fee</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : !selectedAddressId ? (
-              <p className="text-sm text-gray-500 py-4 text-center">Select a delivery address to see shipping options.</p>
-            ) : (
-              <div className="bg-[#f0faf7] rounded-xl p-4 text-center">
-                <p className="text-sm text-[#1F6F78] font-medium">
-                  {shippingRate > 0 ? `Flat shipping charge: ₹${shippingRate}` : "Free Delivery"}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">Live courier rates unavailable for this pincode.</p>
-              </div>
-            )}
-          </div>
-
           {/* Payment Method */}
           <div className="bg-white rounded-[32px] shadow-sm border border-nyxis-gray-100 p-8">
             <h2 className="font-jost text-xl font-bold text-[#144D53] flex items-center mb-6">
@@ -1217,6 +1139,7 @@ export default function CheckoutPage() {
                 onClick={handleCheckout}
                 disabled={
                   processing ||
+                  loadingRates ||
                   !selectedAddressId ||
                   !paymentMethod ||
                   addresses.length === 0
@@ -1226,6 +1149,11 @@ export default function CheckoutPage() {
                   <span className="flex items-center">
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     <span className="animate-pulse">Processing Payment...</span>
+                  </span>
+                ) : loadingRates ? (
+                  <span className="flex items-center">
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <span>Calculating Shipping...</span>
                   </span>
                 ) : (
                   <span className="flex items-center justify-center">

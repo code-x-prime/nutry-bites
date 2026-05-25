@@ -20,6 +20,11 @@ import {
     printInvoice,
     getPickupLocations,
     addPickupLocation,
+    getDefaultPickupAddress,
+    buildShiprocketOrderPayload,
+    createShiprocketOrder,
+    assignAWB,
+    schedulePickup,
 } from "../utils/shiprocket.js";
 
 // Get Shiprocket settings
@@ -415,6 +420,142 @@ export const getOrderInvoice = asyncHandler(async (req, res) => {
 
     res.status(200).json(
         new ApiResponsive(200, { invoice: result }, "Invoice generated successfully")
+    );
+});
+
+// Get available couriers for a specific order (admin use)
+export const getOrderCouriers = asyncHandler(async (req, res) => {
+    const { orderId } = req.params;
+
+    const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        include: { shippingAddress: true, items: { include: { variant: true } } },
+    });
+
+    if (!order) throw new ApiError(404, "Order not found");
+    if (!order.shippingAddress) throw new ApiError(400, "Order has no shipping address");
+
+    const pickupAddress = await getDefaultPickupAddress();
+    if (!pickupAddress) throw new ApiError(400, "No pickup address configured");
+
+    const settings = await getShiprocketSettings();
+    const defaultWeight = parseFloat(settings.defaultWeight || 0.5);
+
+    let totalWeight = 0;
+    for (const item of order.items) {
+        const w = parseFloat(item.variant?.shippingWeight || defaultWeight);
+        totalWeight += w * item.quantity;
+    }
+    totalWeight = Math.max(totalWeight, 0.1);
+
+    const isCod = order.paymentMethod === "CASH";
+
+    const serviceabilityData = await checkServiceability({
+        pickupPincode: pickupAddress.pincode,
+        deliveryPincode: order.shippingAddress.postalCode,
+        weight: totalWeight,
+        cod: isCod,
+    });
+
+    const rawCouriers = serviceabilityData?.data?.available_courier_companies || [];
+    const couriers = rawCouriers
+        .filter(c => c.rate !== undefined && c.rate !== null)
+        .map(c => ({
+            courierId: c.courier_company_id,
+            courierName: c.courier_name,
+            rate: Math.round(parseFloat(c.rate || 0)),
+            estimatedDays: c.estimated_delivery_days || c.etd || null,
+            etd: c.etd || null,
+            codCharges: c.cod_charges ? Math.round(parseFloat(c.cod_charges)) : 0,
+            isRecommended: c.is_recommended === 1 || c.is_recommended === true,
+            deliveryPerformance: c.delivery_performance || null,
+        }))
+        .sort((a, b) => {
+            if (a.isRecommended && !b.isRecommended) return -1;
+            if (!a.isRecommended && b.isRecommended) return 1;
+            return a.rate - b.rate;
+        });
+
+    res.status(200).json(
+        new ApiResponsive(200, { couriers, totalWeight }, "Couriers fetched successfully")
+    );
+});
+
+// Assign a specific courier to an order and sync to Shiprocket
+export const assignCourierToOrder = asyncHandler(async (req, res) => {
+    const { orderId } = req.params;
+    const { courierId } = req.body;
+
+    if (!courierId) throw new ApiError(400, "courierId is required");
+
+    const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        include: {
+            user: true,
+            shippingAddress: true,
+            items: { include: { product: true, variant: true } },
+        },
+    });
+
+    if (!order) throw new ApiError(404, "Order not found");
+
+    let shiprocketOrderId = order.shiprocketOrderId;
+    let shipmentId = order.shiprocketShipmentId;
+
+    // Create Shiprocket order if not already done
+    if (!shiprocketOrderId) {
+        const payload = await buildShiprocketOrderPayload(order);
+        const srResponse = await createShiprocketOrder(payload);
+        shiprocketOrderId = srResponse.order_id;
+        shipmentId = srResponse.shipment_id;
+        await prisma.order.update({
+            where: { id: orderId },
+            data: {
+                shiprocketOrderId,
+                shiprocketShipmentId: shipmentId,
+                shiprocketStatus: "CREATED",
+            },
+        });
+    }
+
+    // Assign AWB with specific courier
+    const awbResponse = await assignAWB(shipmentId, courierId);
+    const awbCode = awbResponse.response?.data?.awb_code || null;
+    const courierName = awbResponse.response?.data?.courier_name || null;
+
+    await prisma.order.update({
+        where: { id: orderId },
+        data: {
+            awbCode,
+            courierName,
+            shiprocketStatus: "AWB_ASSIGNED",
+        },
+    });
+
+    // Schedule pickup (non-critical)
+    try {
+        await schedulePickup(shipmentId);
+        await prisma.order.update({
+            where: { id: orderId },
+            data: { shiprocketStatus: "PICKUP_SCHEDULED" },
+        });
+    } catch (e) {
+        console.error("Pickup scheduling failed:", e.message);
+    }
+
+    const updated = await prisma.order.findUnique({
+        where: { id: orderId },
+        select: {
+            shiprocketOrderId: true,
+            shiprocketShipmentId: true,
+            awbCode: true,
+            courierName: true,
+            shiprocketStatus: true,
+        },
+    });
+
+    res.status(200).json(
+        new ApiResponsive(200, { order: updated }, "Courier assigned successfully")
     );
 });
 

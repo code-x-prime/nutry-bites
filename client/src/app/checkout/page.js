@@ -981,7 +981,7 @@ export default function CheckoutPage() {
 
             <div className="divide-y">
               <div className="pb-4">
-                <p className="text-sm font-medium mb-2">
+                <p className="text-sm font-medium mb-2 text-white">
                   {cart.totalQuantity} Items in Cart
                 </p>
                 <div className="max-h-52 overflow-y-auto space-y-3">
@@ -998,13 +998,13 @@ export default function CheckoutPage() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
+                        <p className="text-sm font-medium truncate text-white">
                           {item.product.name}
                         </p>
                         {(item.variant?.attributes?.length > 0 ||
                           item.variant?.color ||
                           item.variant?.size) && (
-                            <p className="text-xs text-gray-500 flex items-center gap-1">
+                            <p className="text-xs text-white/50 flex items-center gap-1">
                               {item.variant?.attributes &&
                                 item.variant.attributes.length > 0 ? (
                                 <span>
@@ -1048,26 +1048,26 @@ export default function CheckoutPage() {
                               )}
                             </p>
                           )}
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-white/50">
                           {item.quantity} × {formatCurrency(item.price)}
                           {item.originalPrice && item.originalPrice !== item.price && (
-                            <span className="line-through text-gray-400 ml-1">
+                            <span className="line-through text-white/30 ml-1">
                               {formatCurrency(item.originalPrice)}
                             </span>
                           )}
                         </p>
                         {item.priceSource && item.priceSource !== "DEFAULT" && (
-                          <p className="text-xs text-green-600 font-medium mt-1">
+                          <p className="text-xs text-emerald-400 font-medium mt-1">
                             Bulk pricing applied
                           </p>
                         )}
                         {item.moq && item.moq > 1 && (
-                          <p className="text-xs text-blue-600 mt-1">
+                          <p className="text-xs text-blue-300 mt-1">
                             Min. Order: {item.moq} units
                           </p>
                         )}
                       </div>
-                      <p className="font-medium text-sm">
+                      <p className="font-medium text-sm text-white">
                         {formatCurrency(item.subtotal)}
                       </p>
                     </div>
@@ -1113,8 +1113,8 @@ export default function CheckoutPage() {
 
                 {/* Free shipping progress bar */}
                 {!isFreeShipping && cart.freeShippingThreshold > 0 && totals.subtotal < cart.freeShippingThreshold && (
-                  <div className="mt-3 text-xs text-amber-700 bg-amber-50 p-2 rounded text-center font-medium border border-amber-200">
-                    Add <strong>{formatCurrency(cart.freeShippingThreshold - totals.subtotal)}</strong> more for <span className="text-green-600 font-bold">FREE shipping!</span>
+                  <div className="mt-3 text-xs text-amber-300 bg-white/10 p-2 rounded text-center font-medium border border-white/20">
+                    Add <strong>{formatCurrency(cart.freeShippingThreshold - totals.subtotal)}</strong> more for <span className="text-emerald-400 font-bold">FREE shipping!</span>
                   </div>
                 )}
 
@@ -1169,8 +1169,16 @@ export default function CheckoutPage() {
                 )}
               </Button>
 
-              <p className="text-xs text-gray-500 mt-4 text-center">
-                By placing your order, you agree to our terms and conditions.
+              <p className="text-xs text-white/50 mt-4 text-center">
+                By placing your order, you agree to our{" "}
+                <Link href="/terms-conditions" className="text-white/80 underline hover:text-white transition-colors">
+                  Terms &amp; Conditions
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy-policy" className="text-white/80 underline hover:text-white transition-colors">
+                  Privacy Policy
+                </Link>
+                .
               </p>
             </div>
           </div>

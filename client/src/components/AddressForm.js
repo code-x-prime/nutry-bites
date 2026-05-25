@@ -8,6 +8,16 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { FiLoader as Loader2, FiXCircle as XCircle } from "react-icons/fi";
 
+const INDIAN_STATES = [
+  "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh",
+  "Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka",
+  "Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram",
+  "Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana",
+  "Tripura","Uttar Pradesh","Uttarakhand","West Bengal",
+  "Andaman and Nicobar Islands","Chandigarh","Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi","Jammu and Kashmir","Ladakh","Lakshadweep","Puducherry",
+];
+
 export default function AddressForm({
   onSuccess,
   onCancel,
@@ -190,14 +200,18 @@ export default function AddressForm({
           {/* State */}
           <div>
             <Label htmlFor="state">State*</Label>
-            <Input
+            <select
               id="state"
               name="state"
               value={formData.state}
               onChange={handleChange}
-              className={errors.state ? "border-red-500" : ""}
-              placeholder="Enter state"
-            />
+              className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${errors.state ? "border-red-500" : "border-input"}`}
+            >
+              <option value="">Select state</option>
+              {INDIAN_STATES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
             {errors.state && (
               <p className="text-red-500 text-sm mt-1">{errors.state}</p>
             )}
@@ -240,14 +254,15 @@ export default function AddressForm({
           {/* Country */}
           <div className="sm:col-span-2">
             <Label htmlFor="country">Country*</Label>
-            <Input
+            <select
               id="country"
               name="country"
               value={formData.country}
               onChange={handleChange}
-              className={errors.country ? "border-red-500" : ""}
-              placeholder="Enter country"
-            />
+              className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${errors.country ? "border-red-500" : "border-input"}`}
+            >
+              <option value="India">India</option>
+            </select>
             {errors.country && (
               <p className="text-red-500 text-sm mt-1">{errors.country}</p>
             )}

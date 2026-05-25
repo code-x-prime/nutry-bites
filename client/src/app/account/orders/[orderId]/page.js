@@ -741,8 +741,8 @@ export default function OrderDetailsPage({ params }) {
               <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-lg font-semibold mb-4">Shipping Address</h2>
                 {order.shippingAddress ? (
-                  <div className="text-sm space-y-1">
-                    <p className="font-medium">
+                  <div className="text-sm space-y-1 text-gray-700">
+                    <p className="font-semibold text-gray-900">
                       {order.shippingAddress.name || ""}
                     </p>
                     <p>{order.shippingAddress.street}</p>
@@ -752,6 +752,12 @@ export default function OrderDetailsPage({ params }) {
                       {order.shippingAddress.postalCode}
                     </p>
                     <p>{order.shippingAddress.country}</p>
+                    {order.shippingAddress.phone && (
+                      <p className="mt-1">
+                        <span className="font-medium">Phone:</span>{" "}
+                        {order.shippingAddress.phone}
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <p className="text-sm text-gray-600">

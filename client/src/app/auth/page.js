@@ -81,6 +81,7 @@ export default function AuthPage() {
     referralCode: "",
   });
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [registerSubmitting, setRegisterSubmitting] = useState(false);
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -361,21 +362,50 @@ export default function AuthPage() {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-slate-700 ml-1">Password</label>
-                      <Input
-                        type={showRegisterPassword ? "text" : "password"}
-                        value={form.password}
-                        onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-                        className="h-14 bg-slate-50/50 border-slate-200 rounded-2xl"
-                        placeholder="••••••••"
-                        required
-                      />
+                      <div className="relative">
+                        <Input
+                          type={showRegisterPassword ? "text" : "password"}
+                          value={form.password}
+                          onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+                          className="h-14 pr-12 bg-slate-50/50 border-slate-200 rounded-2xl"
+                          placeholder="••••••••"
+                          required
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#1F6F78] transition-colors"
+                          onClick={() => setShowRegisterPassword((s) => !s)}
+                        >
+                          {showRegisterPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-slate-700 ml-1">Confirm Password</label>
+                      <div className="relative">
+                        <Input
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={form.confirmPassword}
+                          onChange={(e) => setForm((p) => ({ ...p, confirmPassword: e.target.value }))}
+                          className="h-14 pr-12 bg-slate-50/50 border-slate-200 rounded-2xl"
+                          placeholder="••••••••"
+                          required
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#1F6F78] transition-colors"
+                          onClick={() => setShowConfirmPassword((s) => !s)}
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
                   <Button
                     type="submit"
                     className="w-full h-14 bg-[#1F6F78] hover:bg-[#144D53] text-white font-bold text-lg rounded-2xl shadow-lg mt-4"
-                    disabled={registerSubmitting || !isPasswordValid()}
+                    disabled={registerSubmitting || !form.name.trim() || !form.email || form.password.length < 8 || form.password !== form.confirmPassword}
                   >
                     {registerSubmitting ? <Loader2 className="h-6 w-6 animate-spin" /> : "Create Account"}
                   </Button>

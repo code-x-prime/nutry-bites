@@ -118,7 +118,7 @@ export default function AboutPage() {
       <section className="bg-[#1F6F78] py-14 md:py-16 text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-12 font-jost uppercase tracking-wider">
+            <h2 className="text-3xl md:text-4xl font-bold mb-12 font-jost uppercase tracking-wider text-white">
               Our Mission & Vision
             </h2>
             <div className="grid md:grid-cols-2 gap-12">

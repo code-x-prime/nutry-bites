@@ -9,11 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   FiMail as Mail,
   FiMapPin as MapPin,
-  FiFacebook as Facebook,
   FiInstagram as Instagram,
-  FiTwitter as Twitter,
   FiPhone as Phone,
 } from "react-icons/fi";
+import { FaFacebookF as Facebook, FaTwitter as Twitter } from "react-icons/fa";
 import { toast } from "sonner";
 
 export default function ContactPage() {
@@ -228,7 +227,7 @@ export default function ContactPage() {
                     className="bg-white/10 p-3 rounded-xl hover:bg-white/20 hover:scale-110 transition-all"
                     aria-label="Facebook"
                   >
-                    <Facebook className="h-5 w-5" />
+                    <Facebook className="h-5 w-5 text-white" />
                   </a>
                   <a
                     href="https://instagram.com/nutrybites"
@@ -237,7 +236,7 @@ export default function ContactPage() {
                     className="bg-white/10 p-3 rounded-xl hover:bg-white/20 hover:scale-110 transition-all"
                     aria-label="Instagram"
                   >
-                    <Instagram className="h-5 w-5" />
+                    <Instagram className="h-5 w-5 text-white" />
                   </a>
                   <a
                     href="https://twitter.com/nutrybites"
@@ -246,7 +245,7 @@ export default function ContactPage() {
                     className="bg-white/10 p-3 rounded-xl hover:bg-white/20 hover:scale-110 transition-all"
                     aria-label="Twitter"
                   >
-                    <Twitter className="h-5 w-5" />
+                    <Twitter className="h-5 w-5 text-white" />
                   </a>
                 </div>
               </div>

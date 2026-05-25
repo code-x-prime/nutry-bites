@@ -179,19 +179,19 @@ export function Footer() {
               <div className="space-y-3">
                 <a
                   href={`mailto:${contactInfo.email}`}
-                  className="flex items-center gap-3 text-gray-400 hover:text-white text-sm transition-colors"
+                  className="flex items-center gap-3 text-gray-300 hover:text-white text-sm transition-colors"
                 >
                   <FiMail className="h-4 w-4 flex-shrink-0" />
                   {contactInfo.email}
                 </a>
                 <a
                   href={`tel:${contactInfo.phone}`}
-                  className="flex items-center gap-3 text-gray-400 hover:text-white text-sm transition-colors"
+                  className="flex items-center gap-3 text-gray-300 hover:text-white text-sm transition-colors"
                 >
                   <FiPhone className="h-4 w-4 flex-shrink-0" />
                   {contactInfo.phone}
                 </a>
-                <p className="flex items-center gap-3 text-gray-400 text-sm">
+                <p className="flex items-center gap-3 text-gray-300 text-sm">
                   <FiMapPin className="h-4 w-4 flex-shrink-0" />
                   {contactInfo.address}
                 </p>
@@ -225,8 +225,8 @@ export function Footer() {
       {/* ── Bottom Bar ── */}
       <div className="bg-[#0d3538] border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 py-5 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-gray-500 text-xs text-center">
-            © {new Date().getFullYear()} <strong className="text-gray-400">Nutry Bites</strong> · All rights reserved. | Developed by <a href="https://groxmedia.in" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors font-medium">Grox Media</a>
+          <p className="text-gray-400 text-xs text-center">
+            © {new Date().getFullYear()} <strong className="text-white">Nutry Bites</strong> · All rights reserved. | Developed by <a href="https://groxmedia.in" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors font-medium">Grox Media</a>
           </p>
 
           {/* Social Icons */}

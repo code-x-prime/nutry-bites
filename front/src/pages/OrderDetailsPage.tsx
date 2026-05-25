@@ -15,6 +15,7 @@ import {
   User,
   Truck,
   CheckCircle,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency, debugData, cn } from "@/lib/utils";
@@ -110,6 +111,10 @@ export default function OrderDetailsPage() {
   const [loadingCouriers, setLoadingCouriers] = useState(false);
   const [selectedCourierId, setSelectedCourierId] = useState<number | null>(null);
   const [assigningCourier, setAssigningCourier] = useState(false);
+
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelling, setCancelling] = useState(false);
 
   interface OrderItem {
     id: string;
@@ -422,6 +427,36 @@ export default function OrderDetailsPage() {
     }
   };
 
+  const handleCancelOrder = async () => {
+    if (!id || !cancelReason.trim()) return;
+    setCancelling(true);
+    try {
+      const response = await orders.updateOrderStatus(id, {
+        status: "CANCELLED",
+        cancelReason: cancelReason.trim(),
+        cancelledBy: "ADMIN",
+      });
+      if (response?.data?.success) {
+        toast.success("Order cancelled successfully");
+        setOrderDetails((prev: OrderDetails | null) => ({
+          ...prev!,
+          status: "CANCELLED",
+          cancelReason: cancelReason.trim(),
+          cancelledBy: "ADMIN",
+          cancelledAt: new Date().toISOString(),
+        }));
+        setShowCancelModal(false);
+        setCancelReason("");
+      } else {
+        toast.error(response?.data?.message || "Failed to cancel order");
+      }
+    } catch {
+      toast.error("Failed to cancel order");
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   // Get image URL helper
   const getImageUrl = (image: string | string[] | undefined | null): string => {
     if (!image) return "/images/product-placeholder.png";
@@ -640,7 +675,7 @@ export default function OrderDetailsPage() {
                     size="sm"
                     variant="outline"
                     className="border-[var(--destructive)] text-[var(--destructive)] hover:bg-[var(--destructive)]/10"
-                    onClick={() => handleStatusUpdate("CANCELLED")}
+                    onClick={() => setShowCancelModal(true)}
                   >
                     {t('orders.actions.cancel')}
                   </Button>
@@ -1301,68 +1336,60 @@ export default function OrderDetailsPage() {
             </Card>
           ) : null}
 
-          {/* Shiprocket Information */}
-          {orderDetails.shiprocket && (
-            <Card className="bg-[var(--bg-card)] border-[var(--border-color)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] rounded-xl">
-              <CardHeader className="px-6 pt-6 pb-4">
-                <CardTitle className="text-lg font-semibold text-[var(--text-primary)] flex items-center">
-                  <Truck className="mr-2 h-5 w-5 text-[var(--accent)]" />
-                  Shiprocket Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-6 pb-6">
-                <div className="space-y-3">
-                  {orderDetails.shiprocket.orderId && (
-                    <div>
-                      <p className="text-xs text-[var(--text-secondary)] mb-1">Shiprocket Order ID</p>
-                      <p className="font-mono text-sm text-[var(--text-primary)] bg-[var(--bg-secondary)] px-2 py-1 rounded border border-[var(--border-color)]">
-                        {orderDetails.shiprocket.orderId}
-                      </p>
-                    </div>
-                  )}
-                  {orderDetails.shiprocket.shipmentId && (
-                    <div>
-                      <p className="text-xs text-[var(--text-secondary)] mb-1">Shipment ID</p>
-                      <p className="font-mono text-sm text-[var(--text-primary)] bg-[var(--bg-secondary)] px-2 py-1 rounded border border-[var(--border-color)]">
-                        {orderDetails.shiprocket.shipmentId}
-                      </p>
-                    </div>
-                  )}
-                  {orderDetails.shiprocket.awbCode && (
-                    <div>
-                      <p className="text-xs text-[var(--text-secondary)] mb-1">AWB Code</p>
-                      <p className="font-mono text-sm text-[var(--text-primary)] bg-[var(--bg-secondary)] px-2 py-1 rounded border border-[var(--border-color)]">
-                        {orderDetails.shiprocket.awbCode}
-                      </p>
-                    </div>
-                  )}
-                  {orderDetails.shiprocket.courierName && (
-                    <div>
-                      <p className="text-xs text-[var(--text-secondary)] mb-1">Courier</p>
-                      <p className="font-medium text-[var(--text-primary)]">
-                        {orderDetails.shiprocket.courierName}
-                      </p>
-                    </div>
-                  )}
-                  {orderDetails.shiprocket.status && (
-                    <div>
-                      <p className="text-xs text-[var(--text-secondary)] mb-1">Shiprocket Status</p>
-                      <Badge
-                        className={cn(
-                          "text-xs font-medium border",
-                          getStatusBadgeClass(orderDetails.shiprocket.status)
-                        )}
-                      >
-                        {orderDetails.shiprocket.status}
-                      </Badge>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
+
+      {/* Cancel Order Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-[var(--destructive)]" />
+                Cancel Order
+              </h3>
+              <button
+                onClick={() => { setShowCancelModal(false); setCancelReason(""); }}
+                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)] mb-4">
+              This will cancel order <span className="font-semibold text-[var(--text-primary)]">#{orderDetails.orderNumber}</span>. This action cannot be undone.
+            </p>
+            <div className="mb-4">
+              <label className="text-sm font-semibold text-[var(--text-primary)] mb-2 block">
+                Cancellation Reason <span className="text-[var(--destructive)]">*</span>
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Enter reason for cancellation..."
+                rows={3}
+                className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] resize-none"
+              />
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => { setShowCancelModal(false); setCancelReason(""); }}
+                disabled={cancelling}
+              >
+                Keep Order
+              </Button>
+              <Button
+                className="flex-1 bg-[var(--destructive)] hover:bg-[var(--destructive)]/90 text-white"
+                onClick={handleCancelOrder}
+                disabled={cancelling || !cancelReason.trim()}
+              >
+                {cancelling ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm Cancel"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

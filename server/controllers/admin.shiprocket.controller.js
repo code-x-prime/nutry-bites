@@ -529,6 +529,7 @@ export const assignCourierToOrder = asyncHandler(async (req, res) => {
             awbCode,
             courierName,
             shiprocketStatus: "AWB_ASSIGNED",
+            status: "SHIPPED",
         },
     });
 

@@ -3,6 +3,8 @@ import {
   getAllCategories,
   getProductsByCategory,
   getCategoriesWithSubCategories,
+  getCategoryBySlug,
+  getProductsBySubCategory,
 } from "../controllers/category.controller.js";
 import {
   getAllProducts,
@@ -30,7 +32,9 @@ const router = express.Router();
 // Categories
 router.get("/categories", getAllCategories);
 router.get("/categories-with-subcategories", getCategoriesWithSubCategories);
+router.get("/categories/:slug", getCategoryBySlug);
 router.get("/categories/:slug/products", getProductsByCategory);
+router.get("/categories/:categorySlug/sub/:subSlug/products", getProductsBySubCategory);
 
 // Products
 router.get("/products", getAllProducts);

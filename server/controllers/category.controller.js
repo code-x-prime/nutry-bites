@@ -209,6 +209,13 @@ export const getProductsByCategory = asyncHandler(async (req, res) => {
         ...image,
         url: getFileUrl(image.url),
       })),
+      variants: product.variants.map((variant) => ({
+        ...variant,
+        images: variant.images.map((img) => ({
+          ...img,
+          url: getFileUrl(img.url),
+        })),
+      })),
       // Add fallback image
       image: imageUrl ? getFileUrl(imageUrl) : null,
       basePrice:
@@ -224,7 +231,138 @@ export const getProductsByCategory = asyncHandler(async (req, res) => {
     new ApiResponsive(
       200,
       {
-        category,
+        category: {
+          ...category,
+          image: category.image ? getFileUrl(category.image) : null,
+        },
+        products: formattedProducts,
+        pagination: {
+          total: totalProducts,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          pages: Math.ceil(totalProducts / parseInt(limit)),
+        },
+      },
+      "Products fetched successfully"
+    )
+  );
+});
+
+// Get single category by slug (public)
+export const getCategoryBySlug = asyncHandler(async (req, res) => {
+  const { slug } = req.params;
+
+  const category = await prisma.category.findUnique({
+    where: { slug },
+    include: {
+      subCategories: {
+        where: { isActive: true },
+        orderBy: { name: "asc" },
+      },
+      _count: { select: { products: true } },
+    },
+  });
+
+  if (!category) {
+    throw new ApiError(404, "Category not found");
+  }
+
+  const formattedCategory = {
+    ...category,
+    image: category.image ? getFileUrl(category.image) : null,
+    subCategories: category.subCategories.map((sub) => ({
+      ...sub,
+      image: sub.image ? getFileUrl(sub.image) : null,
+    })),
+  };
+
+  res.status(200).json(
+    new ApiResponsive(200, { category: formattedCategory }, "Category fetched successfully")
+  );
+});
+
+// Get products by subcategory slug (public)
+export const getProductsBySubCategory = asyncHandler(async (req, res) => {
+  const { categorySlug, subSlug } = req.params;
+  const {
+    page = 1,
+    limit = 12,
+    sort = "createdAt",
+    order = "desc",
+  } = req.query;
+
+  const category = await prisma.category.findUnique({ where: { slug: categorySlug } });
+  if (!category) throw new ApiError(404, "Category not found");
+
+  const subCategory = await prisma.subCategory.findUnique({
+    where: { categoryId_slug: { categoryId: category.id, slug: subSlug } },
+  });
+  if (!subCategory) throw new ApiError(404, "Sub-category not found");
+
+  const totalProducts = await prisma.product.count({
+    where: {
+      subCategories: { some: { subCategoryId: subCategory.id } },
+      isActive: true,
+    },
+  });
+
+  const products = await prisma.product.findMany({
+    where: {
+      subCategories: { some: { subCategoryId: subCategory.id } },
+      isActive: true,
+    },
+    include: {
+      images: { where: { isPrimary: true }, take: 1 },
+      categories: { include: { category: true }, take: 1 },
+      variants: {
+        where: { isActive: true },
+        include: {
+          attributes: { include: { attributeValue: { include: { attribute: true } } } },
+          images: true,
+        },
+      },
+      _count: { select: { reviews: true } },
+    },
+    orderBy: [{ ourProduct: "desc" }, { [sort]: order }],
+    skip: (parseInt(page) - 1) * parseInt(limit),
+    take: parseInt(limit),
+  });
+
+  const formattedProducts = products.map((product) => {
+    const primaryCategory = product.categories.length > 0 ? product.categories[0].category : null;
+    let imageUrl = null;
+    if (product.images && product.images.length > 0) {
+      imageUrl = product.images[0].url;
+    } else if (product.variants && product.variants.length > 0) {
+      const variantWithImages = product.variants.find((v) => v.images && v.images.length > 0);
+      if (variantWithImages) {
+        const primary = variantWithImages.images.find((img) => img.isPrimary);
+        imageUrl = primary ? primary.url : variantWithImages.images[0].url;
+      }
+    }
+
+    return {
+      ...product,
+      category: primaryCategory,
+      images: product.images.map((img) => ({ ...img, url: getFileUrl(img.url) })),
+      variants: product.variants.map((variant) => ({
+        ...variant,
+        images: variant.images.map((img) => ({ ...img, url: getFileUrl(img.url) })),
+      })),
+      image: imageUrl ? getFileUrl(imageUrl) : null,
+      basePrice:
+        product.variants.length > 0
+          ? Math.min(...product.variants.map((v) => parseFloat(v.salePrice || v.price)))
+          : null,
+    };
+  });
+
+  res.status(200).json(
+    new ApiResponsive(
+      200,
+      {
+        category: { ...category, image: category.image ? getFileUrl(category.image) : null },
+        subCategory: { ...subCategory, image: subCategory.image ? getFileUrl(subCategory.image) : null },
         products: formattedProducts,
         pagination: {
           total: totalProducts,

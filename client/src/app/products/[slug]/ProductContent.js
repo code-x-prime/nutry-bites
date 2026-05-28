@@ -777,11 +777,21 @@ export default function ProductContent({ slug }) {
           <>
             <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 mx-1 sm:mx-2 text-gray-400" />
             <Link
-              href={`/category/${product.category?.slug || product.categories[0]?.category?.slug
-                }`}
+              href={`/category/${product.category?.slug || product.categories[0]?.category?.slug}`}
               className="text-gray-500 hover:text-primary transition-colors uppercase"
             >
               {product.category?.name || product.categories[0]?.category?.name}
+            </Link>
+          </>
+        )}
+        {product?.subCategory && (
+          <>
+            <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 mx-1 sm:mx-2 text-gray-400" />
+            <Link
+              href={`/category/${product.category?.slug || product.categories[0]?.category?.slug}/${product.subCategory.slug}`}
+              className="text-gray-500 hover:text-primary transition-colors uppercase"
+            >
+              {product.subCategory.name}
             </Link>
           </>
         )}

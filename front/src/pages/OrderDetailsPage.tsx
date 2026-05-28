@@ -250,6 +250,13 @@ export default function OrderDetailsPage() {
     fetchOrderDetails();
   }, [id, fetchOrderDetails]);
 
+  // Auto-load couriers once order is fetched and has no AWB yet
+  useEffect(() => {
+    if (orderDetails && !orderDetails.shiprocket?.awbCode && id) {
+      fetchCouriers(id);
+    }
+  }, [orderDetails?.id, fetchCouriers]);
+
   // Format date
   const formatDate = (dateString: string) => {
     if (!dateString) return t('orders.details.not_available');
@@ -621,9 +628,9 @@ export default function OrderDetailsPage() {
             </Badge>
 
             {/* Status update buttons */}
-            {orderDetails.status !== "DELIVERED" &&
-              orderDetails.status !== "CANCELLED" &&
-              orderDetails.status !== "REFUNDED" && (
+            {orderDetails.status !== "CANCELLED" &&
+              orderDetails.status !== "REFUNDED" &&
+              orderDetails.status !== "RETURN_COMPLETED" && (
                 <div className="flex flex-wrap gap-2">
                   {orderDetails.status === "PENDING" && (
                     <Button
@@ -670,14 +677,40 @@ export default function OrderDetailsPage() {
                       </Button>
                     )}
 
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-[var(--destructive)] text-[var(--destructive)] hover:bg-[var(--destructive)]/10"
-                    onClick={() => setShowCancelModal(true)}
-                  >
-                    {t('orders.actions.cancel')}
-                  </Button>
+                  {orderDetails.status === "DELIVERED" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-amber-500 text-amber-600 hover:bg-amber-50"
+                      onClick={() => handleStatusUpdate("RETURN_APPROVED")}
+                    >
+                      Approve Return
+                    </Button>
+                  )}
+
+                  {orderDetails.status === "RETURN_APPROVED" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-teal-500 text-teal-600 hover:bg-teal-50"
+                      onClick={() => handleStatusUpdate("RETURN_COMPLETED")}
+                    >
+                      Mark Return Completed
+                    </Button>
+                  )}
+
+                  {orderDetails.status !== "DELIVERED" &&
+                    orderDetails.status !== "RETURN_APPROVED" &&
+                    orderDetails.status !== "RETURN_COMPLETED" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-[var(--destructive)] text-[var(--destructive)] hover:bg-[var(--destructive)]/10"
+                        onClick={() => setShowCancelModal(true)}
+                      >
+                        {t('orders.actions.cancel')}
+                      </Button>
+                    )}
                 </div>
               )}
           </div>
@@ -879,11 +912,11 @@ export default function OrderDetailsPage() {
 
           {/* Shiprocket Shipping */}
           <Card className="bg-[var(--bg-card)] border-[var(--border-color)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] rounded-xl">
-            <CardHeader className="px-6 pt-6 pb-4">
+            <CardHeader className="px-6 pt-6 pb-2">
               <CardTitle className="text-lg font-semibold text-[var(--text-primary)] flex items-center justify-between">
                 <span className="flex items-center">
-                  <Truck className="mr-2 h-5 w-5 text-[var(--accent)]" />
-                  Shipping (Shiprocket)
+                  <Truck className="mr-2 h-5 w-5 text-emerald-600" />
+                  Shiprocket Shipment
                 </span>
                 {orderDetails.shiprocket?.awbCode && (
                   <Badge className="text-xs font-medium border bg-emerald-500/10 text-emerald-600 border-emerald-500/30">
@@ -893,65 +926,83 @@ export default function OrderDetailsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="px-6 pb-6 space-y-4">
-              {/* Already synced — show details */}
+              {/* Already synced — show AWB details */}
               {orderDetails.shiprocket?.awbCode ? (
                 <div className="space-y-3">
-                  {orderDetails.shiprocket.orderId && (
-                    <div>
-                      <p className="text-xs text-[var(--text-secondary)] mb-1">Shiprocket Order ID</p>
-                      <p className="font-mono text-sm text-[var(--text-primary)]">{orderDetails.shiprocket.orderId}</p>
-                    </div>
-                  )}
-                  {orderDetails.shiprocket.shipmentId && (
-                    <div>
-                      <p className="text-xs text-[var(--text-secondary)] mb-1">Shipment ID</p>
-                      <p className="font-mono text-sm text-[var(--text-primary)]">{orderDetails.shiprocket.shipmentId}</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-xs text-[var(--text-secondary)] mb-1">AWB Number</p>
-                    <p className="font-mono text-sm text-[var(--text-primary)] bg-[var(--bg-secondary)] px-2 py-1 rounded border border-[var(--border-color)]">
-                      {orderDetails.shiprocket.awbCode}
-                    </p>
+                  {/* AWB — big and prominent */}
+                  <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-lg p-4">
+                    <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400 uppercase tracking-wide mb-1">AWB / Tracking Number</p>
+                    <p className="font-mono font-bold text-2xl text-[var(--text-primary)] tracking-widest">{orderDetails.shiprocket.awbCode}</p>
+                    {orderDetails.shiprocket.trackingUrl && (
+                      <Button
+                        size="sm"
+                        className="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+                        onClick={() => window.open(orderDetails.shiprocket!.trackingUrl!, "_blank")}
+                      >
+                        <Truck className="h-3.5 w-3.5" />
+                        Track Live on Shiprocket
+                      </Button>
+                    )}
                   </div>
-                  {orderDetails.shiprocket.courierName && (
-                    <div>
-                      <p className="text-xs text-[var(--text-secondary)] mb-1">Courier</p>
-                      <p className="font-semibold text-[var(--text-primary)]">{orderDetails.shiprocket.courierName}</p>
-                    </div>
-                  )}
-                  {orderDetails.shiprocket.trackingUrl && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => window.open(orderDetails.shiprocket!.trackingUrl!, "_blank")}
-                    >
-                      Open Tracking
-                    </Button>
-                  )}
+
+                  {/* IDs grid */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {orderDetails.shiprocket.orderId && (
+                      <div className="bg-[var(--bg-secondary)] rounded-lg p-3 border border-[var(--border-color)]">
+                        <p className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-1">SR Order ID</p>
+                        <p className="font-mono font-semibold text-[var(--text-primary)] text-base">{orderDetails.shiprocket.orderId}</p>
+                      </div>
+                    )}
+                    {orderDetails.shiprocket.shipmentId && (
+                      <div className="bg-[var(--bg-secondary)] rounded-lg p-3 border border-[var(--border-color)]">
+                        <p className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-1">Shipment ID</p>
+                        <p className="font-mono font-semibold text-[var(--text-primary)] text-base">{orderDetails.shiprocket.shipmentId}</p>
+                      </div>
+                    )}
+                    {orderDetails.shiprocket.courierName && (
+                      <div className="bg-[var(--bg-secondary)] rounded-lg p-3 border border-[var(--border-color)]">
+                        <p className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-1">Courier</p>
+                        <p className="font-semibold text-[var(--text-primary)] text-sm">{orderDetails.shiprocket.courierName}</p>
+                      </div>
+                    )}
+                    {orderDetails.shiprocket.status && (
+                      <div className="bg-[var(--bg-secondary)] rounded-lg p-3 border border-[var(--border-color)]">
+                        <p className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wide mb-1">SR Status</p>
+                        <p className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm">{orderDetails.shiprocket.status}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
-                /* Not yet assigned — show courier picker */
+                /* Not yet assigned — courier picker */
                 <div className="space-y-3">
-                  <p className="text-sm text-[var(--text-secondary)]">
-                    Select a courier to sync this order to Shiprocket and assign AWB.
-                  </p>
-
-                  {/* Load couriers button */}
-                  {couriers.length === 0 && !loadingCouriers && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-[var(--border-color)]"
+                  {/* Select Courier header row */}
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">Select Courier</p>
+                    <button
+                      type="button"
                       onClick={() => fetchCouriers(id!)}
+                      disabled={loadingCouriers}
+                      className="text-xs text-[var(--accent)] hover:underline disabled:opacity-50"
                     >
-                      <Truck className="mr-2 h-4 w-4" />
+                      {loadingCouriers ? "Loading…" : "Refresh"}
+                    </button>
+                  </div>
+
+                  {/* Auto-load couriers on mount if none loaded */}
+                  {couriers.length === 0 && !loadingCouriers && (
+                    <button
+                      type="button"
+                      onClick={() => fetchCouriers(id!)}
+                      className="w-full text-sm text-[var(--text-secondary)] border border-dashed border-[var(--border-color)] rounded-lg py-3 hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
+                    >
+                      <Truck className="inline mr-2 h-4 w-4" />
                       Load Available Couriers
-                    </Button>
+                    </button>
                   )}
 
                   {loadingCouriers && (
-                    <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)] py-2">
+                    <div className="flex items-center justify-center gap-2 text-sm text-[var(--text-secondary)] py-4">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Fetching couriers for this pincode…
                     </div>
@@ -964,10 +1015,10 @@ export default function OrderDetailsPage() {
                           key={c.courierId}
                           onClick={() => setSelectedCourierId(c.courierId)}
                           className={cn(
-                            "flex items-center justify-between border rounded-lg p-3 cursor-pointer transition-all",
+                            "flex items-center justify-between border rounded-lg px-4 py-3 cursor-pointer transition-all",
                             selectedCourierId === c.courierId
-                              ? "border-[var(--accent)] bg-[var(--accent)]/5"
-                              : "border-[var(--border-color)] hover:border-[var(--accent)]/40"
+                              ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10"
+                              : "border-[var(--border-color)] hover:border-emerald-400"
                           )}
                         >
                           <div className="flex items-center gap-3">
@@ -975,56 +1026,54 @@ export default function OrderDetailsPage() {
                               type="radio"
                               checked={selectedCourierId === c.courierId}
                               onChange={() => setSelectedCourierId(c.courierId)}
-                              className="h-4 w-4 accent-[var(--accent)]"
+                              className="h-4 w-4 accent-emerald-600"
                             />
                             <div>
                               <div className="flex items-center gap-2">
                                 <p className="font-semibold text-sm text-[var(--text-primary)]">{c.courierName}</p>
                                 {c.isRecommended && (
-                                  <span className="text-[10px] bg-[var(--accent)] text-white px-1.5 py-0.5 rounded font-bold">REC</span>
+                                  <span className="text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded font-bold">REC</span>
                                 )}
                               </div>
                               <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                                {c.etd ? `By ${c.etd}` : c.estimatedDays ? `Est. ${c.estimatedDays}` : "Delivery time varies"}
-                                {c.deliveryPerformance ? ` · ${c.deliveryPerformance}% on-time` : ""}
+                                ETD: {c.etd ?? c.estimatedDays ?? "—"}
+                                {c.codCharges > 0 && orderDetails.paymentMethod === "CASH" && (
+                                  <span className="ml-2 text-amber-600">+₹{c.codCharges} COD</span>
+                                )}
                               </p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-[var(--accent)] text-sm">
+                            <p className="font-bold text-sm text-[var(--text-primary)]">
                               {c.rate === 0 ? "FREE" : `₹${c.rate}`}
                             </p>
                             {c.codCharges > 0 && orderDetails.paymentMethod === "CASH" && (
-                              <p className="text-xs text-amber-600">+₹{c.codCharges} COD</p>
+                              <p className="text-[10px] text-amber-600">COD available</p>
                             )}
                           </div>
                         </div>
                       ))}
 
                       <Button
-                        className="w-full mt-2"
+                        className="w-full mt-1 bg-emerald-600 hover:bg-emerald-700 text-white"
                         disabled={!selectedCourierId || assigningCourier}
                         onClick={handleAssignCourier}
                       >
                         {assigningCourier ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Assigning…
+                            Booking…
                           </>
                         ) : (
-                          <>
-                            <Truck className="mr-2 h-4 w-4" />
-                            Assign Courier & Sync to Shiprocket
-                          </>
+                          "Book Shipment"
                         )}
                       </Button>
                     </div>
                   )}
 
-                  {/* Fallback: already created on Shiprocket but no AWB */}
                   {orderDetails.shiprocket?.orderId && !orderDetails.shiprocket?.awbCode && (
                     <p className="text-xs text-amber-600">
-                      Order created on Shiprocket (ID: {orderDetails.shiprocket.orderId}) but AWB not yet assigned.
+                      Order on Shiprocket (ID: {orderDetails.shiprocket.orderId}) — AWB not yet assigned.
                     </p>
                   )}
                 </div>

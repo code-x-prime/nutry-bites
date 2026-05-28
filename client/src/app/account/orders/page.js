@@ -228,7 +228,7 @@ export default function OrdersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1.5">
                           <span
                             className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
                               order.status
@@ -236,7 +236,20 @@ export default function OrdersPage() {
                           >
                             {order.status}
                           </span>
-                          {/* Show return status if any item has return request */}
+                          {/* AWB tracking chip */}
+                          {order.awbCode && (
+                            <a
+                              href={order.trackingUrl || `https://shiprocket.co/tracking/${order.awbCode}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-mono rounded hover:bg-indigo-100 transition-colors w-fit"
+                            >
+                              <DynamicIcon name="Truck" className="h-3 w-3" />
+                              {order.awbCode}
+                            </a>
+                          )}
+                          {/* Return status chips */}
                           {order.items.some(item => item.returnRequest) && (
                             <div className="flex flex-wrap gap-1">
                               {order.items

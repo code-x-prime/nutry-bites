@@ -319,8 +319,25 @@ export const getProductBySlug = asyncHandler(async (req, res) => {
     include: {
       categories: {
         include: {
-          category: true,
+          category: {
+            include: {
+              subCategories: {
+                where: { isActive: true },
+                orderBy: { name: "asc" },
+              },
+            },
+          },
         },
+      },
+      subCategories: {
+        include: {
+          subCategory: {
+            include: {
+              category: true,
+            },
+          },
+        },
+        take: 1,
       },
       brand: true,
       images: {
@@ -339,7 +356,7 @@ export const getProductBySlug = asyncHandler(async (req, res) => {
             },
           },
           images: {
-            orderBy: { order: "asc" }, // Sort images by order (0, 1, 2, 3...)
+            orderBy: { order: "asc" },
           },
         },
       },
@@ -391,9 +408,14 @@ export const getProductBySlug = asyncHandler(async (req, res) => {
   // Format the response
   const formattedProduct = {
     ...product,
-    // Add primary category
+    // Add primary category (with its sibling subcategories)
     category:
       product.categories.length > 0 ? product.categories[0].category : null,
+    // Add product's assigned subcategory
+    subCategory:
+      product.subCategories && product.subCategories.length > 0
+        ? product.subCategories[0].subCategory
+        : null,
     // Include brand (only select basic fields)
     brand: product.brand
       ? {

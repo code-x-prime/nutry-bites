@@ -530,6 +530,7 @@ export const assignCourierToOrder = asyncHandler(async (req, res) => {
             courierName,
             shiprocketStatus: "AWB_ASSIGNED",
             status: "SHIPPED",
+            trackingUrl: awbCode ? `https://shiprocket.co/tracking/${awbCode}` : null,
         },
     });
 

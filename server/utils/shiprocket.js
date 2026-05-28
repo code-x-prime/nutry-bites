@@ -693,12 +693,14 @@ export async function processOrderForShipping(orderId) {
         try {
             const awbResponse = await assignAWB(shiprocketResponse.shipment_id);
 
+            const assignedAwb = awbResponse.response?.data?.awb_code || null;
             await prisma.order.update({
                 where: { id: orderId },
                 data: {
-                    awbCode: awbResponse.response?.data?.awb_code || null,
+                    awbCode: assignedAwb,
                     courierName: awbResponse.response?.data?.courier_name || null,
                     shiprocketStatus: "AWB_ASSIGNED",
+                    trackingUrl: assignedAwb ? `https://shiprocket.co/tracking/${assignedAwb}` : null,
                 },
             });
 

@@ -3,7 +3,7 @@ import { ApiResponsive } from "../utils/ApiResponsive.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { prisma } from "../config/db.js";
 import { razorpay } from "../app.js";
-import { cancelShiprocketOrder, getShiprocketSettings } from "../utils/shiprocket.js";
+import { cancelShiprocketOrder, getShiprocketSettings, processShiprocketReturn } from "../utils/shiprocket.js";
 
 // Get all orders with pagination, filtering, and sorting
 export const getOrders = asyncHandler(async (req, res, next) => {
@@ -120,6 +120,9 @@ export const getOrders = asyncHandler(async (req, res, next) => {
           country: true,
           phone: true,
         },
+      },
+      _count: {
+        select: { items: true },
       },
     },
     orderBy: {
@@ -582,6 +585,13 @@ export const updateOrderStatus = asyncHandler(async (req, res, next) => {
 
     return updatedOrder;
   });
+
+  // Trigger Shiprocket return (non-blocking) after tx completes
+  if (status === "RETURN_APPROVED" && order.shiprocketOrderId) {
+    processShiprocketReturn(orderId, notes || "Admin approved return").catch((err) => {
+      console.error("Shiprocket return processing error:", err.message);
+    });
+  }
 
   // Log the activity
   await prisma.activityLog.create({
@@ -1311,8 +1321,10 @@ function isValidStatusTransition(currentStatus, newStatus) {
     PROCESSING: ["PAID", "CANCELLED", "SHIPPED"],
     PAID: ["PROCESSING", "SHIPPED", "CANCELLED", "REFUNDED"],
     SHIPPED: ["DELIVERED", "CANCELLED", "PROCESSING"],
-    DELIVERED: ["REFUNDED"],
+    DELIVERED: ["REFUNDED", "RETURN_APPROVED"],
     CANCELLED: ["REFUNDED"],
+    RETURN_APPROVED: ["RETURN_COMPLETED", "REFUNDED"],
+    RETURN_COMPLETED: ["REFUNDED"],
     REFUNDED: [],
   };
 

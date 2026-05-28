@@ -60,14 +60,14 @@ export default function CheckoutPage() {
   const [redirectCountdown, setRedirectCountdown] = useState(2);
   const [confettiCannon, setConfettiCannon] = useState(false);
 
-  // Shiprocket courier selection
-  const [couriers, setCouriers] = useState([]);
-  const [selectedCourier, setSelectedCourier] = useState(null);
-  const [loadingRates, setLoadingRates] = useState(false);
-  const [shippingRate, setShippingRate] = useState(cart.shippingTotal || 0);
-  const [isFreeShipping, setIsFreeShipping] = useState(false);
-
   const totals = getCartTotals();
+
+  const selectedShippingOption = {
+    id: null,
+    name: "Standard Shipping",
+    rate: totals.shipping,
+    etd: "3-5 business days",
+  };
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -180,52 +180,14 @@ export default function CheckoutPage() {
     fetchKey();
   }, [isAuthenticated]);
 
-  // Fetch live Shiprocket courier rates for selected address
-  const fetchShippingRates = async (addressId, isCod) => {
-    if (!addressId) return;
-    setLoadingRates(true);
-    setCouriers([]);
-    setSelectedCourier(null);
-    try {
-      const res = await fetchApi("/payment/shipping-rates", {
-        method: "POST",
-        credentials: "include",
-        body: JSON.stringify({ shippingAddressId: addressId, isCod: isCod ?? paymentMethod === "CASH" }),
-      });
-      if (res.success) {
-        const data = res.data;
-        setIsFreeShipping(data.isFreeShipping || false);
-        if (data.couriers && data.couriers.length > 0) {
-          setCouriers(data.couriers);
-          // Auto-select recommended or cheapest
-          const recommended = data.couriers.find(c => c.isRecommended) || data.couriers[0];
-          setSelectedCourier(recommended);
-          setShippingRate(data.isFreeShipping ? 0 : recommended.rate);
-        } else {
-          // No couriers — use flat charge
-          const flat = data.flatCharge || data.staticCharge || 0;
-          setShippingRate(data.isFreeShipping ? 0 : flat);
-        }
-      }
-    } catch (e) {
-      console.error("Shipping rates fetch failed:", e);
-      // Keep cart's default shippingTotal as fallback
-      setShippingRate(cart.shippingTotal || 0);
-    } finally {
-      setLoadingRates(false);
-    }
-  };
-
   // Handle address selection
   const handleAddressSelect = (id) => {
     setSelectedAddressId(id);
-    fetchShippingRates(id, paymentMethod === "CASH");
   };
 
   // Handle payment method selection
   const handlePaymentMethodSelect = (method) => {
     setPaymentMethod(method);
-    if (selectedAddressId) fetchShippingRates(selectedAddressId, method === "CASH");
   };
 
   // Handle address form success
@@ -233,14 +195,6 @@ export default function CheckoutPage() {
     setShowAddressForm(false);
     fetchAddresses();
   };
-
-  // Fetch shipping rates when address first loads
-  useEffect(() => {
-    if (selectedAddressId && isAuthenticated) {
-      fetchShippingRates(selectedAddressId, paymentMethod === "CASH");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAddressId]);
 
   // Add countdown for redirect
   useEffect(() => {
@@ -1088,31 +1042,29 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                {/* Shipping row — uses live selectedCourier rate */}
+                {/* Shipping row */}
                 <div className="flex justify-between border-b border-white/10 pb-3">
                   <span className="text-white/60 font-jost">
                     Shipping
-                    {selectedCourier && (
-                      <span className="block text-[10px] text-white/40">{selectedCourier.courierName}</span>
-                    )}
+                    <span className="block text-[10px] text-white/40">{selectedShippingOption.etd}</span>
                   </span>
-                  {isFreeShipping || shippingRate === 0 ? (
+                  {selectedShippingOption.rate === 0 ? (
                     <span className="text-emerald-400 font-bold">FREE</span>
                   ) : (
-                    <span className="font-bold">{formatCurrency(shippingRate)}</span>
+                    <span className="font-bold">{formatCurrency(selectedShippingOption.rate)}</span>
                   )}
                 </div>
 
                 {/* COD Charge */}
-                {paymentMethod === "CASH" && (selectedCourier?.codCharges > 0 || paymentSettings.codCharge > 0) && (
+                {paymentMethod === "CASH" && paymentSettings.codCharge > 0 && (
                   <div className="flex justify-between text-amber-400 border-b border-white/10 pb-3">
                     <span className="font-jost">COD Surcharge</span>
-                    <span className="font-bold">{formatCurrency(selectedCourier?.codCharges || paymentSettings.codCharge)}</span>
+                    <span className="font-bold">{formatCurrency(paymentSettings.codCharge)}</span>
                   </div>
                 )}
 
                 {/* Free shipping progress bar */}
-                {!isFreeShipping && cart.freeShippingThreshold > 0 && totals.subtotal < cart.freeShippingThreshold && (
+                {selectedShippingOption.rate > 0 && cart.freeShippingThreshold > 0 && totals.subtotal < cart.freeShippingThreshold && (
                   <div className="mt-3 text-xs text-amber-300 bg-white/10 p-2 rounded text-center font-medium border border-white/20">
                     Add <strong>{formatCurrency(cart.freeShippingThreshold - totals.subtotal)}</strong> more for <span className="text-emerald-400 font-bold">FREE shipping!</span>
                   </div>
@@ -1125,8 +1077,8 @@ export default function CheckoutPage() {
                       {formatCurrency(
                         totals.subtotal
                         - (coupon ? parseFloat(coupon.discountAmount || 0) : 0)
-                        + (isFreeShipping ? 0 : shippingRate)
-                        + (paymentMethod === "CASH" ? (selectedCourier?.codCharges || paymentSettings.codCharge || 0) : 0)
+                        + selectedShippingOption.rate
+                        + (paymentMethod === "CASH" ? (paymentSettings.codCharge || 0) : 0)
                       )}
                     </span>
                   </div>
@@ -1139,7 +1091,6 @@ export default function CheckoutPage() {
                 onClick={handleCheckout}
                 disabled={
                   processing ||
-                  loadingRates ||
                   !selectedAddressId ||
                   !paymentMethod ||
                   addresses.length === 0
@@ -1150,11 +1101,6 @@ export default function CheckoutPage() {
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     <span className="animate-pulse">Processing Payment...</span>
                   </span>
-                ) : loadingRates ? (
-                  <span className="flex items-center">
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    <span>Calculating Shipping...</span>
-                  </span>
                 ) : (
                   <span className="flex items-center justify-center">
                     <IndianRupee className="mr-2 h-4 w-4" />
@@ -1162,8 +1108,8 @@ export default function CheckoutPage() {
                     {formatCurrency(
                       totals.subtotal
                       - (coupon ? parseFloat(coupon.discountAmount || 0) : 0)
-                      + (isFreeShipping ? 0 : shippingRate)
-                      + (paymentMethod === "CASH" ? (selectedCourier?.codCharges || paymentSettings.codCharge || 0) : 0)
+                      + selectedShippingOption.rate
+                      + (paymentMethod === "CASH" ? (paymentSettings.codCharge || 0) : 0)
                     )}
                   </span>
                 )}

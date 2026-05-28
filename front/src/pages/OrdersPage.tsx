@@ -355,7 +355,7 @@ export default function OrdersPage() {
                             #{order.orderNumber}
                           </h3>
                           <p className="text-sm text-[var(--text-secondary)]">
-                            {t('orders.list.items_count', { count: order.items?.length || 0 })}
+                            {t('orders.list.items_count', { count: order._count?.items ?? order.items?.length ?? 0 })}
                           </p>
                         </div>
                       </div>
@@ -403,17 +403,17 @@ export default function OrdersPage() {
                             parseFloat(order.discount || 0))
                         )}
                       </p>
-                      {order.discount && parseFloat(order.discount) > 0 && (
+                      {parseFloat(order.discount || 0) > 0 && (
                         <p className="text-xs text-[var(--accent)] mt-1">
                           {t('orders.list.discount', { amount: formatCurrency(parseFloat(order.discount)) })}
                         </p>
                       )}
-                      {order.shippingCost && parseFloat(order.shippingCost) > 0 && (
+                      {parseFloat(order.shippingCost || 0) > 0 && (
                         <p className="text-xs text-[var(--text-secondary)] mt-1">
                           Shipping: {formatCurrency(parseFloat(order.shippingCost))}
                         </p>
                       )}
-                      {order.couponCode && (
+                      {!!order.couponCode && (
                         <p className="text-xs text-[var(--accent)] mt-1">
                           Coupon: {order.couponCode}
                         </p>

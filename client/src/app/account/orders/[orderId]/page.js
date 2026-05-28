@@ -338,88 +338,136 @@ export default function OrderDetailsPage({ params }) {
                   </div>
                 )}
 
-                {/* Tracking info - from Shiprocket or manual tracking */}
-                {(order.tracking || order.trackingUrl || order.awbCode) && (
-                  <div className="mt-4 border rounded-md p-4">
-                    <h3 className="font-semibold mb-2">Tracking Information</h3>
-                    <div className="space-y-2">
-                      {(order.courierName || order.tracking?.carrier) && (
-                        <div className="flex flex-col sm:flex-row sm:justify-between">
-                          <div className="text-sm">
-                            <span className="text-gray-600">Carrier:</span>{" "}
-                            {order.courierName || order.tracking?.carrier}
-                          </div>
-                          {order.tracking?.status && (
-                            <div className="text-sm">
-                              <span className="text-gray-600">Status:</span>{" "}
-                              <span
-                                className={`px-2 py-0.5 inline-flex text-xs font-semibold rounded-full ${getStatusColor(
-                                  order.tracking.status
-                                )}`}
-                              >
-                                {order.tracking.status}
-                              </span>
-                            </div>
+                {/* Shiprocket Tracking Card */}
+                {(order.awbCode || order.trackingUrl || order.tracking) && (
+                  <div className="mt-4 rounded-xl border-2 border-indigo-100 bg-gradient-to-br from-indigo-50 to-blue-50 overflow-hidden">
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-5 py-4 border-b border-indigo-100 bg-white/60">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
+                          <DynamicIcon name="Truck" className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-gray-900 text-base leading-tight">Shipment Tracking</h3>
+                          {order.courierName && (
+                            <p className="text-xs text-gray-500">via {order.courierName}</p>
                           )}
                         </div>
-                      )}
-                      {(order.awbCode || order.tracking?.trackingNumber) && (
-                        <span className="text-sm block">
-                          <span className="text-gray-600">Tracking Number:</span>{" "}
-                          <span className="font-mono">
-                            {order.awbCode || order.tracking?.trackingNumber}
-                          </span>
-                        </span>
-                      )}
-                      {order.tracking?.estimatedDelivery && (
-                        <span className="text-sm block">
-                          <span className="text-gray-600">
-                            Estimated Delivery:
-                          </span>{" "}
-                          {formatDate(order.tracking.estimatedDelivery)}
-                        </span>
-                      )}
+                      </div>
                       {order.trackingUrl && (
                         <a
                           href={order.trackingUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-sm text-primary hover:underline font-medium"
+                          className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                         >
-                          Track Shipment →
+                          <DynamicIcon name="ExternalLink" className="h-4 w-4" />
+                          Track Live
                         </a>
                       )}
                     </div>
 
-                    {order.tracking?.updates &&
-                      order.tracking.updates.length > 0 && (
-                        <div className="mt-4">
-                          <h4 className="text-sm font-semibold mb-2">
-                            Tracking Updates
-                          </h4>
-                          <div className="space-y-3">
-                            {order.tracking.updates.map((update, index) => (
-                              <div
-                                key={index}
-                                className="border-l-2 border-gray-200 pl-3 py-1"
-                              >
-                                <p className="text-sm font-medium">
-                                  {update.status}
-                                </p>
-                                <p className="text-xs text-gray-600">
-                                  {formatDate(update.timestamp)}{" "}
-                                  {update.location && `• ${update.location}`}
-                                </p>
-                                {update.description && (
-                                  <p className="text-xs mt-1">
-                                    {update.description}
-                                  </p>
-                                )}
-                              </div>
-                            ))}
-                          </div>
+                    {/* IDs grid */}
+                    <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {order.awbCode && (
+                        <div className="bg-white rounded-lg p-3 border border-indigo-100">
+                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">AWB / Tracking Number</p>
+                          <p className="font-mono font-bold text-gray-900 text-lg tracking-wider">{order.awbCode}</p>
+                          {order.trackingUrl && (
+                            <a
+                              href={order.trackingUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-indigo-600 hover:underline mt-1 inline-flex items-center gap-1"
+                            >
+                              <DynamicIcon name="ExternalLink" className="h-3 w-3" />
+                              Open tracking page
+                            </a>
+                          )}
                         </div>
                       )}
+
+                      {order.shiprocket?.orderId && (
+                        <div className="bg-white rounded-lg p-3 border border-indigo-100">
+                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Shiprocket Order ID</p>
+                          <p className="font-mono font-bold text-gray-900 text-lg">{order.shiprocket.orderId}</p>
+                        </div>
+                      )}
+
+                      {order.shiprocket?.shipmentId && (
+                        <div className="bg-white rounded-lg p-3 border border-indigo-100">
+                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Shipment ID</p>
+                          <p className="font-mono font-bold text-gray-900 text-lg">{order.shiprocket.shipmentId}</p>
+                        </div>
+                      )}
+
+                      {(order.courierName || order.tracking?.carrier) && (
+                        <div className="bg-white rounded-lg p-3 border border-indigo-100">
+                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Courier Partner</p>
+                          <p className="font-bold text-gray-900 text-base">{order.courierName || order.tracking?.carrier}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Status & ETA row */}
+                    {(order.tracking?.status || order.tracking?.estimatedDelivery) && (
+                      <div className="px-5 pb-4 flex flex-wrap gap-3">
+                        {order.tracking?.status && (
+                          <div className="flex items-center gap-2 bg-white border border-indigo-100 rounded-lg px-3 py-2">
+                            <DynamicIcon name="Package" className="h-4 w-4 text-indigo-500" />
+                            <span className="text-sm font-medium text-gray-700">{order.tracking.status}</span>
+                          </div>
+                        )}
+                        {order.tracking?.estimatedDelivery && (
+                          <div className="flex items-center gap-2 bg-white border border-indigo-100 rounded-lg px-3 py-2">
+                            <DynamicIcon name="Calendar" className="h-4 w-4 text-indigo-500" />
+                            <span className="text-sm font-medium text-gray-700">Est. {formatDate(order.tracking.estimatedDelivery)}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Tracking updates timeline */}
+                    {order.tracking?.updates && order.tracking.updates.length > 0 && (
+                      <div className="px-5 pb-5">
+                        <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                          <DynamicIcon name="Clock" className="h-4 w-4" />
+                          Tracking History
+                        </h4>
+                        <div className="relative pl-5 space-y-0">
+                          {order.tracking.updates.map((update, index) => (
+                            <div key={index} className="relative pb-4 last:pb-0">
+                              {/* vertical line */}
+                              {index < order.tracking.updates.length - 1 && (
+                                <div className="absolute left-[-14px] top-3 bottom-0 w-0.5 bg-indigo-200" />
+                              )}
+                              {/* dot */}
+                              <div className={`absolute left-[-18px] top-1.5 w-3 h-3 rounded-full border-2 ${index === 0 ? "bg-indigo-600 border-indigo-600" : "bg-white border-indigo-300"}`} />
+                              <div className="bg-white rounded-lg border border-indigo-100 p-3">
+                                <p className="text-sm font-semibold text-gray-900">{update.status}</p>
+                                <p className="text-xs text-gray-500 mt-0.5">
+                                  {formatDate(update.timestamp)}
+                                  {update.location && <span className="ml-1">• {update.location}</span>}
+                                </p>
+                                {update.description && (
+                                  <p className="text-xs text-gray-600 mt-1">{update.description}</p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* No AWB yet message */}
+                    {!order.awbCode && !order.tracking?.updates?.length && (
+                      <div className="px-5 pb-5">
+                        <div className="flex items-center gap-2 text-sm text-gray-500 bg-white/70 rounded-lg p-3 border border-indigo-100">
+                          <DynamicIcon name="Info" className="h-4 w-4 text-indigo-400 flex-shrink-0" />
+                          Your order is being prepared. Tracking details will appear once dispatched.
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

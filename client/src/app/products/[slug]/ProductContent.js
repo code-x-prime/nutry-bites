@@ -343,6 +343,24 @@ export default function ProductContent({ slug }) {
     }
   };
 
+  // Touch swipe state for mobile image carousel
+  const touchStartX = typeof window !== "undefined" ? { current: 0 } : { current: 0 };
+  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd = (imagesToShow, currentMainImage) => (e) => {
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) < 30) return;
+    const idx = imagesToShow.findIndex(img => img.url === currentMainImage?.url);
+    if (diff > 0) {
+      // swipe left → next
+      const next = imagesToShow[(idx + 1) % imagesToShow.length];
+      setMainImage(next);
+    } else {
+      // swipe right → prev
+      const prev = imagesToShow[(idx - 1 + imagesToShow.length) % imagesToShow.length];
+      setMainImage(prev);
+    }
+  };
+
   // Render product images - now supports variant images with improved fallback
   const renderImages = () => {
     let imagesToShow = [];
@@ -407,10 +425,17 @@ export default function ProductContent({ slug }) {
         ? mainImage
         : primaryImage;
 
+    const currentIdx = imagesToShow.findIndex(img => img.url === currentMainImage?.url);
+
     // Main image display
     return (
       <div className="space-y-4">
-        <div className="relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden">
+        {/* Main image with swipe support */}
+        <div
+          className="relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden select-none"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd(imagesToShow, currentMainImage)}
+        >
           <Image
             src={getImageUrl(currentMainImage?.url)}
             alt={product?.name || "Product"}
@@ -418,15 +443,28 @@ export default function ProductContent({ slug }) {
             className="object-contain"
             priority
           />
+          {/* Dot indicators — mobile only */}
+          {imagesToShow.length > 1 && (
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 md:hidden">
+              {imagesToShow.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setMainImage(imagesToShow[i])}
+                  className={`w-2 h-2 rounded-full transition-all ${i === currentIdx ? "bg-primary w-4" : "bg-gray-400/60"}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+        {/* Thumbnail strip */}
+        <div className="grid grid-cols-4 md:grid-cols-4 gap-2">
           {imagesToShow.map((image, index) => (
             <div
               key={index}
-              className={`relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 ${currentMainImage?.url === image.url
+              className={`relative aspect-square w-full bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${currentMainImage?.url === image.url
                 ? "border-primary"
-                : "border-transparent"
+                : "border-transparent hover:border-gray-300"
                 }`}
               onClick={() => setMainImage(image)}
             >
@@ -1068,23 +1106,30 @@ export default function ProductContent({ slug }) {
           {/* Product Metadata */}
           <div className="border-t border-gray-200 pt-5 space-y-3 text-sm">
             {selectedVariant && selectedVariant.sku && (
-              <div className="flex">
-                <span className="font-medium w-32 text-gray-700">SKU:</span>
-                <span className="text-gray-600">{selectedVariant.sku}</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-medium text-gray-500 text-xs uppercase tracking-wide">SKU:</span>
+                <span className="font-mono text-gray-700 text-xs bg-gray-100 px-2 py-0.5 rounded">{selectedVariant.sku}</span>
               </div>
             )}
 
             {product.category && (
-              <div className="flex">
-                <span className="font-medium w-32 text-gray-700">
-                  Category:
-                </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-medium text-gray-500 text-xs uppercase tracking-wide">Category:</span>
                 <Link
                   href={`/category/${product.category?.slug}`}
-                  className="text-primary hover:underline"
+                  className="text-xs bg-primary/10 text-primary px-3 py-1 rounded-full hover:bg-primary/20 transition-colors font-medium"
                 >
                   {product.category?.name}
                 </Link>
+                {/* Only show the subcategory assigned to THIS product */}
+                {product.subCategory && (
+                  <Link
+                    href={`/category/${product.category?.slug}/${product.subCategory.slug}`}
+                    className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full hover:bg-gray-200 transition-colors font-medium border border-gray-200"
+                  >
+                    {product.subCategory.name}
+                  </Link>
+                )}
               </div>
             )}
           </div>

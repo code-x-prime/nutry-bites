@@ -250,12 +250,13 @@ export default function OrderDetailsPage() {
     fetchOrderDetails();
   }, [id, fetchOrderDetails]);
 
-  // Auto-load couriers once order is fetched and has no AWB yet
+  // Auto-load couriers once order is fetched and has no AWB yet — run only once per order
   useEffect(() => {
     if (orderDetails && !orderDetails.shiprocket?.awbCode && id) {
       fetchCouriers(id);
     }
-  }, [orderDetails?.id, fetchCouriers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderDetails?.id]);
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -1025,7 +1026,8 @@ export default function OrderDetailsPage() {
                             <input
                               type="radio"
                               checked={selectedCourierId === c.courierId}
-                              onChange={() => setSelectedCourierId(c.courierId)}
+                              onChange={(e) => { e.stopPropagation(); setSelectedCourierId(c.courierId); }}
+                              onClick={(e) => e.stopPropagation()}
                               className="h-4 w-4 accent-emerald-600"
                             />
                             <div>

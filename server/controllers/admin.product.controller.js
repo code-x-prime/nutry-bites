@@ -294,6 +294,11 @@ export const getProductById = asyncHandler(async (req, res, next) => {
           category: true,
         },
       },
+      subCategories: {
+        include: {
+          subCategory: true,
+        },
+      },
       images: {
         orderBy: { order: "asc" },
       },
@@ -335,6 +340,12 @@ export const getProductById = asyncHandler(async (req, res, next) => {
   // Format the response data
   const formattedProduct = {
     ...product,
+    subCategories: product.subCategories.map((psc) => ({
+      id: psc.subCategory.id,
+      name: psc.subCategory.name,
+      slug: psc.subCategory.slug,
+      categoryId: psc.subCategory.categoryId,
+    })),
     videoUrl: product.videoUrl ? getFileUrl(product.videoUrl) : null,
     // Extract categories into a more usable format
     categories: product.categories.map((pc) => ({
@@ -562,6 +573,18 @@ export const createProduct = asyncHandler(async (req, res, next) => {
             isPrimary: catId === primaryCategory,
           },
         });
+      }
+
+      // Create product-subcategory connections
+      const subCategoryIds = req.body.subCategoryIds
+        ? (Array.isArray(req.body.subCategoryIds)
+            ? req.body.subCategoryIds
+            : JSON.parse(req.body.subCategoryIds))
+        : [];
+      for (const subCatId of subCategoryIds) {
+        await prisma.productSubCategory.create({
+          data: { productId: newProduct.id, subCategoryId: subCatId },
+        }).catch(() => {}); // ignore duplicate
       }
 
       // Create product variants
@@ -1201,6 +1224,20 @@ export const updateProduct = asyncHandler(async (req, res, next) => {
         },
         data: { isPrimary: true },
       });
+    }
+  }
+
+  // Update subcategory connections if provided
+  if (req.body.subCategoryIds !== undefined) {
+    const subCategoryIds = Array.isArray(req.body.subCategoryIds)
+      ? req.body.subCategoryIds
+      : JSON.parse(req.body.subCategoryIds || "[]");
+
+    await prisma.productSubCategory.deleteMany({ where: { productId } });
+    for (const subCatId of subCategoryIds) {
+      await prisma.productSubCategory.create({
+        data: { productId, subCategoryId: subCatId },
+      }).catch(() => {});
     }
   }
 

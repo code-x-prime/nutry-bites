@@ -18,7 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { formatCurrency, debugData, cn } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -212,10 +212,6 @@ export default function OrderDetailsPage() {
       setIsLoading(true);
       const response = await orders.getOrderById(id);
 
-      // Use the debug utility
-      debugData("Order API Response", response, true);
-      debugData("Order Data", response?.data?.data, true);
-
       if (response?.data?.success && response?.data?.data?.order) {
         // Fix: Access the order data correctly from response.data.data.order
         setOrderDetails(response.data.data.order);
@@ -228,13 +224,10 @@ export default function OrderDetailsPage() {
       // Handle axios error properly
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as { response: { status: number; data?: { message?: string } } };
-        debugData("Error Response", axiosError.response, true);
         setError(
           `API Error (${axiosError.response.status}): ${axiosError.response.data?.message || "Unknown error"}`
         );
       } else if (error && typeof error === 'object' && 'request' in error) {
-        const requestError = error as { request: unknown };
-        debugData("Error Request", requestError.request, true);
         setError("Network error: No response received from server");
       } else if (error instanceof Error) {
         setError(`Error: ${error.message}`);

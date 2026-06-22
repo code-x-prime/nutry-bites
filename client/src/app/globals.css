@@ -209,6 +209,18 @@
     color: #144D53;
     letter-spacing: -0.01em;
   }
+  
+  /* Inherit text color for headings inside containers with dark backgrounds or white text classes */
+  .text-white h1, .text-white h2, .text-white h3, .text-white h4, .text-white h5, .text-white h6,
+  [class*="text-white"] h1, [class*="text-white"] h2, [class*="text-white"] h3,
+  [class*="text-gray-100"] h1, [class*="text-gray-200"] h1, [class*="text-gray-300"] h1,
+  [class*="bg-[#144D53]"] h1, [class*="bg-[#144D53]"] h2, [class*="bg-[#144D53]"] h3,
+  [class*="bg-[#1F6F78]"] h1, [class*="bg-[#1F6F78]"] h2, [class*="bg-[#1F6F78]"] h3,
+  [class*="from-[#1F6F78]"] h1, [class*="from-[#1F6F78]"] h2, [class*="from-[#1F6F78]"] h3,
+  footer h1, footer h2, footer h3, footer h4, footer h5, footer h6 {
+    color: inherit;
+  }
+
   h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
   h2 { font-size: clamp(1.5rem, 3.5vw, 2.25rem); }
   h3 { font-size: clamp(1.1rem, 2.5vw, 1.5rem); }
@@ -218,7 +230,6 @@
 
   p, .description, .desc, .product-desc, .about-text {
     font-weight: 400;
-    color: #3a3a3a;
   }
 
   a {

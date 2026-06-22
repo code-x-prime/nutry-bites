@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency, cn } from "@/lib/utils";
-import { useLanguage } from "@/context/LanguageContext";
 
 /* ─── types ─────────────────────────────────────────── */
 interface OrderUpdate { id: string; status: string; timestamp: string; note?: string; location?: string; description?: string; }
@@ -77,7 +76,6 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
 /* ═══════════════════════════════════════════════════════ */
 export default function OrderDetailsPage() {
   const { id } = useParams<{ id: string }>();
-  const { t } = useLanguage();
 
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [isLoading, setIsLoading]       = useState(true);

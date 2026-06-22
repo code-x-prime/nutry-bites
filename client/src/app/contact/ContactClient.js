@@ -11,6 +11,7 @@ import {
   FiMapPin as MapPin,
   FiInstagram as Instagram,
   FiPhone as Phone,
+  FiClock as Clock,
 } from "react-icons/fi";
 import { FaFacebookF as Facebook, FaTwitter as Twitter } from "react-icons/fa";
 import { toast } from "sonner";
@@ -182,11 +183,12 @@ export default function ContactPage() {
                     <div>
                       <p className="font-bold text-gray-900">Our Office</p>
                       <p className="text-gray-600 text-sm leading-relaxed">
-                        -6/7 A, ACHARYYA JADADISH CHANDRA BOSE ROAD,<br />KOLKATA -700017
+                        6/7 A, Acharyya Jagadish Chandra Bose Road,<br />Kolkata - 700017, West Bengal, India
                       </p>
                       <div className="mt-2 space-y-0.5">
-                        <p className="text-[#1F6F78] text-[10px] font-bold uppercase tracking-wide">GST: 19ASGPY5969C1Z1</p>
-                        <p className="text-[#1F6F78] text-[10px] font-bold uppercase tracking-wide">FSSAI: 22826039000129</p>
+                        <p className="text-[#1F6F78] text-[10px] font-bold uppercase tracking-wide">Legal Name: Nutry Bites</p>
+                        <p className="text-[#1F6F78] text-[10px] font-bold uppercase tracking-wide">GSTIN: 19ASGPY5969C1Z1</p>
+                        <p className="text-[#1F6F78] text-[10px] font-bold uppercase tracking-wide">FSSAI License No: 22826039000129</p>
                       </div>
                     </div>
                   </div>
@@ -197,7 +199,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-bold text-gray-900">Email Us</p>
-                      <p className="text-gray-600 text-sm">nutrybitesstore@gmail.com</p>
+                      <p className="text-gray-600 text-sm">support@nutrybites.co.in</p>
                     </div>
                   </div>
 
@@ -207,7 +209,19 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-bold text-gray-900">Call Us</p>
-                      <p className="text-gray-600 text-sm">8910072220, 6290958664</p>
+                      <p className="text-gray-600 text-sm">8910072220</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start group">
+                    <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mr-4 group-hover:bg-emerald-600 transition-colors duration-300">
+                      <Clock className="h-5 w-5 text-emerald-600 group-hover:text-white transition-colors" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-900">Support Hours</p>
+                      <p className="text-gray-600 text-sm font-semibold">Monday - Saturday</p>
+                      <p className="text-gray-600 text-sm">10:00 AM - 7:00 PM</p>
+                      <p className="text-[#1F6F78] text-[10px] font-bold uppercase tracking-wide mt-1">Response: Within 24 Hours</p>
                     </div>
                   </div>
                 </div>

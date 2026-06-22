@@ -39,9 +39,9 @@ export function Footer() {
         if (res?.success) {
           setSocialLinks(res.data?.socialLinks || {});
           setContactInfo({
-            email: res.data?.contactEmail || "nutrybitesstore@gmail.com",
-            phone: res.data?.contactPhone || "8910072220, 6290958664",
-            address: res.data?.contactAddress || "-6/7 A, ACHARYYA JADADISH CHANDRA BOSE ROAD, KOLKATA -700017",
+            email: res.data?.contactEmail || "support@nutrybites.co.in",
+            phone: res.data?.contactPhone || "8910072220",
+            address: res.data?.contactAddress || "6/7 A, Acharyya Jagadish Chandra Bose Road, Kolkata - 700017, West Bengal, India",
           });
         }
       } catch (error) {
@@ -73,6 +73,7 @@ export function Footer() {
   const policyLinks = [
     { name: "Privacy Policy", href: "/privacy-policy" },
     { name: "Refund Policy", href: "/refund-policy" },
+    { name: "Cancellation Policy", href: "/cancellation-policy" },
     { name: "Shipping Policy", href: "/shipping-policy" },
     { name: "Terms & Conditions", href: "/terms-conditions" },
   ];
@@ -175,29 +176,36 @@ export function Footer() {
                 Nutry Bites is your destination for premium, oil-free roasted snacks. We specialize in wholesome Makhana and nutritious munchies designed for your active lifestyle.
               </p>
 
-              {/* Contact info */}
-              <div className="space-y-3">
-                <a
-                  href={`mailto:${contactInfo.email}`}
-                  className="flex items-center gap-3 text-gray-300 hover:text-white text-sm transition-colors"
-                >
-                  <FiMail className="h-4 w-4 flex-shrink-0" />
-                  {contactInfo.email}
-                </a>
-                <a
-                  href={`tel:${contactInfo.phone}`}
-                  className="flex items-center gap-3 text-gray-300 hover:text-white text-sm transition-colors"
-                >
-                  <FiPhone className="h-4 w-4 flex-shrink-0" />
-                  {contactInfo.phone}
-                </a>
-                <p className="flex items-center gap-3 text-gray-300 text-sm">
-                  <FiMapPin className="h-4 w-4 flex-shrink-0" />
-                  {contactInfo.address}
-                </p>
-                <div className="pt-2 text-white text-[12px] font-bold uppercase tracking-wider">
-                  <p className="text-white">GST NO: 19ASGPY5969C1Z1</p>
-                  <p className="text-white">FSSAI LIC NO: 22826039000129</p>
+              {/* Contact & Legal info */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <a
+                    href={`mailto:${contactInfo.email}`}
+                    className="flex items-center gap-3 text-gray-300 hover:text-white text-sm transition-colors"
+                  >
+                    <FiMail className="h-4 w-4 flex-shrink-0" />
+                    {contactInfo.email}
+                  </a>
+                  <a
+                    href={`tel:${contactInfo.phone}`}
+                    className="flex items-center gap-3 text-gray-300 hover:text-white text-sm transition-colors"
+                  >
+                    <FiPhone className="h-4 w-4 flex-shrink-0" />
+                    {contactInfo.phone}
+                  </a>
+                </div>
+
+                <div className="border-t border-white/10 pt-4 space-y-2">
+                  <p className="text-white text-xs font-bold uppercase tracking-wider">Legal Information</p>
+                  <div className="text-xs text-gray-400 space-y-1">
+                    <p><span className="text-gray-300 font-medium">Brand Name:</span> Nutry Bites</p>
+                    <p><span className="text-gray-300 font-medium">GSTIN:</span> 19ASGPY5969C1Z1</p>
+                    <p><span className="text-gray-300 font-medium">FSSAI:</span> 22826039000129</p>
+                    <p className="pt-1 leading-relaxed">
+                      <span className="text-gray-300 font-medium block mb-0.5">Address:</span>
+                      6/7 A, Acharyya Jagadish Chandra Bose Road,<br />Kolkata - 700017
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

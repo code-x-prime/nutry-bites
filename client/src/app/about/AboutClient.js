@@ -202,6 +202,80 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Business Information Section */}
+      <section className="py-14 md:py-16 bg-white border-t border-gray-100">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <Badge variant="outline" className="mb-4 border-[#1F6F78] text-[#1F6F78]">
+                Official Details
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 font-jost">
+                Business Information
+              </h2>
+              <p className="text-gray-500 mt-2 font-lato">
+                Official registration and contact details of our brand.
+              </p>
+            </div>
+
+            <div className="bg-[#f0faf7] p-8 md:p-12 rounded-3xl border border-[#1F6F78]/10 shadow-lg shadow-[#1F6F78]/5">
+              <div className="grid md:grid-cols-2 gap-8 md:gap-12">
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#E6A15A] mb-1 font-jost">Brand Name</h4>
+                    <p className="text-lg font-bold text-gray-900">Nutry Bites</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#E6A15A] mb-1 font-jost">Business Type</h4>
+                    <p className="text-lg font-semibold text-gray-800">Proprietorship</p>
+                  </div>
+
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#E6A15A] mb-1 font-jost">Registered Address</h4>
+                    <p className="text-gray-700 leading-relaxed text-sm">
+                      6/7 A, Acharyya Jagadish Chandra Bose Road,<br />
+                      Kolkata - 700017, West Bengal, India
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#E6A15A] mb-1 font-jost">GSTIN</h4>
+                    <p className="text-base font-mono font-bold text-gray-900 bg-white px-3 py-1.5 rounded-lg border border-gray-150 inline-block">
+                      19ASGPY5969C1Z1
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#E6A15A] mb-1 font-jost">FSSAI License No</h4>
+                    <p className="text-base font-mono font-bold text-gray-900 bg-white px-3 py-1.5 rounded-lg border border-gray-150 inline-block">
+                      22826039000129
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#E6A15A] mb-1 font-jost">Email</h4>
+                      <a href="mailto:support@nutrybites.co.in" className="text-sm font-semibold text-[#1F6F78] hover:underline break-all">
+                        support@nutrybites.co.in
+                      </a>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#E6A15A] mb-1 font-jost">Phone</h4>
+                      <a href="tel:8910072220" className="text-sm font-semibold text-[#1F6F78] hover:underline">
+                        8910072220
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Call to Action */}
       <section className="bg-gradient-to-r from-[#1F6F78] to-[#144D53] py-16 text-white">
         <div className="container mx-auto px-4 text-center">

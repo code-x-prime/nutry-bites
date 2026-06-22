@@ -9,6 +9,7 @@ import { RouteGuard } from "@/components/route-guard";
 import { ClientOnly } from "@/components/client-only";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import TawkToWidget from "@/components/TawkToWidget";
+import { WhatsAppWidget } from "@/components/WhatsAppWidget";
 
 /* ── Body font: Lato ── */
 const lato = Lato({
@@ -145,6 +146,7 @@ export default function RootLayout({ children }) {
             </div>
             <Toaster position="top-center" richColors closeButton />
             <TawkToWidget />
+            <WhatsAppWidget />
           </CartProvider>
         </AuthProvider>
       </body>

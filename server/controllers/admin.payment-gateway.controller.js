@@ -20,7 +20,7 @@ async function getOrCreateUserForAdmin(admin, userId = null) {
 
     // For all admins (including SUPER_ADMIN using their own ID), find or create User based on admin email
     // This is because PaymentGatewaySetting requires a User, not Admin
-    let user = await prisma.user.findUnique({
+    let user = await prisma.user.findFirst({
         where: { email: admin.email },
     });
 

@@ -959,7 +959,7 @@ export const updateUserDetails = asyncHandler(async (req, res) => {
 
   // Check if email is being changed and already exists
   if (email && email !== user.email) {
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.user.findFirst({
       where: { email },
     });
 

@@ -12,6 +12,7 @@ import { decrypt } from "../utils/encryption.js";
 import { processOrderForShipping, checkServiceability, getDefaultPickupAddress, isShiprocketEnabled } from "../utils/shiprocket.js";
 import { getStoreConfigFromDb } from "../utils/storeConfig.js";
 import { applyFlashSalePrice } from "../utils/flashSaleHelpers.js";
+import { initiatePhonePePayment, checkPhonePeStatus } from "../utils/phonepe.js";
 
 
 async function getPaymentGatewayConfig(userId = null, gateway = "RAZORPAY") {
@@ -183,6 +184,7 @@ export const getPaymentSettings = asyncHandler(async (req, res) => {
         cashEnabled: paymentSettings.cashEnabled,
         razorpayEnabled: paymentSettings.razorpayEnabled && !!razorpaySettings,
         phonepeEnabled: !!phonepeSettings,
+        phonepeMode: phonepeSettings?.mode || "TEST",
         codCharge: parseFloat(paymentSettings.codCharge) || 0,
       },
       "Payment settings fetched successfully"
@@ -2019,3 +2021,516 @@ export const getShippingRates = asyncHandler(async (req, res) => {
   }
 });
 
+// ============================================================
+// PhonePe Payment Integration
+// ============================================================
+
+// Helper: Get active PhonePe gateway config from DB
+async function getPhonePeConfig() {
+  const setting = await prisma.paymentGatewaySetting.findFirst({
+    where: {
+      gateway: "PHONEPE",
+      isActive: true,
+      phonepeMerchantId: { not: null },
+      phonepeSaltKey: { not: null },
+      phonepeSaltIndex: { not: null },
+    },
+  });
+
+  if (!setting) {
+    throw new ApiError(400, "PhonePe payment gateway is not configured or not active. Please configure PhonePe keys in Payment Gateway Settings.");
+  }
+
+  return {
+    merchantId: setting.phonepeMerchantId,
+    saltKey: decrypt(setting.phonepeSaltKey),
+    saltIndex: setting.phonepeSaltIndex,
+    mode: setting.mode, // "TEST" | "LIVE"
+    settingId: setting.id,
+  };
+}
+
+// Helper: Build order from cart (shared between PhonePe initiate and verify)
+async function buildOrderDataFromCart(userId, shippingAddressId, couponOverrides = {}) {
+  const cartItems = await prisma.cartItem.findMany({
+    where: { userId },
+    include: {
+      productVariant: {
+        include: {
+          product: {
+            include: {
+              images: { where: { isPrimary: true }, take: 1 },
+              pricingSlabs: { orderBy: { minQty: "desc" } },
+            },
+          },
+          attributes: {
+            include: {
+              attributeValue: { include: { attribute: true } },
+            },
+          },
+          pricingSlabs: { orderBy: { minQty: "desc" } },
+        },
+      },
+    },
+  });
+
+  if (!cartItems.length) throw new ApiError(400, "Cart is empty");
+
+  const shippingAddress = await prisma.address.findFirst({
+    where: { id: shippingAddressId, userId },
+  });
+  if (!shippingAddress) throw new ApiError(404, "Shipping address not found");
+
+  const calcPrice = async (variant, quantity) => {
+    const qty = parseInt(quantity);
+    let basePrice = parseFloat(variant.salePrice || variant.price);
+    const flashSale = await applyFlashSalePrice(basePrice, variant.productId);
+    if (flashSale.hasFlashSale) basePrice = flashSale.price;
+    if (variant.pricingSlabs?.length > 0) {
+      const match = variant.pricingSlabs.find(s => qty >= s.minQty && (s.maxQty === null || qty <= s.maxQty));
+      if (match) return parseFloat(match.price);
+    }
+    if (variant.product.pricingSlabs?.length > 0) {
+      const match = variant.product.pricingSlabs.find(s => qty >= s.minQty && (s.maxQty === null || qty <= s.maxQty));
+      if (match) return parseFloat(match.price);
+    }
+    return basePrice;
+  };
+
+  let subTotal = 0;
+  for (const item of cartItems) {
+    const variant = item.productVariant;
+    if (variant.quantity < item.quantity) {
+      throw new ApiError(400, `Not enough stock for ${variant.product.name}`);
+    }
+    const price = Math.round(await calcPrice(variant, item.quantity));
+    subTotal += Math.round(price * item.quantity);
+  }
+
+  // Shipping
+  let shippingCost = 0;
+  const srSettings = await prisma.shiprocketSettings.findFirst();
+  if (srSettings) {
+    const threshold = parseFloat(srSettings.freeShippingThreshold || 0);
+    const charge = parseFloat(srSettings.shippingCharge || 0);
+    shippingCost = threshold > 0 && subTotal >= threshold ? 0 : charge;
+  }
+
+  // Coupon
+  let discount = 0;
+  let couponCode = null;
+  let couponId = null;
+  const userCoupon = await prisma.userCoupon.findFirst({
+    where: { userId, isActive: true },
+    include: { coupon: true },
+  });
+  if (userCoupon?.coupon) {
+    couponCode = userCoupon.coupon.code;
+    couponId = userCoupon.coupon.id;
+    if (userCoupon.coupon.discountType === "PERCENTAGE") {
+      let pct = parseFloat(userCoupon.coupon.discountValue);
+      if (pct > 90 || userCoupon.coupon.isDiscountCapped) pct = Math.min(pct, 90);
+      discount = (subTotal * pct) / 100;
+    } else {
+      discount = Math.min(parseFloat(userCoupon.coupon.discountValue), subTotal);
+    }
+  } else if (couponOverrides.couponCode || couponOverrides.couponId || couponOverrides.discountAmount) {
+    if (couponOverrides.couponCode) couponCode = couponOverrides.couponCode;
+    if (couponOverrides.couponId) couponId = couponOverrides.couponId;
+    if (couponOverrides.discountAmount) discount = parseFloat(couponOverrides.discountAmount);
+  }
+
+  const roundedSubTotal = Math.round(subTotal);
+  const roundedShipping = Math.round(shippingCost);
+  const roundedDiscount = Math.round(discount);
+  const roundedTotal = Math.round(roundedSubTotal + roundedShipping - roundedDiscount);
+
+  return {
+    cartItems,
+    shippingAddress,
+    subTotal: roundedSubTotal,
+    shippingCost: roundedShipping,
+    discount: roundedDiscount,
+    total: roundedTotal,
+    couponCode,
+    couponId,
+    userCoupon,
+    calcPrice,
+  };
+}
+
+// POST /payment/phonepe/initiate
+export const initPhonePePayment = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const {
+    shippingAddressId,
+    billingAddressSameAsShipping = true,
+    couponCode,
+    couponId,
+    discountAmount,
+  } = req.body;
+
+  if (!shippingAddressId) throw new ApiError(400, "Shipping address is required");
+
+  // Get PhonePe config
+  const phonePeConfig = await getPhonePeConfig();
+
+  // Build order data
+  const orderData = await buildOrderDataFromCart(userId, shippingAddressId, {
+    couponCode,
+    couponId,
+    discountAmount,
+  });
+
+  if (orderData.total < 1) throw new ApiError(400, "Order amount must be at least ₹1");
+
+  // Generate unique transaction ID
+  const transactionId = `PP_${Date.now()}_${userId.slice(-6)}`;
+
+  // Get user mobile
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+
+  // Callback URLs
+  const clientUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL || "http://localhost:3000";
+  const serverUrl = process.env.BASE_URL || "http://localhost:4000";
+  const redirectUrl = `${serverUrl}/api/payment/phonepe/verify?transactionId=${transactionId}`;
+  const callbackUrl = `${serverUrl}/api/payment/phonepe/webhook`;
+
+  // Store pending transaction with order snapshot
+  await prisma.phonePeTransaction.create({
+    data: {
+      transactionId,
+      userId,
+      amount: orderData.total * 100, // in paise
+      orderData: JSON.stringify({
+        userId,
+        shippingAddressId,
+        billingAddressSameAsShipping,
+        couponCode: orderData.couponCode,
+        couponId: orderData.couponId,
+        discountAmount: orderData.discount,
+        paymentGateway: "PHONEPE",
+        paymentMode: phonePeConfig.mode,
+        subTotal: orderData.subTotal,
+        shippingCost: orderData.shippingCost,
+        discount: orderData.discount,
+        total: orderData.total,
+        clientRedirectBase: clientUrl,
+      }),
+      status: "PENDING",
+    },
+  });
+
+  // Initiate payment with PhonePe
+  const phonePeResponse = await initiatePhonePePayment({
+    merchantId: phonePeConfig.merchantId,
+    saltKey: phonePeConfig.saltKey,
+    saltIndex: phonePeConfig.saltIndex,
+    mode: phonePeConfig.mode,
+    transactionId,
+    amountInPaise: orderData.total * 100,
+    redirectUrl,
+    callbackUrl,
+    mobileNumber: user?.phone || undefined,
+    userId,
+  });
+
+  // Get redirect URL from PhonePe response
+  const paymentUrl =
+    phonePeResponse?.data?.instrumentResponse?.redirectInfo?.url ||
+    phonePeResponse?.data?.redirectInfo?.url;
+
+  if (!paymentUrl) {
+    // Cleanup pending transaction
+    await prisma.phonePeTransaction.update({
+      where: { transactionId },
+      data: { status: "FAILED", errorMessage: "No redirect URL in PhonePe response" },
+    });
+    throw new ApiError(500, "PhonePe did not return a payment URL. Please try again.");
+  }
+
+  return res.status(200).json(
+    new ApiResponsive(200, { redirectUrl: paymentUrl, transactionId }, "PhonePe payment initiated")
+  );
+});
+
+// GET /payment/phonepe/verify?transactionId=xxx
+// This is the redirect URL PhonePe calls after payment
+export const verifyPhonePePayment = asyncHandler(async (req, res) => {
+  const { transactionId } = req.query;
+
+  if (!transactionId) {
+    return res.redirect(`${process.env.CLIENT_URL || process.env.FRONTEND_URL || "http://localhost:3000"}/payment/failed?error=Missing+transaction+ID`);
+  }
+
+  const clientUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL || "http://localhost:3000";
+
+  // Get the stored transaction
+  const storedTransaction = await prisma.phonePeTransaction.findUnique({
+    where: { transactionId },
+  });
+
+  if (!storedTransaction) {
+    return res.redirect(`${clientUrl}/payment/failed?error=Transaction+not+found&transactionId=${transactionId}`);
+  }
+
+  // ✅ Double payment prevention - if already processed, redirect to success/failed
+  if (storedTransaction.status === "SUCCESS" && storedTransaction.orderId) {
+    return res.redirect(`${clientUrl}/payment/success?transactionId=${transactionId}&orderId=${storedTransaction.orderId}&alreadyProcessed=true`);
+  }
+  if (storedTransaction.status === "FAILED") {
+    const errMsg = encodeURIComponent(storedTransaction.errorMessage || "Payment failed");
+    return res.redirect(`${clientUrl}/payment/failed?error=${errMsg}&transactionId=${transactionId}`);
+  }
+
+  const orderSnap = JSON.parse(storedTransaction.orderData);
+  const userId = storedTransaction.userId;
+
+  // Get PhonePe config
+  let phonePeConfig;
+  try {
+    phonePeConfig = await getPhonePeConfig();
+  } catch (err) {
+    await prisma.phonePeTransaction.update({
+      where: { transactionId },
+      data: { status: "FAILED", errorMessage: "PhonePe not configured" },
+    });
+    return res.redirect(`${clientUrl}/payment/failed?error=Payment+gateway+not+configured&transactionId=${transactionId}`);
+  }
+
+  // Check payment status with PhonePe API
+  let statusResponse;
+  try {
+    statusResponse = await checkPhonePeStatus({
+      merchantId: phonePeConfig.merchantId,
+      saltKey: phonePeConfig.saltKey,
+      saltIndex: phonePeConfig.saltIndex,
+      mode: phonePeConfig.mode,
+      transactionId,
+    });
+  } catch (err) {
+    console.error("PhonePe status check error:", err);
+    return res.redirect(`${clientUrl}/payment/failed?error=Could+not+verify+payment&transactionId=${transactionId}`);
+  }
+
+  const isSuccess = statusResponse?.success === true && statusResponse?.code === "PAYMENT_SUCCESS";
+
+  if (!isSuccess) {
+    const errCode = statusResponse?.code || "PAYMENT_FAILED";
+    const errMsg = statusResponse?.message || "Payment was not successful";
+    await prisma.phonePeTransaction.update({
+      where: { transactionId },
+      data: { status: "FAILED", errorMessage: `${errCode}: ${errMsg}` },
+    });
+    return res.redirect(`${clientUrl}/payment/failed?error=${encodeURIComponent(errMsg)}&code=${errCode}&transactionId=${transactionId}`);
+  }
+
+  // Payment successful - create order
+  try {
+    const orderData = await buildOrderDataFromCart(userId, orderSnap.shippingAddressId, {
+      couponCode: orderSnap.couponCode,
+      couponId: orderSnap.couponId,
+      discountAmount: orderSnap.discount,
+    });
+
+    const siteSettings = await prisma.siteSettings.findFirst();
+    const orderPrefix = siteSettings?.orderPrefix || "ORD";
+    const orderNumber = `${orderPrefix}-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
+
+    const phonepePaymentId = statusResponse?.data?.transactionId || transactionId;
+
+    const result = await prisma.$transaction(async (tx) => {
+      const order = await tx.order.create({
+        data: {
+          orderNumber,
+          userId,
+          subTotal: orderData.subTotal.toString(),
+          tax: "0",
+          shippingCost: orderData.shippingCost.toString(),
+          discount: orderData.discount,
+          total: orderData.total.toString(),
+          paymentMethod: "PHONEPE",
+          paymentGateway: "PHONEPE",
+          paymentMode: orderSnap.paymentMode || phonePeConfig.mode,
+          shippingAddressId: orderSnap.shippingAddressId,
+          billingAddressSameAsShipping: orderSnap.billingAddressSameAsShipping ?? true,
+          status: "PAID",
+          couponCode: orderData.couponCode,
+          couponId: orderData.couponId,
+          notes: JSON.stringify({
+            phonePeTransactionId: transactionId,
+            phonePePaymentId: phonepePaymentId,
+          }),
+        },
+      });
+
+      // Deactivate coupon if used
+      if (orderData.userCoupon?.coupon) {
+        await tx.userCoupon.update({
+          where: { id: orderData.userCoupon.id },
+          data: { isActive: false },
+        });
+        await tx.coupon.update({
+          where: { id: orderData.userCoupon.coupon.id },
+          data: { usedCount: { increment: 1 } },
+        });
+      }
+
+      // Create order items + update inventory
+      for (const item of orderData.cartItems) {
+        const variant = item.productVariant;
+        const price = Math.round(await orderData.calcPrice(variant, item.quantity));
+        const subtotal = Math.round(price * item.quantity);
+
+        await tx.orderItem.create({
+          data: {
+            orderId: order.id,
+            productId: variant.product.id,
+            variantId: variant.id,
+            price,
+            quantity: item.quantity,
+            subtotal,
+          },
+        });
+
+        await tx.productVariant.update({
+          where: { id: variant.id },
+          data: { quantity: { decrement: item.quantity } },
+        });
+
+        await tx.inventoryLog.create({
+          data: {
+            variantId: variant.id,
+            quantityChange: -item.quantity,
+            reason: "sale",
+            referenceId: order.id,
+            previousQuantity: variant.quantity,
+            newQuantity: variant.quantity - item.quantity,
+            createdBy: userId,
+          },
+        });
+      }
+
+      // Clear cart
+      await tx.cartItem.deleteMany({ where: { userId } });
+
+      // Mark PhonePe transaction as SUCCESS
+      await tx.phonePeTransaction.update({
+        where: { transactionId },
+        data: { status: "SUCCESS", orderId: order.id },
+      });
+
+      return order;
+    });
+
+    // Non-blocking: referral + shiprocket + email
+    processReferralReward(result.id, userId).catch((err) =>
+      console.error("PhonePe referral error:", err)
+    );
+    processOrderForShipping(result.id).catch((err) =>
+      console.error("PhonePe Shiprocket error:", err)
+    );
+
+    // Send confirmation email
+    try {
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (user?.email) {
+        const orderItems = await prisma.orderItem.findMany({
+          where: { orderId: result.id },
+          include: {
+            product: true,
+            variant: {
+              include: {
+                attributes: {
+                  include: { attributeValue: { include: { attribute: true } } },
+                },
+              },
+            },
+          },
+        });
+        const emailItems = orderItems.map((item) => ({
+          name: item.product.name,
+          variant: item.variant.attributes.map((a) => a.attributeValue.value).join(" "),
+          quantity: item.quantity,
+          price: parseFloat(item.price).toFixed(2),
+        }));
+        const storeConfig = await getStoreConfigFromDb();
+        await sendEmail({
+          email: user.email,
+          subject: `Order Confirmation - #${result.orderNumber}`,
+          html: getOrderConfirmationTemplate({
+            userName: user.name || "Valued Customer",
+            orderNumber: result.orderNumber,
+            orderDate: result.createdAt,
+            paymentMethod: "PhonePe",
+            items: emailItems,
+            subtotal: orderData.subTotal.toFixed(2),
+            shipping: orderData.shippingCost.toFixed(2),
+            tax: "0.00",
+            total: orderData.total.toFixed(2),
+            shippingAddress: orderData.shippingAddress,
+          }, storeConfig),
+        });
+      }
+    } catch (emailErr) {
+      console.error("PhonePe order email error:", emailErr);
+    }
+
+    return res.redirect(
+      `${clientUrl}/payment/success?transactionId=${transactionId}&orderId=${result.id}&orderNumber=${encodeURIComponent(result.orderNumber)}`
+    );
+  } catch (orderErr) {
+    console.error("PhonePe order creation error:", orderErr);
+    // Don't mark as failed yet - payment was successful, manual intervention may be needed
+    return res.redirect(
+      `${clientUrl}/payment/success?transactionId=${transactionId}&pendingOrder=true`
+    );
+  }
+});
+
+// POST /payment/phonepe/webhook
+// PhonePe server-to-server callback (backup, in case redirect fails)
+export const phonePeWebhook = asyncHandler(async (req, res) => {
+  try {
+    const { response } = req.body;
+    if (!response) return res.status(200).json({ success: true, message: "No response data" });
+
+    let decodedResponse;
+    try {
+      decodedResponse = JSON.parse(Buffer.from(response, "base64").toString());
+    } catch {
+      return res.status(200).json({ success: true, message: "Invalid response format" });
+    }
+
+    const { success, code, data } = decodedResponse;
+    const transactionId = data?.merchantTransactionId;
+    if (!transactionId) return res.status(200).json({ success: true, message: "No transactionId" });
+
+    const storedTx = await prisma.phonePeTransaction.findUnique({ where: { transactionId } });
+    if (!storedTx) return res.status(200).json({ success: true, message: "Transaction not found" });
+
+    // Skip if already processed (double payment prevention)
+    if (storedTx.status === "SUCCESS") {
+      return res.status(200).json({ success: true, message: "Already processed" });
+    }
+
+    if (success && code === "PAYMENT_SUCCESS") {
+      // Payment successful via webhook - redirect verify will handle order creation
+      // Just log it here, the redirect flow creates the order
+      console.log(`PhonePe webhook: payment successful for ${transactionId}`);
+    } else {
+      // Mark as failed if not already done
+      if (storedTx.status === "PENDING") {
+        await prisma.phonePeTransaction.update({
+          where: { transactionId },
+          data: { status: "FAILED", errorMessage: decodedResponse.message || code },
+        });
+      }
+    }
+
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("PhonePe webhook error:", err);
+    return res.status(200).json({ success: true }); // Always return 200 to PhonePe
+  }
+});

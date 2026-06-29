@@ -1030,6 +1030,7 @@ export const getPaymentSettings = asyncHandler(async (req, res) => {
       data: {
         cashEnabled: true,
         razorpayEnabled: false,
+        phonepeEnabled: false,
         codCharge: 0,
       },
     });
@@ -1041,6 +1042,7 @@ export const getPaymentSettings = asyncHandler(async (req, res) => {
       {
         cashEnabled: paymentSettings.cashEnabled,
         razorpayEnabled: paymentSettings.razorpayEnabled,
+        phonepeEnabled: paymentSettings.phonepeEnabled ?? false,
         codCharge: parseFloat(paymentSettings.codCharge) || 0,
       },
       "Payment settings fetched successfully"
@@ -1050,13 +1052,13 @@ export const getPaymentSettings = asyncHandler(async (req, res) => {
 
 // Update payment settings
 export const updatePaymentSettings = asyncHandler(async (req, res) => {
-  const { cashEnabled, razorpayEnabled, codCharge } = req.body;
+  const { cashEnabled, razorpayEnabled, phonepeEnabled, codCharge } = req.body;
 
   // Validate that at least one payment method is enabled
-  if (cashEnabled === false && razorpayEnabled === false) {
+  if (cashEnabled === false && razorpayEnabled === false && phonepeEnabled === false) {
     throw new ApiError(
       400,
-      "At least one payment method must be enabled (Cash or Razorpay)"
+      "At least one payment method must be enabled (Cash, PhonePe, or Razorpay)"
     );
   }
 
@@ -1073,6 +1075,7 @@ export const updatePaymentSettings = asyncHandler(async (req, res) => {
       data: {
         cashEnabled: cashEnabled !== undefined ? cashEnabled : true,
         razorpayEnabled: razorpayEnabled !== undefined ? razorpayEnabled : false,
+        phonepeEnabled: phonepeEnabled !== undefined ? phonepeEnabled : false,
         codCharge: codCharge !== undefined ? codCharge : 0,
         updatedBy: req.admin?.id,
       },
@@ -1083,6 +1086,7 @@ export const updatePaymentSettings = asyncHandler(async (req, res) => {
       data: {
         ...(cashEnabled !== undefined && { cashEnabled }),
         ...(razorpayEnabled !== undefined && { razorpayEnabled }),
+        ...(phonepeEnabled !== undefined && { phonepeEnabled }),
         ...(codCharge !== undefined && { codCharge }),
         updatedBy: req.admin?.id,
       },
@@ -1095,6 +1099,7 @@ export const updatePaymentSettings = asyncHandler(async (req, res) => {
       {
         cashEnabled: paymentSettings.cashEnabled,
         razorpayEnabled: paymentSettings.razorpayEnabled,
+        phonepeEnabled: paymentSettings.phonepeEnabled ?? false,
         codCharge: parseFloat(paymentSettings.codCharge) || 0,
       },
       "Payment settings updated successfully"

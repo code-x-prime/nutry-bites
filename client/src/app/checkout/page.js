@@ -44,6 +44,7 @@ export default function CheckoutPage() {
   const [paymentSettings, setPaymentSettings] = useState({
     cashEnabled: true,
     razorpayEnabled: false,
+    phonepeEnabled: false,
     codCharge: 0,
   });
   const [paymentMethod, setPaymentMethod] = useState("CASH");
@@ -94,10 +95,13 @@ export default function CheckoutPage() {
           setPaymentSettings({
             cashEnabled: response.data.cashEnabled ?? true,
             razorpayEnabled: response.data.razorpayEnabled ?? false,
+            phonepeEnabled: response.data.phonepeEnabled ?? false,
             codCharge: response.data.codCharge ?? 0,
           });
-          // Set default payment method based on settings (priority: Cash > Razorpay)
-          if (response.data.cashEnabled) {
+          // Set default payment method based on settings (priority: PhonePe > Cash > Razorpay)
+          if (response.data.phonepeEnabled) {
+            setPaymentMethod("PHONEPE");
+          } else if (response.data.cashEnabled) {
             setPaymentMethod("CASH");
           } else if (response.data.razorpayEnabled) {
             setPaymentMethod("RAZORPAY");
@@ -105,7 +109,6 @@ export default function CheckoutPage() {
         }
       } catch (error) {
         console.error("Error fetching payment settings:", error);
-        // Default to cash if fetch fails
         setPaymentMethod("CASH");
       }
     };
@@ -529,6 +532,43 @@ export default function CheckoutPage() {
 
         const razorpay = new window.Razorpay(options);
         razorpay.open();
+      } else if (paymentMethod === "PHONEPE") {
+        // PhonePe Payment Flow - redirect based
+        toast.loading("Initiating PhonePe payment...", {
+          id: "phonepe-initiate",
+          duration: 15000,
+        });
+
+        const initiateResponse = await fetchApi("/payment/phonepe/initiate", {
+          method: "POST",
+          credentials: "include",
+          body: JSON.stringify({
+            shippingAddressId: selectedAddressId,
+            billingAddressSameAsShipping: true,
+            couponCode: coupon?.code || null,
+            couponId: coupon?.id || null,
+            discountAmount: totals.discount || 0,
+          }),
+        });
+
+        toast.dismiss("phonepe-initiate");
+
+        if (!initiateResponse.success) {
+          throw new Error(initiateResponse.message || "Failed to initiate PhonePe payment");
+        }
+
+        const { redirectUrl } = initiateResponse.data;
+        if (!redirectUrl) {
+          throw new Error("PhonePe did not return a payment URL. Please try again.");
+        }
+
+        // Redirect user to PhonePe payment page
+        toast.success("Redirecting to PhonePe...", { duration: 2000 });
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 500);
+        return; // Don't setProcessing(false) - we're redirecting
+
       } else {
         // No payment method selected or available
         toast.error("Please select a payment method");
@@ -541,6 +581,7 @@ export default function CheckoutPage() {
       toast.dismiss("order-creation");
       toast.dismiss("payment-gateway");
       toast.dismiss("payment-verification");
+      toast.dismiss("phonepe-initiate");
 
       if (
         error.message &&
@@ -824,24 +865,22 @@ export default function CheckoutPage() {
               Payment Method
             </h2>
 
-            {!paymentSettings.cashEnabled && !paymentSettings.razorpayEnabled ? (
-              <div className="border rounded-md p-4 bg-yellow-50 border-yellow-200">
-                <p className="text-sm text-yellow-800">
-                  No payment methods are currently available. Please contact support or try again later.
-                </p>
+            {!paymentSettings.cashEnabled && !paymentSettings.razorpayEnabled && !paymentSettings.phonepeEnabled ? (
+              <div className="border rounded-xl p-4 bg-yellow-50 border-yellow-200">
+                <p className="text-sm text-yellow-800 font-medium">⚠️ No payment methods are available.</p>
+                <p className="text-xs text-yellow-600 mt-1">Contact the store admin to configure a payment method.</p>
               </div>
             ) : (
               <div className="space-y-3">
-                {/* Cash on Delivery Option - Only show if enabled */}
+                {/* Cash on Delivery Option */}
                 {paymentSettings.cashEnabled && (
                   <div
-                    className={`border-2 rounded-2xl p-5 transition-all duration-300 ${paymentMethod === "CASH"
-                      ? "border-[#1F6F78] bg-[#1F6F78]/5 cursor-pointer ring-4 ring-[#1F6F78]/5"
-                      : "border-nyxis-gray-100 hover:border-[#1F6F78]/30 cursor-pointer"
-                      }`}
-                    onClick={() => {
-                      handlePaymentMethodSelect("CASH");
-                    }}
+                    className={`border-2 rounded-2xl p-5 transition-all duration-300 ${
+                      paymentMethod === "CASH"
+                        ? "border-[#1F6F78] bg-[#1F6F78]/5 cursor-pointer ring-4 ring-[#1F6F78]/5"
+                        : "border-nyxis-gray-100 hover:border-[#1F6F78]/30 cursor-pointer"
+                    }`}
+                    onClick={() => handlePaymentMethodSelect("CASH")}
                   >
                     <div className="flex items-center">
                       <input
@@ -849,15 +888,10 @@ export default function CheckoutPage() {
                         id="cash"
                         name="paymentMethod"
                         checked={paymentMethod === "CASH"}
-                        onChange={() => {
-                          handlePaymentMethodSelect("CASH");
-                        }}
+                        onChange={() => handlePaymentMethodSelect("CASH")}
                         className="h-4 w-4 text-[#1F6F78] border-gray-300 focus:ring-[#1F6F78]"
                       />
-                      <label
-                        htmlFor="cash"
-                        className="ml-2 flex items-center flex-1"
-                      >
+                      <label htmlFor="cash" className="ml-2 flex items-center flex-1">
                         <span className="font-medium">Cash on Delivery (COD)</span>
                         {paymentMethod === "CASH" && (
                           <span className="ml-2 text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">
@@ -865,9 +899,7 @@ export default function CheckoutPage() {
                           </span>
                         )}
                       </label>
-                      <span className="flex items-center">
-                        <Wallet className="h-4 w-4 text-green-600" />
-                      </span>
+                      <Wallet className="h-4 w-4 text-green-600" />
                     </div>
                     <p className="text-sm mt-2 ml-6 text-gray-600">
                       Pay with cash when your order is delivered
@@ -880,16 +912,60 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                {/* Razorpay Option */}
+                {/* PhonePe Option */}
+                {paymentSettings.phonepeEnabled && (
+                  <div
+                    className={`border-2 rounded-2xl p-5 transition-all duration-300 ${
+                      paymentMethod === "PHONEPE"
+                        ? "border-purple-600 bg-purple-50 cursor-pointer ring-4 ring-purple-100"
+                        : "border-nyxis-gray-100 hover:border-purple-300 cursor-pointer"
+                    }`}
+                    onClick={() => handlePaymentMethodSelect("PHONEPE")}
+                  >
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        id="phonepe"
+                        name="paymentMethod"
+                        checked={paymentMethod === "PHONEPE"}
+                        onChange={() => handlePaymentMethodSelect("PHONEPE")}
+                        className="h-4 w-4 text-purple-600 border-gray-300 focus:ring-purple-600"
+                      />
+                      <label htmlFor="phonepe" className="ml-2 flex items-center flex-1 gap-2">
+                        {/* PhonePe Logo SVG */}
+                        <svg viewBox="0 0 60 60" className="h-6 w-6" fill="none">
+                          <rect width="60" height="60" rx="12" fill="#5F259F" />
+                          <path d="M35.5 15h-8.4c-1.2 0-2.1 1-2.1 2.2v4.3l-5.4 1.2c-.9.2-1.6 1-1.6 2v15.1c0 1.2 1 2.2 2.2 2.2h2.1v3.2c0 1.2 1 2.2 2.2 2.2h2.1c1.2 0 2.1-1 2.1-2.2V42h7c4.8 0 8.7-3.9 8.7-8.7v-9.6C44.3 18.9 40.3 15 35.5 15z" fill="white" />
+                        </svg>
+                        <span className="font-medium">Pay with PhonePe</span>
+                        {paymentMethod === "PHONEPE" && (
+                          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
+                            Selected
+                          </span>
+                        )}
+                      </label>
+                      <IndianRupee className="h-4 w-4 text-purple-600" />
+                    </div>
+                    <p className="text-sm mt-2 ml-6 text-gray-600">
+                      Pay securely via PhonePe — UPI, Cards, Wallets, Net Banking
+                    </p>
+                    {paymentMethod === "PHONEPE" && (
+                      <div className="mt-3 ml-6 text-xs text-purple-600 bg-purple-50 border border-purple-100 rounded-lg p-2">
+                        ✓ You will be redirected to PhonePe to complete payment securely.
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Razorpay Option (if enabled) */}
                 {paymentSettings.razorpayEnabled && (
                   <div
-                    className={`border-2 rounded-2xl p-5 transition-all duration-300 ${paymentMethod === "RAZORPAY"
-                      ? "border-[#1F6F78] bg-[#1F6F78]/5 cursor-pointer ring-4 ring-[#1F6F78]/5"
-                      : "border-nyxis-gray-100 hover:border-[#1F6F78]/30 cursor-pointer"
-                      }`}
-                    onClick={() => {
-                      handlePaymentMethodSelect("RAZORPAY");
-                    }}
+                    className={`border-2 rounded-2xl p-5 transition-all duration-300 ${
+                      paymentMethod === "RAZORPAY"
+                        ? "border-[#1F6F78] bg-[#1F6F78]/5 cursor-pointer ring-4 ring-[#1F6F78]/5"
+                        : "border-nyxis-gray-100 hover:border-[#1F6F78]/30 cursor-pointer"
+                    }`}
+                    onClick={() => handlePaymentMethodSelect("RAZORPAY")}
                   >
                     <div className="flex items-center">
                       <input
@@ -897,15 +973,10 @@ export default function CheckoutPage() {
                         id="razorpay"
                         name="paymentMethod"
                         checked={paymentMethod === "RAZORPAY"}
-                        onChange={() => {
-                          handlePaymentMethodSelect("RAZORPAY");
-                        }}
+                        onChange={() => handlePaymentMethodSelect("RAZORPAY")}
                         className="h-4 w-4 text-[#1F6F78] border-gray-300 focus:ring-[#1F6F78]"
                       />
-                      <label
-                        htmlFor="razorpay"
-                        className="ml-2 flex items-center flex-1"
-                      >
+                      <label htmlFor="razorpay" className="ml-2 flex items-center flex-1">
                         <span className="font-medium">Pay Online (Razorpay)</span>
                         {paymentMethod === "RAZORPAY" && (
                           <span className="ml-2 text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">
@@ -913,16 +984,13 @@ export default function CheckoutPage() {
                           </span>
                         )}
                       </label>
-                      <span className="flex items-center">
-                        <IndianRupee className="h-4 w-4 text-[#1F6F78]" />
-                      </span>
+                      <IndianRupee className="h-4 w-4 text-[#1F6F78]" />
                     </div>
                     <p className="text-sm mt-2 ml-6 text-gray-600">
                       Pay securely with Credit/Debit Card, UPI, NetBanking, etc.
                     </p>
                   </div>
                 )}
-
               </div>
             )}
           </div>

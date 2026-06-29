@@ -13,25 +13,24 @@ import {
 } from "@/components/ui/select";
 import {
     Loader2,
-    CreditCard,
     Smartphone,
     Info,
     Eye,
     EyeOff,
+    ExternalLink,
+    CheckCircle,
+    XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/api/api";
 import { useAuth } from "@/context/AuthContext";
-import { useLanguage } from "@/context/LanguageContext";
+import { Badge } from "@/components/ui/badge";
 
 interface PaymentGatewaySetting {
     id: string;
     gateway: "RAZORPAY" | "PHONEPE";
     isActive: boolean;
     mode: "TEST" | "LIVE";
-    razorpayKeyId?: string | null;
-    razorpayKeySecret?: string | null;
-    razorpayWebhookSecret?: string | null;
     phonepeMerchantId?: string | null;
     phonepeSaltKey?: string | null;
     phonepeSaltIndex?: string | null;
@@ -39,21 +38,10 @@ interface PaymentGatewaySetting {
 
 export default function PaymentGatewaySettingsPage() {
     const { admin } = useAuth();
-    const { t } = useLanguage();
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 
-    const [razorpaySettings, setRazorpaySettings] = useState<PaymentGatewaySetting | null>(null);
     const [phonepeSettings, setPhonepeSettings] = useState<PaymentGatewaySetting | null>(null);
-
-    // Razorpay form state
-    const [razorpayForm, setRazorpayForm] = useState({
-        isActive: false,
-        mode: "TEST" as "TEST" | "LIVE",
-        keyId: "",
-        keySecret: "",
-        webhookSecret: "",
-    });
 
     // PhonePe form state
     const [phonepeForm, setPhonepeForm] = useState({
@@ -61,44 +49,24 @@ export default function PaymentGatewaySettingsPage() {
         mode: "TEST" as "TEST" | "LIVE",
         merchantId: "",
         saltKey: "",
-        saltIndex: "",
+        saltIndex: "1",
     });
 
     // Show/hide secrets
-    const [showRazorpaySecret, setShowRazorpaySecret] = useState(false);
-    const [showRazorpayWebhook, setShowRazorpayWebhook] = useState(false);
     const [showPhonepeSalt, setShowPhonepeSalt] = useState(false);
 
     useEffect(() => {
-        if (admin) {
-            fetchSettings();
-        }
+        if (admin) fetchSettings();
     }, [admin]);
 
     const fetchSettings = async () => {
         if (!admin) return;
-
         try {
             setIsLoading(true);
             const response = await api.get(`/api/admin/payment-gateway-settings/${admin.id}`);
-
             if (response.data.success) {
                 const settings = response.data.data || [];
-
-                const razorpay = settings.find((s: PaymentGatewaySetting) => s.gateway === "RAZORPAY");
                 const phonepe = settings.find((s: PaymentGatewaySetting) => s.gateway === "PHONEPE");
-
-                if (razorpay) {
-                    setRazorpaySettings(razorpay);
-                    setRazorpayForm({
-                        isActive: razorpay.isActive,
-                        mode: razorpay.mode,
-                        keyId: razorpay.razorpayKeyId || "",
-                        keySecret: razorpay.razorpayKeySecret || "",
-                        webhookSecret: razorpay.razorpayWebhookSecret || "",
-                    });
-                }
-
                 if (phonepe) {
                     setPhonepeSettings(phonepe);
                     setPhonepeForm({
@@ -106,73 +74,26 @@ export default function PaymentGatewaySettingsPage() {
                         mode: phonepe.mode,
                         merchantId: phonepe.phonepeMerchantId || "",
                         saltKey: phonepe.phonepeSaltKey || "",
-                        saltIndex: phonepe.phonepeSaltIndex || "",
+                        saltIndex: phonepe.phonepeSaltIndex || "1",
                     });
                 }
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error fetching payment gateway settings:", error);
-            if (error.response?.status !== 404) {
-                toast.error("Failed to load payment gateway settings");
-            }
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleSaveRazorpay = async () => {
-        if (!admin) return;
-
-        if (razorpayForm.isActive && (!razorpayForm.keyId || !razorpayForm.keySecret)) {
-            toast.error("Key ID and Key Secret are required when Razorpay is enabled");
-            return;
-        }
-
-        try {
-            setIsSaving(true);
-            const response = await api.post(
-                `/api/admin/payment-gateway-settings/${admin.id}`,
-                {
-                    gateway: "RAZORPAY",
-                    isActive: razorpayForm.isActive,
-                    mode: razorpayForm.mode,
-                    razorpayKeyId: razorpayForm.keyId || null,
-                    razorpayKeySecret: razorpayForm.keySecret || null,
-                    razorpayWebhookSecret: razorpayForm.webhookSecret || null,
-                }
-            );
-
-            if (response.data.success) {
-                toast.success(t('payment_gateway_settings.razorpay.success'));
-                fetchSettings();
-                // Trigger window event to notify Payment Settings page
-                window.dispatchEvent(new Event("paymentGatewayUpdated"));
-            } else {
-                toast.error(response.data.message || "Failed to save Razorpay settings");
-            }
-        } catch (error: any) {
-            console.error("Error saving Razorpay settings:", error);
-            toast.error(
-                error.response?.data?.message || "Failed to save Razorpay settings"
-            );
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
     const handleSavePhonepe = async () => {
         if (!admin) return;
-
         if (
             phonepeForm.isActive &&
             (!phonepeForm.merchantId || !phonepeForm.saltKey || !phonepeForm.saltIndex)
         ) {
-            toast.error(
-                "Merchant ID, Salt Key, and Salt Index are required when PhonePe is enabled"
-            );
+            toast.error("Merchant ID, Salt Key, and Salt Index are required when PhonePe is enabled");
             return;
         }
-
         try {
             setIsSaving(true);
             const response = await api.post(
@@ -186,20 +107,16 @@ export default function PaymentGatewaySettingsPage() {
                     phonepeSaltIndex: phonepeForm.saltIndex || null,
                 }
             );
-
             if (response.data.success) {
-                toast.success("PhonePe settings saved successfully");
+                toast.success("PhonePe settings saved successfully!");
                 fetchSettings();
-                // Trigger window event to notify Payment Settings page
                 window.dispatchEvent(new Event("paymentGatewayUpdated"));
             } else {
                 toast.error(response.data.message || "Failed to save PhonePe settings");
             }
-        } catch (error: any) {
-            console.error("Error saving PhonePe settings:", error);
-            toast.error(
-                error.response?.data?.message || "Failed to save PhonePe settings"
-            );
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { message?: string } } };
+            toast.error(err.response?.data?.message || "Failed to save PhonePe settings");
         } finally {
             setIsSaving(false);
         }
@@ -213,347 +130,271 @@ export default function PaymentGatewaySettingsPage() {
         );
     }
 
+    const isConfigured = phonepeSettings?.phonepeMerchantId && phonepeSettings?.phonepeSaltKey;
+
     return (
         <div className="space-y-6">
             <div>
                 <h1 className="text-3xl font-semibold text-[var(--text-primary)] tracking-tight">
-                    {t('payment_gateway_settings.title')}
+                    Payment Gateway Settings
                 </h1>
                 <p className="text-[var(--text-secondary)] text-sm mt-1.5">
-                    {t('payment_gateway_settings.description')}
+                    Configure PhonePe payment gateway for online payments. Keys are stored encrypted in the database.
                 </p>
             </div>
 
+            {/* Status Overview */}
+            <div className="flex items-center gap-3 p-4 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)]">
+                {phonepeSettings?.isActive && isConfigured ? (
+                    <>
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                        <div>
+                            <p className="text-sm font-medium text-[var(--text-primary)]">PhonePe is Active</p>
+                            <p className="text-xs text-[var(--text-secondary)]">
+                                Mode: <Badge variant={phonepeSettings.mode === "LIVE" ? "default" : "secondary"}>{phonepeSettings.mode}</Badge>
+                                {" · "}Merchant ID: {phonepeSettings.phonepeMerchantId}
+                            </p>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <XCircle className="h-5 w-5 text-orange-500 flex-shrink-0" />
+                        <div>
+                            <p className="text-sm font-medium text-[var(--text-primary)]">PhonePe is Not Configured</p>
+                            <p className="text-xs text-[var(--text-secondary)]">Enter credentials below and enable to accept online payments.</p>
+                        </div>
+                    </>
+                )}
+            </div>
+
             {/* Info Card */}
-            <Card className="bg-[var(--accent)]/10 border-[var(--accent)]/30">
+            <Card className="bg-blue-50 border-blue-200">
                 <CardContent className="pt-6">
                     <div className="flex gap-3">
-                        <Info className="h-5 w-5 text-[var(--accent)] flex-shrink-0 mt-0.5" />
-                        <div className="space-y-1">
-                            <p className="text-sm font-medium text-[var(--text-primary)]">
-                                {t('payment_gateway_settings.info_title')}
-                            </p>
-                            <ul className="text-sm text-[var(--text-primary)] space-y-1 list-disc list-inside">
-                                <li>{t('payment_gateway_settings.info_list.1')}</li>
-                                <li>{t('payment_gateway_settings.info_list.2')}</li>
-                                <li>{t('payment_gateway_settings.info_list.3')}</li>
-                                <li>{t('payment_gateway_settings.info_list.4')}</li>
+                        <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <div className="space-y-2">
+                            <p className="text-sm font-semibold text-blue-800">Where to get PhonePe credentials?</p>
+                            <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
+                                <li>
+                                    <strong>Test Mode:</strong> Use sandbox credentials from PhonePe Developer Portal
+                                    <br />
+                                    <span className="ml-4 font-mono text-xs bg-blue-100 px-1 rounded">Merchant ID: PGTESTPAYUAT86</span>
+                                    <span className="ml-2 font-mono text-xs bg-blue-100 px-1 rounded">Salt Key: 96434309-7796-489d-8924-ab56988a6076</span>
+                                    <span className="ml-2 font-mono text-xs bg-blue-100 px-1 rounded">Salt Index: 1</span>
+                                </li>
+                                <li>
+                                    <strong>Live Mode:</strong> Apply at PhonePe Business Portal for production credentials
+                                </li>
+                                <li>Keys are <strong>encrypted</strong> before storing in database (AES-256)</li>
+                                <li>Change mode between TEST and LIVE as needed — each has separate keys</li>
                             </ul>
+                            <a
+                                href="https://developer.phonepe.com/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 underline mt-1"
+                            >
+                                PhonePe Developer Portal <ExternalLink className="h-3 w-3" />
+                            </a>
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Razorpay Settings */}
-            <Card>
+            {/* PhonePe Settings */}
+            <Card className="bg-[var(--bg-card)] border-[var(--border-color)]">
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <CreditCard className="h-5 w-5" />
-                        {t('payment_gateway_settings.razorpay.title')}
+                    <CardTitle className="flex items-center gap-2 text-[var(--text-primary)]">
+                        <Smartphone className="h-5 w-5 text-purple-600" />
+                        PhonePe Payment Gateway
+                        <Badge variant={phonepeForm.isActive ? "default" : "secondary"} className="ml-auto">
+                            {phonepeForm.isActive ? "Enabled" : "Disabled"}
+                        </Badge>
                     </CardTitle>
                     <CardDescription>
-                        {t('payment_gateway_settings.razorpay.description')}
+                        Accept payments via PhonePe — UPI, Cards, Wallets, Net Banking.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                    {/* Enable/Disable Toggle */}
+                    <div className="flex items-center justify-between p-4 border border-[var(--border-color)] rounded-lg bg-[var(--bg-secondary)]">
                         <div className="space-y-0.5">
-                            <Label htmlFor="razorpay-enabled" className="text-base font-medium">
-                                {t('payment_gateway_settings.razorpay.enable')}
+                            <Label htmlFor="phonepe-enabled" className="text-base font-medium text-[var(--text-primary)]">
+                                Enable PhonePe
                             </Label>
                             <p className="text-sm text-[var(--text-secondary)]">
-                                {t('payment_gateway_settings.razorpay.enable_desc')}
+                                When enabled, PhonePe payment option appears at checkout
                             </p>
                         </div>
                         <Switch
-                            id="razorpay-enabled"
-                            checked={razorpayForm.isActive}
+                            id="phonepe-enabled"
+                            checked={phonepeForm.isActive}
                             onCheckedChange={(checked) =>
-                                setRazorpayForm({ ...razorpayForm, isActive: checked })
+                                setPhonepeForm({ ...phonepeForm, isActive: checked })
                             }
                         />
                     </div>
 
-                    {razorpayForm.isActive && (
-                        <>
-                            <div className="space-y-2">
-                                <Label htmlFor="razorpay-mode">{t('payment_gateway_settings.razorpay.mode')}</Label>
-                                <Select
-                                    value={razorpayForm.mode}
-                                    onValueChange={(value: "TEST" | "LIVE") =>
-                                        setRazorpayForm({ ...razorpayForm, mode: value })
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="TEST">{t('payment_gateway_settings.razorpay.test_mode')}</SelectItem>
-                                        <SelectItem value="LIVE">{t('payment_gateway_settings.razorpay.live_mode')}</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <p className="text-sm text-[var(--text-secondary)]">
-                                    {t('payment_gateway_settings.razorpay.mode_desc')}
-                                </p>
-                            </div>
+                    {/* Mode Selection */}
+                    <div className="space-y-2">
+                        <Label htmlFor="phonepe-mode" className="text-[var(--text-primary)]">
+                            Payment Mode <span className="text-red-500">*</span>
+                        </Label>
+                        <Select
+                            value={phonepeForm.mode}
+                            onValueChange={(value: "TEST" | "LIVE") =>
+                                setPhonepeForm({ ...phonepeForm, mode: value })
+                            }
+                        >
+                            <SelectTrigger id="phonepe-mode">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="TEST">
+                                    🧪 Test Mode — Use sandbox credentials
+                                </SelectItem>
+                                <SelectItem value="LIVE">
+                                    🚀 Live Mode — Use production credentials
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p className="text-xs text-[var(--text-secondary)]">
+                            {phonepeForm.mode === "TEST"
+                                ? "Test mode: No real money is charged. Use test credentials shown above."
+                                : "⚠️ Live mode: Real money will be charged. Use your production credentials only."}
+                        </p>
+                    </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="razorpay-key-id">
-                                    {t('payment_gateway_settings.razorpay.key_id')} <span className="text-[var(--destructive)]">*</span>
-                                </Label>
-                                <Input
-                                    id="razorpay-key-id"
-                                    value={razorpayForm.keyId}
-                                    onChange={(e) =>
-                                        setRazorpayForm({ ...razorpayForm, keyId: e.target.value })
-                                    }
-                                    placeholder="rzp_test_xxxxx or rzp_live_xxxxx"
-                                />
-                            </div>
+                    {/* Merchant ID */}
+                    <div className="space-y-2">
+                        <Label htmlFor="phonepe-merchant-id" className="text-[var(--text-primary)]">
+                            Merchant ID <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                            id="phonepe-merchant-id"
+                            value={phonepeForm.merchantId}
+                            onChange={(e) =>
+                                setPhonepeForm({ ...phonepeForm, merchantId: e.target.value })
+                            }
+                            placeholder={phonepeForm.mode === "TEST" ? "PGTESTPAYUAT86" : "Enter your PhonePe Merchant ID"}
+                        />
+                        <p className="text-xs text-[var(--text-secondary)]">
+                            Your PhonePe Merchant ID from the {phonepeForm.mode === "TEST" ? "sandbox" : "production"} dashboard
+                        </p>
+                    </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="razorpay-key-secret">
-                                    {t('payment_gateway_settings.razorpay.key_secret')} <span className="text-[var(--destructive)]">*</span>
-                                </Label>
-                                <div className="relative">
-                                    <Input
-                                        id="razorpay-key-secret"
-                                        type={showRazorpaySecret ? "text" : "password"}
-                                        value={razorpayForm.keySecret}
-                                        onChange={(e) =>
-                                            setRazorpayForm({ ...razorpayForm, keySecret: e.target.value })
-                                        }
-                                        placeholder={razorpaySettings?.razorpayKeySecret ? "Enter new key or leave to keep existing" : "Enter key secret"}
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        className="absolute right-0 top-0 h-full"
-                                        onClick={() => setShowRazorpaySecret(!showRazorpaySecret)}
-                                    >
-                                        {showRazorpaySecret ? (
-                                            <EyeOff className="h-4 w-4" />
-                                        ) : (
-                                            <Eye className="h-4 w-4" />
-                                        )}
-                                    </Button>
-                                </div>
-                                {razorpaySettings?.razorpayKeySecret && (
-                                    <p className="text-xs text-[var(--text-secondary)]">
-                                        Current: {razorpaySettings.razorpayKeySecret} (Leave empty to keep existing)
-                                    </p>
+                    {/* Salt Key */}
+                    <div className="space-y-2">
+                        <Label htmlFor="phonepe-salt-key" className="text-[var(--text-primary)]">
+                            Salt Key <span className="text-red-500">*</span>
+                        </Label>
+                        <div className="relative">
+                            <Input
+                                id="phonepe-salt-key"
+                                type={showPhonepeSalt ? "text" : "password"}
+                                value={phonepeForm.saltKey}
+                                onChange={(e) =>
+                                    setPhonepeForm({ ...phonepeForm, saltKey: e.target.value })
+                                }
+                                placeholder={
+                                    phonepeSettings?.phonepeSaltKey
+                                        ? "Leave empty to keep existing key"
+                                        : phonepeForm.mode === "TEST"
+                                        ? "96434309-7796-489d-8924-ab56988a6076"
+                                        : "Enter your PhonePe Salt Key"
+                                }
+                            />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-0 top-0 h-full"
+                                onClick={() => setShowPhonepeSalt(!showPhonepeSalt)}
+                            >
+                                {showPhonepeSalt ? (
+                                    <EyeOff className="h-4 w-4" />
+                                ) : (
+                                    <Eye className="h-4 w-4" />
                                 )}
-                            </div>
+                            </Button>
+                        </div>
+                        {phonepeSettings?.phonepeSaltKey && (
+                            <p className="text-xs text-green-600">
+                                ✓ Salt Key saved (encrypted). Leave empty to keep existing.
+                            </p>
+                        )}
+                        <p className="text-xs text-[var(--text-secondary)]">
+                            Stored encrypted in database. Never exposed in plain text.
+                        </p>
+                    </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="razorpay-webhook-secret">{t('payment_gateway_settings.razorpay.webhook_secret')}</Label>
-                                <div className="relative">
-                                    <Input
-                                        id="razorpay-webhook-secret"
-                                        type={showRazorpayWebhook ? "text" : "password"}
-                                        value={razorpayForm.webhookSecret}
-                                        onChange={(e) =>
-                                            setRazorpayForm({ ...razorpayForm, webhookSecret: e.target.value })
-                                        }
-                                        placeholder={razorpaySettings?.razorpayWebhookSecret ? "Enter new webhook secret or leave to keep existing" : "Enter webhook secret"}
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        className="absolute right-0 top-0 h-full"
-                                        onClick={() => setShowRazorpayWebhook(!showRazorpayWebhook)}
-                                    >
-                                        {showRazorpayWebhook ? (
-                                            <EyeOff className="h-4 w-4" />
-                                        ) : (
-                                            <Eye className="h-4 w-4" />
-                                        )}
-                                    </Button>
-                                </div>
-                                {razorpaySettings?.razorpayWebhookSecret && (
-                                    <p className="text-xs text-[var(--text-secondary)]">
-                                        Current: {razorpaySettings.razorpayWebhookSecret} (Leave empty to keep existing)
-                                    </p>
-                                )}
-                            </div>
-                        </>
-                    )}
+                    {/* Salt Index */}
+                    <div className="space-y-2">
+                        <Label htmlFor="phonepe-salt-index" className="text-[var(--text-primary)]">
+                            Salt Index <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                            id="phonepe-salt-index"
+                            value={phonepeForm.saltIndex}
+                            onChange={(e) =>
+                                setPhonepeForm({ ...phonepeForm, saltIndex: e.target.value })
+                            }
+                            placeholder="1"
+                            className="w-32"
+                        />
+                        <p className="text-xs text-[var(--text-secondary)]">
+                            Usually "1" for both test and live mode
+                        </p>
+                    </div>
 
-                    <div className="flex justify-end gap-3 pt-4 border-t">
+                    {/* Actions */}
+                    <div className="flex justify-between items-center pt-4 border-t border-[var(--border-color)]">
                         <Button
                             variant="outline"
                             onClick={() => fetchSettings()}
                             disabled={isSaving}
                         >
-                            {t('payment_gateway_settings.razorpay.reset')}
+                            Reset
                         </Button>
-                        <Button onClick={handleSaveRazorpay} disabled={isSaving}>
+                        <Button
+                            onClick={handleSavePhonepe}
+                            disabled={isSaving}
+                            className="min-w-[160px]"
+                        >
                             {isSaving ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    {t('payment_gateway_settings.razorpay.saving')}
+                                    Saving...
                                 </>
                             ) : (
-                                t('payment_gateway_settings.razorpay.save_button')
+                                "Save PhonePe Settings"
                             )}
                         </Button>
                     </div>
                 </CardContent>
             </Card>
 
-            {/* PhonePe Settings - Hidden for now */}
-            {false && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Smartphone className="h-5 w-5" />
-                            {t('payment_gateway_settings.phonepe.title')}
-                        </CardTitle>
-                        <CardDescription>
-                            Configure your PhonePe payment gateway keys.
-                            <br />
-                            <span className="text-xs text-[var(--text-secondary)] mt-1 block">
-                                Development: Use Merchant ID (Client ID), Salt Key (Client Secret), and Salt Index from PhonePe dashboard.
-                                <br />
-                                Production: Use the same structure with your production credentials.
-                            </span>
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="flex items-center justify-between p-4 border rounded-lg">
-                            <div className="space-y-0.5">
-                                <Label htmlFor="phonepe-enabled" className="text-base font-medium">
-                                    Enable PhonePe
-                                </Label>
-                                <p className="text-sm text-[var(--text-secondary)]">
-                                    Activate PhonePe payment gateway
-                                </p>
-                            </div>
-                            <Switch
-                                id="phonepe-enabled"
-                                checked={phonepeForm.isActive}
-                                onCheckedChange={(checked) =>
-                                    setPhonepeForm({ ...phonepeForm, isActive: checked })
-                                }
-                            />
+            {/* Help Card */}
+            <Card className="bg-amber-50 border-amber-200">
+                <CardContent className="pt-6">
+                    <div className="flex gap-3">
+                        <Info className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-amber-800 space-y-1">
+                            <p className="font-semibold">How PhonePe checkout works:</p>
+                            <ol className="list-decimal list-inside space-y-1">
+                                <li>Customer selects "PhonePe" at checkout</li>
+                                <li>System creates a payment request and redirects to PhonePe</li>
+                                <li>Customer completes payment on PhonePe page</li>
+                                <li>PhonePe redirects back — order is automatically created</li>
+                                <li>Confirmation email sent + Shiprocket order created</li>
+                            </ol>
+                            <p className="mt-2 text-xs">
+                                Callback URL (auto-configured): <code className="bg-amber-100 px-1 rounded">/api/payment/phonepe/verify</code>
+                            </p>
                         </div>
-
-                        {phonepeForm.isActive && (
-                            <>
-                                <div className="space-y-2">
-                                    <Label htmlFor="phonepe-mode">Payment Mode</Label>
-                                    <Select
-                                        value={phonepeForm.mode}
-                                        onValueChange={(value: "TEST" | "LIVE") =>
-                                            setPhonepeForm({ ...phonepeForm, mode: value })
-                                        }
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="TEST">Test Mode</SelectItem>
-                                            <SelectItem value="LIVE">Live Mode</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="phonepe-merchant-id">
-                                        Merchant ID (Client ID) <span className="text-[var(--destructive)]">*</span>
-                                    </Label>
-                                    <Input
-                                        id="phonepe-merchant-id"
-                                        value={phonepeForm.merchantId}
-                                        onChange={(e) =>
-                                            setPhonepeForm({ ...phonepeForm, merchantId: e.target.value })
-                                        }
-                                        placeholder="Enter PhonePe Merchant ID (Client ID)"
-                                    />
-                                    <p className="text-xs text-[var(--text-secondary)]">
-                                        This is your PhonePe Merchant ID (also called Client ID in development)
-                                    </p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="phonepe-salt-key">
-                                        Salt Key (Client Secret) <span className="text-[var(--destructive)]">*</span>
-                                    </Label>
-                                    <div className="relative">
-                                        <Input
-                                            id="phonepe-salt-key"
-                                            type={showPhonepeSalt ? "text" : "password"}
-                                            value={phonepeForm.saltKey}
-                                            onChange={(e) =>
-                                                setPhonepeForm({ ...phonepeForm, saltKey: e.target.value })
-                                            }
-                                            placeholder={phonepeSettings?.phonepeSaltKey ? "Enter new salt key or leave to keep existing" : "Enter Salt Key (Client Secret)"}
-                                        />
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            className="absolute right-0 top-0 h-full"
-                                            onClick={() => setShowPhonepeSalt(!showPhonepeSalt)}
-                                        >
-                                            {showPhonepeSalt ? (
-                                                <EyeOff className="h-4 w-4" />
-                                            ) : (
-                                                <Eye className="h-4 w-4" />
-                                            )}
-                                        </Button>
-                                    </div>
-                                    <p className="text-xs text-[var(--text-secondary)]">
-                                        This is your PhonePe Salt Key (also called Client Secret in development)
-                                    </p>
-                                    {phonepeSettings?.phonepeSaltKey && (
-                                        <p className="text-xs text-[var(--text-primary)]">
-                                            Current: {phonepeSettings?.phonepeSaltKey} (Leave empty to keep existing)
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="phonepe-salt-index">
-                                        Salt Index <span className="text-[var(--destructive)]">*</span>
-                                    </Label>
-                                    <Input
-                                        id="phonepe-salt-index"
-                                        value={phonepeForm.saltIndex}
-                                        onChange={(e) =>
-                                            setPhonepeForm({ ...phonepeForm, saltIndex: e.target.value })
-                                        }
-                                        placeholder="Enter salt index (usually 1)"
-                                    />
-                                </div>
-                            </>
-                        )}
-
-                        <div className="flex justify-end gap-3 pt-4 border-t">
-                            <Button
-                                variant="outline"
-                                onClick={() => fetchSettings()}
-                                disabled={isSaving}
-                            >
-                                Reset
-                            </Button>
-                            <Button onClick={handleSavePhonepe} disabled={isSaving}>
-                                {isSaving ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        {t('payment_gateway_settings.razorpay.saving')}
-                                    </>
-                                ) : (
-                                    t('payment_gateway_settings.phonepe.save_button')
-                                )}
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }
-

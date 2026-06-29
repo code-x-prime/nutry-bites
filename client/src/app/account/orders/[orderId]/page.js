@@ -815,12 +815,70 @@ export default function OrderDetailsPage({ params }) {
               </div>
 
               {/* Order notes */}
-              {order.notes && (
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h2 className="text-lg font-semibold mb-2">Order Notes</h2>
-                  <p className="text-sm">{order.notes}</p>
-                </div>
-              )}
+              {order.notes && (() => {
+                try {
+                  const parsed = JSON.parse(order.notes);
+                  if (typeof parsed === "object" && parsed !== null) {
+                    const items = [];
+                    if (parsed.notes) {
+                      items.push(
+                        <p key="notes" className="text-sm text-gray-700 whitespace-pre-wrap break-words">
+                          {parsed.notes}
+                        </p>
+                      );
+                    }
+                    if (parsed.phonePeTransactionId) {
+                      items.push(
+                        <p key="tx" className="text-sm text-gray-600 break-all">
+                          <span className="font-medium text-gray-700">PhonePe Transaction ID:</span> {parsed.phonePeTransactionId}
+                        </p>
+                      );
+                    }
+                    if (parsed.phonePePaymentId) {
+                      items.push(
+                        <p key="pay" className="text-sm text-gray-600 break-all">
+                          <span className="font-medium text-gray-700">PhonePe Payment ID:</span> {parsed.phonePePaymentId}
+                        </p>
+                      );
+                    }
+                    if (parsed.razorpay_payment_id || parsed.razorpayPaymentId) {
+                      items.push(
+                        <p key="rz" className="text-sm text-gray-600 break-all">
+                          <span className="font-medium text-gray-700">Razorpay Payment ID:</span> {parsed.razorpay_payment_id || parsed.razorpayPaymentId}
+                        </p>
+                      );
+                    }
+                    
+                    Object.keys(parsed).forEach((key) => {
+                      if (!["notes", "phonePeTransactionId", "phonePePaymentId", "razorpay_payment_id", "razorpayPaymentId"].includes(key)) {
+                        items.push(
+                          <p key={key} className="text-sm text-gray-600 break-all">
+                            <span className="font-medium text-gray-700">{key}:</span> {typeof parsed[key] === "object" ? JSON.stringify(parsed[key]) : String(parsed[key])}
+                          </p>
+                        );
+                      }
+                    });
+
+                    if (items.length > 0) {
+                      return (
+                        <div className="bg-white rounded-lg shadow p-6">
+                          <h2 className="text-lg font-semibold mb-2">Order Notes</h2>
+                          <div className="space-y-1.5">{items}</div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }
+                } catch (e) {
+                  // Fall back to plain text
+                }
+                return (
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h2 className="text-lg font-semibold mb-2">Order Notes</h2>
+                    <p className="text-sm break-all whitespace-pre-wrap">{order.notes}</p>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         )}

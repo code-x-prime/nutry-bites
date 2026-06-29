@@ -85,9 +85,7 @@ export default function SiteSettingsPage() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [isTestingRazorpay, setIsTestingRazorpay] = useState(false);
   const [isConnectingShiprocket, setIsConnectingShiprocket] = useState(false);
-  const [showRazorpaySecret, setShowRazorpaySecret] = useState(false);
   const [showShiprocketPassword, setShowShiprocketPassword] = useState(false);
   const [showGoogleSecret, setShowGoogleSecret] = useState(false);
   const [oauthForm, setOauthForm] = useState<Record<string, { isEnabled: boolean; clientId: string; clientSecret: string }>>({});
@@ -402,36 +400,8 @@ export default function SiteSettingsPage() {
     }
   };
 
-  const handleSaveRazorpay = async () => {
-    try {
-      setIsSaving(true);
-      await api.put("/api/admin/site-settings", {
-        razorpayKeyId: form.razorpayKeyId || null,
-        razorpayKeySecret: form.razorpayKeySecret !== "••••••••" ? form.razorpayKeySecret : undefined,
-        razorpayEnabled: form.razorpayEnabled,
-      });
-      toast.success("Razorpay settings saved");
-      fetchSettings();
-    } catch (err: unknown) {
-      const msg = err && typeof err === "object" && "response" in err ? (err as { response?: { data?: { message?: string } } }).response?.data?.message : undefined;
-      toast.error(msg || "Failed to save");
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
-  const handleTestRazorpay = async () => {
-    try {
-      setIsTestingRazorpay(true);
-      const response = await api.post("/api/admin/site-settings/test-razorpay");
-      const connected = response.data?.data?.connected;
-      toast.success(connected ? "Razorpay connected" : (response.data?.message || "Not connected"));
-    } catch {
-      toast.error("Test failed");
-    } finally {
-      setIsTestingRazorpay(false);
-    }
-  };
+
 
   const handleConnectShiprocket = async () => {
     if (!form.shiprocketEmail || !form.shiprocketPassword || form.shiprocketPassword === "••••••••") {
@@ -940,22 +910,20 @@ export default function SiteSettingsPage() {
                   <button
                     type="button"
                     onClick={() => setPhonepeForm({ ...phonepeForm, mode: "TEST" })}
-                    className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${
-                      phonepeForm.mode === "TEST"
-                        ? "border-blue-500 bg-blue-50 text-blue-700"
-                        : "border-[var(--border-color)] text-[var(--text-secondary)] hover:border-blue-300"
-                    }`}
+                    className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${phonepeForm.mode === "TEST"
+                      ? "border-blue-500 bg-blue-50 text-blue-700"
+                      : "border-[var(--border-color)] text-[var(--text-secondary)] hover:border-blue-300"
+                      }`}
                   >
                     🧪 Test Mode
                   </button>
                   <button
                     type="button"
                     onClick={() => setPhonepeForm({ ...phonepeForm, mode: "LIVE" })}
-                    className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${
-                      phonepeForm.mode === "LIVE"
-                        ? "border-green-500 bg-green-50 text-green-700"
-                        : "border-[var(--border-color)] text-[var(--text-secondary)] hover:border-green-300"
-                    }`}
+                    className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${phonepeForm.mode === "LIVE"
+                      ? "border-green-500 bg-green-50 text-green-700"
+                      : "border-[var(--border-color)] text-[var(--text-secondary)] hover:border-green-300"
+                      }`}
                   >
                     🚀 Live Mode
                   </button>
@@ -996,8 +964,8 @@ export default function SiteSettingsPage() {
                       phonepeSavedKey
                         ? "Leave empty to keep saved key"
                         : phonepeForm.mode === "TEST"
-                        ? "96434309-7796-489d-8924-ab56988a6076"
-                        : "Your PhonePe Salt Key"
+                          ? "96434309-7796-489d-8924-ab56988a6076"
+                          : "Your PhonePe Salt Key"
                     }
                   />
                   <Button

@@ -4,13 +4,14 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  CheckCircle,
-  PartyPopper,
-  ShoppingBag,
-  Gift,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+  FaCheckCircle,
+  FaGift,
+  FaShoppingBag,
+} from "react-icons/fa";
+import {
+  FaCircleInfo,
+} from "react-icons/fa6";
+import { ImSpinner2 } from "react-icons/im";
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
@@ -26,7 +27,6 @@ function PaymentSuccessContent() {
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
-    // Show animation after brief delay
     const t = setTimeout(() => setShowConfetti(true), 300);
     return () => clearTimeout(t);
   }, []);
@@ -41,12 +41,11 @@ function PaymentSuccessContent() {
   }, [countdown, router]);
 
   if (pendingOrder === "true") {
-    // Payment was successful but order creation had an issue
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 p-4">
         <div className="max-w-lg w-full bg-white rounded-[32px] shadow-2xl p-10 text-center">
           <div className="h-24 w-24 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <AlertCircle className="h-12 w-12 text-amber-500" />
+            <FaCircleInfo className="h-12 w-12 text-amber-500" />
           </div>
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Payment Received!</h1>
           <p className="text-gray-600 mb-4">
@@ -74,23 +73,20 @@ function PaymentSuccessContent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-50 p-4">
       <div className="max-w-lg w-full bg-white rounded-[32px] shadow-2xl p-10 text-center relative overflow-hidden">
-        {/* Background decoration */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#1F6F78]/5 to-transparent pointer-events-none" />
 
         <div className="relative">
-          {/* Success Icon with animation */}
           <div className="relative flex justify-center mb-6">
             <div
               className={`h-32 w-32 bg-[#1F6F78]/10 rounded-full flex items-center justify-center transition-all duration-700 ${
                 showConfetti ? "scale-100 opacity-100" : "scale-50 opacity-0"
               }`}
             >
-              <PartyPopper className="h-16 w-16 text-[#1F6F78]" />
+              <FaCheckCircle className="h-16 w-16 text-[#1F6F78]" />
             </div>
             {showConfetti && (
               <>
                 <div className="animate-ping absolute h-36 w-36 rounded-full bg-[#1F6F78] opacity-10" />
-                <div className="animate-ping absolute h-28 w-28 rounded-full bg-green-400 opacity-10 delay-150" />
               </>
             )}
           </div>
@@ -113,7 +109,7 @@ function PaymentSuccessContent() {
           )}
 
           <div className="flex items-center justify-center bg-green-50 p-4 rounded-xl mb-6">
-            <CheckCircle className="h-6 w-6 text-green-500 mr-2 flex-shrink-0" />
+            <FaCheckCircle className="h-6 w-6 text-green-500 mr-2 flex-shrink-0" />
             <p className="text-green-700 font-medium">Payment Successful via PhonePe ✓</p>
           </div>
 
@@ -122,10 +118,9 @@ function PaymentSuccessContent() {
             Our team will prepare your order and ship it soon.
           </p>
 
-          {/* Redirect countdown */}
           <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
+              <ImSpinner2 className="h-4 w-4 text-blue-500 animate-spin" />
               <p className="text-blue-700 text-sm">
                 Redirecting to orders page in {countdown} seconds...
               </p>
@@ -140,13 +135,13 @@ function PaymentSuccessContent() {
           <div className="flex justify-center gap-3">
             <Link href="/account/orders">
               <button className="flex items-center gap-2 px-6 py-3 bg-[#1F6F78] text-white rounded-xl font-semibold hover:bg-[#144D53] transition-colors">
-                <ShoppingBag size={16} />
+                <FaShoppingBag size={16} />
                 My Orders
               </button>
             </Link>
             <Link href="/products">
               <button className="flex items-center gap-2 px-6 py-3 border-2 border-[#1F6F78] text-[#1F6F78] rounded-xl font-semibold hover:bg-[#1F6F78]/5 transition-colors">
-                <Gift size={16} />
+                <FaGift size={16} />
                 Continue Shopping
               </button>
             </Link>
@@ -162,7 +157,7 @@ export default function PaymentSuccessPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="h-12 w-12 animate-spin text-[#1F6F78]" />
+          <ImSpinner2 className="h-12 w-12 animate-spin text-[#1F6F78]" />
         </div>
       }
     >

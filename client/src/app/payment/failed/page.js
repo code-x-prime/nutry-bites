@@ -4,12 +4,12 @@ import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  XCircle,
-  RotateCcw,
-  ShoppingCart,
-  Loader2,
-  PhoneCall,
-} from "lucide-react";
+  FaTimesCircle,
+  FaArrowLeft,
+  FaShoppingCart,
+  FaPhoneAlt,
+} from "react-icons/fa";
+import { ImSpinner2 } from "react-icons/im";
 
 function PaymentFailedContent() {
   const searchParams = useSearchParams();
@@ -35,15 +35,13 @@ function PaymentFailedContent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-rose-50 p-4">
       <div className="max-w-lg w-full bg-white rounded-[32px] shadow-2xl p-10 text-center">
-        {/* Failed Icon */}
         <div className="h-28 w-28 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <XCircle className="h-14 w-14 text-red-500" />
+          <FaTimesCircle className="h-14 w-14 text-red-500" />
         </div>
 
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Payment Failed</h1>
         <p className="text-gray-600 mb-2">We were unable to process your payment.</p>
 
-        {/* Error Details */}
         <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-6 text-left">
           <p className="text-sm text-red-700 font-medium mb-1">Reason:</p>
           <p className="text-sm text-red-600">{displayMessage}</p>
@@ -52,7 +50,6 @@ function PaymentFailedContent() {
           )}
         </div>
 
-        {/* Transaction ID */}
         {transactionId && (
           <div className="bg-gray-50 rounded-xl p-3 mb-6 text-sm">
             <p className="text-gray-500 text-xs mb-1">Transaction ID (for support)</p>
@@ -60,7 +57,6 @@ function PaymentFailedContent() {
           </div>
         )}
 
-        {/* What to do */}
         <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-6 text-left text-sm text-amber-800">
           <p className="font-semibold mb-2">What you can do:</p>
           <ul className="space-y-1 list-disc list-inside text-amber-700">
@@ -71,26 +67,25 @@ function PaymentFailedContent() {
           </ul>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex flex-col gap-3">
           <button
             onClick={() => router.push("/checkout")}
             className="flex items-center justify-center gap-2 w-full py-3 bg-[#1F6F78] text-white rounded-xl font-semibold hover:bg-[#144D53] transition-colors"
           >
-            <RotateCcw size={16} />
+            <FaArrowLeft size={14} />
             Try Again
           </button>
 
           <Link href="/cart" className="w-full">
             <button className="flex items-center justify-center gap-2 w-full py-3 border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
-              <ShoppingCart size={16} />
+              <FaShoppingCart size={16} />
               Back to Cart
             </button>
           </Link>
 
           <Link href="/contact" className="w-full">
             <button className="flex items-center justify-center gap-2 w-full py-3 text-gray-500 rounded-xl font-medium hover:text-gray-700 transition-colors text-sm">
-              <PhoneCall size={14} />
+              <FaPhoneAlt size={12} />
               Contact Support
             </button>
           </Link>
@@ -105,7 +100,7 @@ export default function PaymentFailedPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="h-12 w-12 animate-spin text-[#1F6F78]" />
+          <ImSpinner2 className="h-12 w-12 animate-spin text-[#1F6F78]" />
         </div>
       }
     >

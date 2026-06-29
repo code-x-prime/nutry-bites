@@ -28,7 +28,7 @@ const sections = [
     content: (
       <p>
         If you feel the product received is not as shown on the website or does not meet your expectations, please notify
-        our customer service team on the <strong>same day of delivery</strong>. Our team will review your complaint and take an
+        our customer service team <strong>within 1 day of delivery</strong>. Our team will review your complaint and take an
         appropriate decision, which may include a replacement or refund.
       </p>
     ),

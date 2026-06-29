@@ -12,13 +12,12 @@ const sections = [
     content: (
       <>
         <p>
-          <strong className="text-[#1F6F78]">Nutry Bites</strong> does not accept returns or cancellations for perishable items like
-          roasted makhana once shipped. However, a <strong>refund or replacement</strong> will be provided if:
+          Returns are eligible for 1 days once the delivery is made. For any issue, reach out to us via email and valid proof. A <strong>refund or replacement</strong> will be provided if:
         </p>
         <ul className="list-disc ml-6 mt-3 space-y-2 text-gray-600">
           <li>The product received is damaged, defective, or tampered with.</li>
           <li>The quality is significantly different from what was advertised.</li>
-          <li>You report the issue to our Customer Service <strong>within 24 hours</strong> of delivery with photo/video proof.</li>
+          <li>You report the issue to our Customer Service <strong>within 1 days</strong> of delivery with email and valid proof.</li>
         </ul>
       </>
     ),

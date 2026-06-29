@@ -18,7 +18,7 @@ const sections = [
         <ul className="list-disc ml-6 mt-3 space-y-2 text-gray-600">
           <li>Cancellations are accepted only if the request is made <strong>within the same day</strong> of placing the order.</li>
           <li>If the order has already been communicated to our fulfilment team or dispatched, cancellation may not be possible.</li>
-          <li>Once an order is shipped, it cannot be cancelled — only a return/replacement can be initiated after delivery.</li>
+          <li>Once an order is shipped, it cannot be cancelled. Returns are eligible for 1 days once the delivery is made. For any issue, reach out to us via email and valid proof.</li>
         </ul>
       </>
     ),

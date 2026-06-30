@@ -288,7 +288,6 @@ export default function PaymentGatewaySettingsPage() {
                         </p>
                     </div>
 
-                    {/* Merchant ID */}
                     <div className="space-y-2">
                         <Label htmlFor="phonepe-merchant-id" className="text-[var(--text-primary)]">
                             Merchant ID <span className="text-red-500">*</span>
@@ -429,8 +428,8 @@ export default function PaymentGatewaySettingsPage() {
                                             phonepeSettings?.phonepeSaltKey
                                                 ? "Leave empty to keep existing key"
                                                 : phonepeForm.mode === "TEST"
-                                                ? "96434309-7796-489d-8924-ab56988a6076"
-                                                : "Enter your PhonePe Salt Key"
+                                                    ? "96434309-7796-489d-8924-ab56988a6076"
+                                                    : "Enter your PhonePe Salt Key"
                                         }
                                     />
                                     <Button

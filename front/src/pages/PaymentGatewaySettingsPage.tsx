@@ -302,6 +302,8 @@ export default function PaymentGatewaySettingsPage() {
                             placeholder={phonepeForm.mode === "TEST" ? "PGTESTPAYUAT86" : "Enter your PhonePe Merchant ID"}
                         />
                         <p className="text-xs text-[var(--text-secondary)]">
+                            Your PhonePe Merchant ID from the {phonepeForm.mode === "TEST" ? "sandbox" : "production"} dashboard
+                        </p>
                     </div>
 
                     {/* Authentication Method Selection */}

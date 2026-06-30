@@ -210,7 +210,15 @@ export const getRazorpayKey = asyncHandler(async (req, res) => {
     throw new ApiError(400, "User ID is required");
   }
 
-  const paymentConfig = await getPaymentGatewayConfig(userId, "RAZORPAY");
+  let paymentConfig;
+  try {
+    paymentConfig = await getPaymentGatewayConfig(userId, "RAZORPAY");
+  } catch (err) {
+    // If Razorpay is not configured or active, return null key instead of 400 error
+    return res.status(200).json(
+      new ApiResponsive(200, { key: null }, "Razorpay is not configured")
+    );
+  }
 
   res
     .status(200)

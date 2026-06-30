@@ -125,6 +125,12 @@ async function getPaymentGatewayConfig(userId = null, gateway = "RAZORPAY") {
         ? decrypt(paymentSettings.phonepeSaltKey)
         : null,
       phonepeSaltIndex: paymentSettings.phonepeSaltIndex,
+      phonepeAuthMethod: paymentSettings.phonepeAuthMethod || "V1",
+      phonepeClientId: paymentSettings.phonepeClientId,
+      phonepeClientSecret: paymentSettings.phonepeClientSecret
+        ? decrypt(paymentSettings.phonepeClientSecret)
+        : null,
+      phonepeClientVersion: paymentSettings.phonepeClientVersion || "1",
     },
   };
 }
@@ -167,15 +173,19 @@ export const getPaymentSettings = asyncHandler(async (req, res) => {
   }
 
   // Check PhonePe keys
-  const phonepeSettings = await prisma.paymentGatewaySetting.findFirst({
+  const activePhonePe = await prisma.paymentGatewaySetting.findFirst({
     where: {
       gateway: "PHONEPE",
       isActive: true,
-      phonepeMerchantId: { not: null },
-      phonepeSaltKey: { not: null },
-      phonepeSaltIndex: { not: null },
     },
   });
+
+  const isPhonePeValid = activePhonePe && (
+    (activePhonePe.phonepeAuthMethod === "V2" && activePhonePe.phonepeMerchantId && activePhonePe.phonepeClientId && activePhonePe.phonepeClientSecret) ||
+    ((!activePhonePe.phonepeAuthMethod || activePhonePe.phonepeAuthMethod === "V1") && activePhonePe.phonepeMerchantId && activePhonePe.phonepeSaltKey && activePhonePe.phonepeSaltIndex)
+  );
+
+  const phonepeSettings = isPhonePeValid ? activePhonePe : null;
 
   res.status(200).json(
     new ApiResponsive(
@@ -2031,9 +2041,6 @@ async function getPhonePeConfig() {
     where: {
       gateway: "PHONEPE",
       isActive: true,
-      phonepeMerchantId: { not: null },
-      phonepeSaltKey: { not: null },
-      phonepeSaltIndex: { not: null },
     },
   });
 
@@ -2041,10 +2048,25 @@ async function getPhonePeConfig() {
     throw new ApiError(400, "PhonePe payment gateway is not configured or not active. Please configure PhonePe keys in Payment Gateway Settings.");
   }
 
+  // Validate fields based on auth method
+  if (setting.phonepeAuthMethod === "V2") {
+    if (!setting.phonepeMerchantId || !setting.phonepeClientId || !setting.phonepeClientSecret) {
+      throw new ApiError(400, "PhonePe V2 credentials (Merchant ID, Client ID, Client Secret) are not fully configured.");
+    }
+  } else {
+    if (!setting.phonepeMerchantId || !setting.phonepeSaltKey || !setting.phonepeSaltIndex) {
+      throw new ApiError(400, "PhonePe V1 credentials (Merchant ID, Salt Key, Salt Index) are not fully configured.");
+    }
+  }
+
   return {
     merchantId: setting.phonepeMerchantId,
-    saltKey: decrypt(setting.phonepeSaltKey),
+    saltKey: setting.phonepeSaltKey ? decrypt(setting.phonepeSaltKey) : null,
     saltIndex: setting.phonepeSaltIndex,
+    authMethod: setting.phonepeAuthMethod || "V1",
+    clientId: setting.phonepeClientId,
+    clientSecret: setting.phonepeClientSecret ? decrypt(setting.phonepeClientSecret) : null,
+    clientVersion: setting.phonepeClientVersion || "1",
     mode: setting.mode, // "TEST" | "LIVE"
     settingId: setting.id,
   };
@@ -2223,9 +2245,13 @@ export const initPhonePePayment = asyncHandler(async (req, res) => {
 
   // Initiate payment with PhonePe
   const phonePeResponse = await initiatePhonePePayment({
+    authMethod: phonePeConfig.authMethod,
     merchantId: phonePeConfig.merchantId,
     saltKey: phonePeConfig.saltKey,
     saltIndex: phonePeConfig.saltIndex,
+    clientId: phonePeConfig.clientId,
+    clientSecret: phonePeConfig.clientSecret,
+    clientVersion: phonePeConfig.clientVersion,
     mode: phonePeConfig.mode,
     transactionId,
     amountInPaise: orderData.total * 100,
@@ -2302,9 +2328,13 @@ export const verifyPhonePePayment = asyncHandler(async (req, res) => {
   let statusResponse;
   try {
     statusResponse = await checkPhonePeStatus({
+      authMethod: phonePeConfig.authMethod,
       merchantId: phonePeConfig.merchantId,
       saltKey: phonePeConfig.saltKey,
       saltIndex: phonePeConfig.saltIndex,
+      clientId: phonePeConfig.clientId,
+      clientSecret: phonePeConfig.clientSecret,
+      clientVersion: phonePeConfig.clientVersion,
       mode: phonePeConfig.mode,
       transactionId,
     });

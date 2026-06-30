@@ -34,6 +34,10 @@ interface PaymentGatewaySetting {
     phonepeMerchantId?: string | null;
     phonepeSaltKey?: string | null;
     phonepeSaltIndex?: string | null;
+    phonepeAuthMethod?: string | null;
+    phonepeClientId?: string | null;
+    phonepeClientSecret?: string | null;
+    phonepeClientVersion?: string | null;
 }
 
 export default function PaymentGatewaySettingsPage() {
@@ -50,10 +54,15 @@ export default function PaymentGatewaySettingsPage() {
         merchantId: "",
         saltKey: "",
         saltIndex: "1",
+        authMethod: "V1",
+        clientId: "",
+        clientSecret: "",
+        clientVersion: "1",
     });
 
     // Show/hide secrets
     const [showPhonepeSalt, setShowPhonepeSalt] = useState(false);
+    const [showPhonepeClientSecret, setShowPhonepeClientSecret] = useState(false);
 
     useEffect(() => {
         if (admin) fetchSettings();
@@ -75,6 +84,10 @@ export default function PaymentGatewaySettingsPage() {
                         merchantId: phonepe.phonepeMerchantId || "",
                         saltKey: phonepe.phonepeSaltKey || "",
                         saltIndex: phonepe.phonepeSaltIndex || "1",
+                        authMethod: phonepe.phonepeAuthMethod || "V1",
+                        clientId: phonepe.phonepeClientId || "",
+                        clientSecret: phonepe.phonepeClientSecret || "",
+                        clientVersion: phonepe.phonepeClientVersion || "1",
                     });
                 }
             }
@@ -87,12 +100,18 @@ export default function PaymentGatewaySettingsPage() {
 
     const handleSavePhonepe = async () => {
         if (!admin) return;
-        if (
-            phonepeForm.isActive &&
-            (!phonepeForm.merchantId || !phonepeForm.saltKey || !phonepeForm.saltIndex)
-        ) {
-            toast.error("Merchant ID, Salt Key, and Salt Index are required when PhonePe is enabled");
-            return;
+        if (phonepeForm.isActive) {
+            if (phonepeForm.authMethod === "V2") {
+                if (!phonepeForm.merchantId || !phonepeForm.clientId || !phonepeForm.clientSecret) {
+                    toast.error("Merchant ID, Client ID, and Client Secret are required when PhonePe is enabled in V2 Mode");
+                    return;
+                }
+            } else {
+                if (!phonepeForm.merchantId || !phonepeForm.saltKey || !phonepeForm.saltIndex) {
+                    toast.error("Merchant ID, Salt Key, and Salt Index are required when PhonePe is enabled in V1 Mode");
+                    return;
+                }
+            }
         }
         try {
             setIsSaving(true);
@@ -105,6 +124,10 @@ export default function PaymentGatewaySettingsPage() {
                     phonepeMerchantId: phonepeForm.merchantId || null,
                     phonepeSaltKey: phonepeForm.saltKey || null,
                     phonepeSaltIndex: phonepeForm.saltIndex || null,
+                    phonepeAuthMethod: phonepeForm.authMethod || "V1",
+                    phonepeClientId: phonepeForm.clientId || null,
+                    phonepeClientSecret: phonepeForm.clientSecret || null,
+                    phonepeClientVersion: phonepeForm.clientVersion || null,
                 }
             );
             if (response.data.success) {
@@ -279,73 +302,179 @@ export default function PaymentGatewaySettingsPage() {
                             placeholder={phonepeForm.mode === "TEST" ? "PGTESTPAYUAT86" : "Enter your PhonePe Merchant ID"}
                         />
                         <p className="text-xs text-[var(--text-secondary)]">
-                            Your PhonePe Merchant ID from the {phonepeForm.mode === "TEST" ? "sandbox" : "production"} dashboard
-                        </p>
                     </div>
 
-                    {/* Salt Key */}
+                    {/* Authentication Method Selection */}
                     <div className="space-y-2">
-                        <Label htmlFor="phonepe-salt-key" className="text-[var(--text-primary)]">
-                            Salt Key <span className="text-red-500">*</span>
+                        <Label htmlFor="phonepe-auth-method" className="text-[var(--text-primary)]">
+                            Integration / Authentication Version
                         </Label>
-                        <div className="relative">
-                            <Input
-                                id="phonepe-salt-key"
-                                type={showPhonepeSalt ? "text" : "password"}
-                                value={phonepeForm.saltKey}
-                                onChange={(e) =>
-                                    setPhonepeForm({ ...phonepeForm, saltKey: e.target.value })
-                                }
-                                placeholder={
-                                    phonepeSettings?.phonepeSaltKey
-                                        ? "Leave empty to keep existing key"
-                                        : phonepeForm.mode === "TEST"
-                                        ? "96434309-7796-489d-8924-ab56988a6076"
-                                        : "Enter your PhonePe Salt Key"
-                                }
-                            />
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="absolute right-0 top-0 h-full"
-                                onClick={() => setShowPhonepeSalt(!showPhonepeSalt)}
-                            >
-                                {showPhonepeSalt ? (
-                                    <EyeOff className="h-4 w-4" />
-                                ) : (
-                                    <Eye className="h-4 w-4" />
-                                )}
-                            </Button>
-                        </div>
-                        {phonepeSettings?.phonepeSaltKey && (
-                            <p className="text-xs text-green-600">
-                                ✓ Salt Key saved (encrypted). Leave empty to keep existing.
-                            </p>
-                        )}
-                        <p className="text-xs text-[var(--text-secondary)]">
-                            Stored encrypted in database. Never exposed in plain text.
-                        </p>
-                    </div>
-
-                    {/* Salt Index */}
-                    <div className="space-y-2">
-                        <Label htmlFor="phonepe-salt-index" className="text-[var(--text-primary)]">
-                            Salt Index <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            id="phonepe-salt-index"
-                            value={phonepeForm.saltIndex}
-                            onChange={(e) =>
-                                setPhonepeForm({ ...phonepeForm, saltIndex: e.target.value })
+                        <Select
+                            value={phonepeForm.authMethod}
+                            onValueChange={(value) =>
+                                setPhonepeForm({ ...phonepeForm, authMethod: value })
                             }
-                            placeholder="1"
-                            className="w-32"
-                        />
+                        >
+                            <SelectTrigger id="phonepe-auth-method">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="V1">
+                                    V1 Standard Checkout (uses Salt Key & Salt Index)
+                                </SelectItem>
+                                <SelectItem value="V2">
+                                    V2 Standard Checkout (uses Client ID & Client Secret)
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                         <p className="text-xs text-[var(--text-secondary)]">
-                            Usually "1" for both test and live mode
+                            Choose between traditional Salt Key verification (V1) or OAuth Client ID Credentials flow (V2)
                         </p>
                     </div>
+
+                    {phonepeForm.authMethod === "V2" ? (
+                        <>
+                            {/* Client ID */}
+                            <div className="space-y-2">
+                                <Label htmlFor="phonepe-client-id" className="text-[var(--text-primary)]">
+                                    Client ID <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="phonepe-client-id"
+                                    value={phonepeForm.clientId}
+                                    onChange={(e) =>
+                                        setPhonepeForm({ ...phonepeForm, clientId: e.target.value })
+                                    }
+                                    placeholder="Enter your PhonePe Client ID"
+                                />
+                            </div>
+
+                            {/* Client Secret */}
+                            <div className="space-y-2">
+                                <Label htmlFor="phonepe-client-secret" className="text-[var(--text-primary)]">
+                                    Client Secret <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="phonepe-client-secret"
+                                        type={showPhonepeClientSecret ? "text" : "password"}
+                                        value={phonepeForm.clientSecret}
+                                        onChange={(e) =>
+                                            setPhonepeForm({ ...phonepeForm, clientSecret: e.target.value })
+                                        }
+                                        placeholder={
+                                            phonepeSettings?.phonepeClientSecret
+                                                ? "Leave empty to keep existing client secret"
+                                                : "Enter your PhonePe Client Secret"
+                                        }
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="absolute right-0 top-0 h-full"
+                                        onClick={() => setShowPhonepeClientSecret(!showPhonepeClientSecret)}
+                                    >
+                                        {showPhonepeClientSecret ? (
+                                            <EyeOff className="h-4 w-4" />
+                                        ) : (
+                                            <Eye className="h-4 w-4" />
+                                        )}
+                                    </Button>
+                                </div>
+                                {phonepeSettings?.phonepeClientSecret && (
+                                    <p className="text-xs text-green-600">
+                                        ✓ Client Secret saved (encrypted). Leave empty to keep existing.
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Client Version */}
+                            <div className="space-y-2">
+                                <Label htmlFor="phonepe-client-version" className="text-[var(--text-primary)]">
+                                    Client Version <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="phonepe-client-version"
+                                    value={phonepeForm.clientVersion}
+                                    onChange={(e) =>
+                                        setPhonepeForm({ ...phonepeForm, clientVersion: e.target.value })
+                                    }
+                                    placeholder="1"
+                                    className="w-32"
+                                />
+                                <p className="text-xs text-[var(--text-secondary)]">
+                                    Usually "1"
+                                </p>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            {/* Salt Key */}
+                            <div className="space-y-2">
+                                <Label htmlFor="phonepe-salt-key" className="text-[var(--text-primary)]">
+                                    Salt Key <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="phonepe-salt-key"
+                                        type={showPhonepeSalt ? "text" : "password"}
+                                        value={phonepeForm.saltKey}
+                                        onChange={(e) =>
+                                            setPhonepeForm({ ...phonepeForm, saltKey: e.target.value })
+                                        }
+                                        placeholder={
+                                            phonepeSettings?.phonepeSaltKey
+                                                ? "Leave empty to keep existing key"
+                                                : phonepeForm.mode === "TEST"
+                                                ? "96434309-7796-489d-8924-ab56988a6076"
+                                                : "Enter your PhonePe Salt Key"
+                                        }
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="absolute right-0 top-0 h-full"
+                                        onClick={() => setShowPhonepeSalt(!showPhonepeSalt)}
+                                    >
+                                        {showPhonepeSalt ? (
+                                            <EyeOff className="h-4 w-4" />
+                                        ) : (
+                                            <Eye className="h-4 w-4" />
+                                        )}
+                                    </Button>
+                                </div>
+                                {phonepeSettings?.phonepeSaltKey && (
+                                    <p className="text-xs text-green-600">
+                                        ✓ Salt Key saved (encrypted). Leave empty to keep existing.
+                                    </p>
+                                )}
+                                <p className="text-xs text-[var(--text-secondary)]">
+                                    Stored encrypted in database. Never exposed in plain text.
+                                </p>
+                            </div>
+
+                            {/* Salt Index */}
+                            <div className="space-y-2">
+                                <Label htmlFor="phonepe-salt-index" className="text-[var(--text-primary)]">
+                                    Salt Index <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="phonepe-salt-index"
+                                    value={phonepeForm.saltIndex}
+                                    onChange={(e) =>
+                                        setPhonepeForm({ ...phonepeForm, saltIndex: e.target.value })
+                                    }
+                                    placeholder="1"
+                                    className="w-32"
+                                />
+                                <p className="text-xs text-[var(--text-secondary)]">
+                                    Usually "1" for both test and live mode
+                                </p>
+                            </div>
+                        </>
+                    )}
 
                     {/* Actions */}
                     <div className="flex justify-between items-center pt-4 border-t border-[var(--border-color)]">

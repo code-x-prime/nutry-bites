@@ -27,23 +27,46 @@ export function generateChecksum(payload, endpoint, saltKey, saltIndex) {
 }
 
 /**
- * Initiate a PhonePe payment
- * @param {Object} params
- * @param {string} params.merchantId
- * @param {string} params.saltKey
- * @param {string|number} params.saltIndex
- * @param {string} params.mode - "TEST" | "LIVE"
- * @param {string} params.transactionId - Unique transaction ID
- * @param {number} params.amountInPaise - Amount in paise (INR * 100)
- * @param {string} params.redirectUrl - URL to redirect after payment
- * @param {string} params.callbackUrl - Webhook callback URL
- * @param {string} params.mobileNumber - User's mobile number (optional)
- * @param {string} params.userId - User ID
+ * Get V2 OAuth Access Token
+ */
+async function getV2Token(clientId, clientSecret, clientVersion = "1", mode) {
+  const tokenUrl = mode === "LIVE"
+    ? "https://api.phonepe.com/apis/identity-manager/v1/oauth/token"
+    : "https://api-preprod.phonepe.com/apis/pg-sandbox/v1/oauth/token";
+
+  const params = new URLSearchParams();
+  params.append("client_id", clientId);
+  params.append("client_version", clientVersion || "1");
+  params.append("client_secret", clientSecret);
+  params.append("grant_type", "client_credentials");
+
+  const response = await fetch(tokenUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "accept": "application/json",
+    },
+    body: params.toString(),
+  });
+
+  const data = await response.json();
+  if (!response.ok || !data.access_token) {
+    throw new Error(data?.message || `Failed to fetch PhonePe access token: ${response.status}`);
+  }
+  return data.access_token;
+}
+
+/**
+ * Initiate a PhonePe payment (Supports both V1 and V2)
  */
 export async function initiatePhonePePayment({
+  authMethod = "V1",
   merchantId,
   saltKey,
   saltIndex,
+  clientId,
+  clientSecret,
+  clientVersion = "1",
   mode = "TEST",
   transactionId,
   amountInPaise,
@@ -52,6 +75,62 @@ export async function initiatePhonePePayment({
   mobileNumber,
   userId,
 }) {
+  const isV2 = authMethod === "V2" && clientId && clientSecret;
+
+  if (isV2) {
+    const accessToken = await getV2Token(clientId, clientSecret, clientVersion || "1", mode);
+
+    const apiUrl = mode === "LIVE"
+      ? "https://api.phonepe.com/apis/pg/checkout/v2/pay"
+      : "https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/pay";
+
+    const requestBody = {
+      merchantOrderId: transactionId,
+      amount: amountInPaise,
+      paymentFlow: {
+        type: "PG_CHECKOUT",
+        merchantUrls: {
+          redirectUrl: redirectUrl,
+        },
+      },
+    };
+
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `O-Bearer ${accessToken}`,
+      "accept": "application/json",
+    };
+
+    if (callbackUrl) {
+      headers["X-CALLBACK-URL"] = callbackUrl;
+    }
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(requestBody),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.redirectUrl) {
+      throw new Error(
+        data?.message || `PhonePe V2 API error: ${response.status}`
+      );
+    }
+
+    // Wrap V2 response to fit V1 structure expected by backend
+    return {
+      success: true,
+      data: {
+        redirectInfo: {
+          url: data.redirectUrl,
+        },
+      },
+    };
+  }
+
+  // --- V1 Flow (Fallback) ---
   const payloadData = {
     merchantId,
     merchantTransactionId: transactionId,
@@ -94,21 +173,63 @@ export async function initiatePhonePePayment({
 }
 
 /**
- * Check PhonePe payment status
- * @param {Object} params
- * @param {string} params.merchantId
- * @param {string} params.saltKey
- * @param {string|number} params.saltIndex
- * @param {string} params.mode - "TEST" | "LIVE"
- * @param {string} params.transactionId - Unique transaction ID
+ * Check PhonePe payment status (Supports both V1 and V2)
  */
 export async function checkPhonePeStatus({
+  authMethod = "V1",
   merchantId,
   saltKey,
   saltIndex,
+  clientId,
+  clientSecret,
+  clientVersion = "1",
   mode = "TEST",
   transactionId,
 }) {
+  const isV2 = authMethod === "V2" && clientId && clientSecret;
+
+  if (isV2) {
+    const accessToken = await getV2Token(clientId, clientSecret, clientVersion || "1", mode);
+
+    const baseUrl = mode === "LIVE"
+      ? "https://api.phonepe.com/apis/pg/checkout/v2/order"
+      : "https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/order";
+
+    const apiUrl = `${baseUrl}/${transactionId}/status`;
+
+    const response = await fetch(apiUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `O-Bearer ${accessToken}`,
+        "accept": "application/json",
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.state) {
+      throw new Error(
+        data?.message || `PhonePe V2 Status API error: ${response.status}`
+      );
+    }
+
+    // Map V2 state to V1 format expected by the backend verify function
+    const isCompleted = data.state === "COMPLETED";
+    const isFailed = data.state === "FAILED";
+
+    return {
+      success: isCompleted,
+      code: isCompleted ? "PAYMENT_SUCCESS" : (isFailed ? "PAYMENT_FAILED" : "PAYMENT_PENDING"),
+      message: data.state || "Payment status checked",
+      data: {
+        merchantTransactionId: transactionId,
+        amount: data.amount,
+      },
+    };
+  }
+
+  // --- V1 Flow (Fallback) ---
   const endpoint = `/pg/v1/status/${merchantId}/${transactionId}`;
   const checksum = generateChecksum("", endpoint, saltKey, saltIndex);
 
@@ -132,3 +253,4 @@ export async function checkPhonePeStatus({
   const data = await response.json();
   return data;
 }
+

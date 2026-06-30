@@ -1114,9 +1114,13 @@ model PaymentGatewaySetting {
   razorpayWebhookSecret String? // Encrypted
 
   // PhonePe Keys
-  phonepeMerchantId String?
-  phonepeSaltKey    String? // Encrypted
-  phonepeSaltIndex  String?
+  phonepeMerchantId    String?
+  phonepeSaltKey       String? // Encrypted
+  phonepeSaltIndex     String?
+  phonepeAuthMethod    String  @default("V1") // "V1" (Salt Key) or "V2" (Client Credentials)
+  phonepeClientId      String?
+  phonepeClientSecret  String? // Encrypted
+  phonepeClientVersion String? @default("1")
 
   mode PaymentMode @default(TEST)
 

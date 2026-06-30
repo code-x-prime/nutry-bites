@@ -98,6 +98,17 @@ export const getPaymentGatewaySettings = asyncHandler(async (req, res, next) => 
                 masked.phonepeSaltKey = null;
             }
 
+            try {
+                if (setting.phonepeClientSecret) {
+                    masked.phonepeClientSecret = maskSecret(decrypt(setting.phonepeClientSecret));
+                } else {
+                    masked.phonepeClientSecret = null;
+                }
+            } catch (error) {
+                console.error("Error decrypting phonepeClientSecret:", error);
+                masked.phonepeClientSecret = null;
+            }
+
             return masked;
         });
 
@@ -168,6 +179,15 @@ export const getPaymentGatewaySetting = asyncHandler(async (req, res, next) => {
         maskedSetting.phonepeSaltKey = null;
     }
 
+    try {
+        maskedSetting.phonepeClientSecret = setting.phonepeClientSecret
+            ? maskSecret(decrypt(setting.phonepeClientSecret))
+            : null;
+    } catch (error) {
+        console.error("Error decrypting phonepeClientSecret:", error);
+        maskedSetting.phonepeClientSecret = null;
+    }
+
     return res
         .status(200)
         .json(
@@ -190,6 +210,10 @@ export const upsertPaymentGatewaySetting = asyncHandler(async (req, res, next) =
         phonepeMerchantId,
         phonepeSaltKey,
         phonepeSaltIndex,
+        phonepeAuthMethod,
+        phonepeClientId,
+        phonepeClientSecret,
+        phonepeClientVersion,
     } = req.body;
 
     const admin = req.admin;
@@ -212,11 +236,22 @@ export const upsertPaymentGatewaySetting = asyncHandler(async (req, res, next) =
             throw new ApiError(400, "Razorpay Key ID and Key Secret are required");
         }
     } else if (gatewayUpper === "PHONEPE") {
-        if (isActive && (!phonepeMerchantId || !phonepeSaltKey || !phonepeSaltIndex)) {
-            throw new ApiError(
-                400,
-                "PhonePe Merchant ID, Salt Key, and Salt Index are required"
-            );
+        if (isActive) {
+            if (phonepeAuthMethod === "V2") {
+                if (!phonepeMerchantId || !phonepeClientId || !phonepeClientSecret) {
+                    throw new ApiError(
+                        400,
+                        "PhonePe Merchant ID, Client ID, and Client Secret are required for V2"
+                    );
+                }
+            } else {
+                if (!phonepeMerchantId || !phonepeSaltKey || !phonepeSaltIndex) {
+                    throw new ApiError(
+                        400,
+                        "PhonePe Merchant ID, Salt Key, and Salt Index are required for V1"
+                    );
+                }
+            }
         }
     }
 
@@ -265,10 +300,21 @@ export const upsertPaymentGatewaySetting = asyncHandler(async (req, res, next) =
         }
     }
 
+    if (phonepeClientSecret) {
+        if (!phonepeClientSecret.includes("****")) {
+            data.phonepeClientSecret = encrypt(phonepeClientSecret);
+        } else if (existing) {
+            data.phonepeClientSecret = existing.phonepeClientSecret;
+        }
+    }
+
     // Add non-secret fields
     if (razorpayKeyId) data.razorpayKeyId = razorpayKeyId;
     if (phonepeMerchantId) data.phonepeMerchantId = phonepeMerchantId;
     if (phonepeSaltIndex) data.phonepeSaltIndex = phonepeSaltIndex;
+    if (phonepeAuthMethod) data.phonepeAuthMethod = phonepeAuthMethod;
+    if (phonepeClientId) data.phonepeClientId = phonepeClientId;
+    if (phonepeClientVersion) data.phonepeClientVersion = phonepeClientVersion;
 
     let setting;
     if (existing) {

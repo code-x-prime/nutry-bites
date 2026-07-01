@@ -392,6 +392,20 @@ export async function processShiprocketReturn(orderId, returnReason = "Customer 
             },
         });
 
+        // Update ReturnRequest with return info
+        if (returnOrderId != null) {
+            await prisma.returnRequest.updateMany({
+                where: { 
+                    orderId: orderId,
+                    status: "APPROVED"
+                },
+                data: {
+                    shiprocketReturnOrderId: returnOrderId.toString(),
+                    shiprocketReturnStatus: "NEW"
+                }
+            });
+        }
+
         console.log(`Shiprocket return created for order ${order.orderNumber}`);
         return response;
     } catch (error) {

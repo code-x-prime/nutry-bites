@@ -1276,7 +1276,6 @@ export const getOrderStats = asyncHandler(async (req, res, next) => {
           name: true,
           slug: true,
           images: {
-            where: { isPrimary: true },
             take: 1,
           },
         },

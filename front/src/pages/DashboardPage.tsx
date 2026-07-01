@@ -587,6 +587,119 @@ export default function DashboardPage() {
         </Card>
       </div>
 
+      {/* Delivery & Shiprocket Tracking Status */}
+      {orderStats?.pendingShipments && orderStats.pendingShipments.length > 0 && (
+        <Card className="bg-card border-border shadow-[0_1px_2px_rgba(0,0,0,0.04)] rounded-xl">
+          <CardHeader className="px-6 pt-6 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <Package2 className="h-5 w-5 text-primary" />
+                  Delivery & Shipment Tracking
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Track active courier shipments, pickups, and transit updates from Shiprocket
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-border hover:bg-muted text-xs"
+                asChild
+              >
+                <Link to="/orders">
+                  View All Orders
+                  <ArrowUpRight className="ml-1 h-3 w-3" />
+                </Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="px-6 pb-6 overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-border text-muted-foreground font-medium">
+                  <th className="pb-3 pr-4">Order Number</th>
+                  <th className="pb-3 px-4">Customer</th>
+                  <th className="pb-3 px-4">Courier</th>
+                  <th className="pb-3 px-4">AWB Code</th>
+                  <th className="pb-3 px-4">Shiprocket Status</th>
+                  <th className="pb-3 px-4">Order Status</th>
+                  <th className="pb-3 pl-4 text-right">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {orderStats.pendingShipments.map((shipment: any) => {
+                  const getShiprocketStatusBadge = (status: string) => {
+                    const normalized = (status || "AWB_ASSIGNED").toUpperCase();
+                    if (normalized.includes("DELIVERED")) {
+                      return <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30">Delivered</Badge>;
+                    }
+                    if (normalized.includes("CANCEL")) {
+                      return <Badge className="bg-destructive/10 text-destructive border-destructive/30">Cancelled</Badge>;
+                    }
+                    if (normalized.includes("RETURN") || normalized.includes("RTO")) {
+                      return <Badge className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30">RTO / Return</Badge>;
+                    }
+                    if (normalized.includes("OUT_FOR_DELIVERY")) {
+                      return <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30">Out for Delivery</Badge>;
+                    }
+                    if (normalized.includes("TRANSIT")) {
+                      return <Badge className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30">In Transit</Badge>;
+                    }
+                    return <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30">{status || "Booked"}</Badge>;
+                  };
+
+                  const getOrderStatusBadge = (status: string) => {
+                    switch (status) {
+                      case "DELIVERED":
+                        return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Delivered</span>;
+                      case "SHIPPED":
+                        return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">Shipped</span>;
+                      case "PROCESSING":
+                        return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Processing</span>;
+                      default:
+                        return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{status}</span>;
+                    }
+                  };
+
+                  return (
+                    <tr key={shipment.id} className="hover:bg-muted/40 transition-colors">
+                      <td className="py-3.5 pr-4 font-medium text-primary">
+                        <Link to={`/orders/${shipment.id}`} className="hover:underline">
+                          {shipment.orderNumber}
+                        </Link>
+                      </td>
+                      <td className="py-3.5 px-4 text-[var(--text-primary)]">
+                        <div className="font-medium">{shipment.user?.name || "Customer"}</div>
+                        <div className="text-xs text-muted-foreground">{shipment.user?.phone || ""}</div>
+                      </td>
+                      <td className="py-3.5 px-4 text-muted-foreground">
+                        {shipment.courierName || "Shiprocket"}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-xs">
+                        {shipment.awbCode || "Generating..."}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        {getShiprocketStatusBadge(shipment.shiprocketStatus)}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        {getOrderStatusBadge(shipment.status)}
+                      </td>
+                      <td className="py-3.5 pl-4 text-right text-xs text-muted-foreground">
+                        {new Date(shipment.createdAt).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                        })}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Main Content Section */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Left Column - Top Products / Sales Activity */}

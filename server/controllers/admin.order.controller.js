@@ -1289,6 +1289,35 @@ export const getOrderStats = asyncHandler(async (req, res, next) => {
     })
   );
 
+  // Get active shipments (not yet delivered or cancelled)
+  const pendingShipments = await prisma.order.findMany({
+    where: {
+      status: {
+        in: ["PROCESSING", "SHIPPED", "RETURN_APPROVED", "RETURN_INITIATED"]
+      },
+      shiprocketOrderId: { not: null }
+    },
+    select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+      shiprocketStatus: true,
+      courierName: true,
+      awbCode: true,
+      createdAt: true,
+      user: {
+        select: {
+          name: true,
+          phone: true
+        }
+      }
+    },
+    orderBy: {
+      createdAt: "desc"
+    },
+    take: 10
+  });
+
   res.status(200).json(
     new ApiResponsive(
       200,
@@ -1306,6 +1335,7 @@ export const getOrderStats = asyncHandler(async (req, res, next) => {
         monthlySales,
         orderGrowth,
         revenueGrowth,
+        pendingShipments,
       },
       "Order statistics fetched successfully"
     )

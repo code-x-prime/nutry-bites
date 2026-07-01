@@ -8,6 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -103,10 +110,16 @@ export default function SiteSettingsPage() {
     merchantId: "",
     saltKey: "",
     saltIndex: "1",
+    authMethod: "V1",
+    clientId: "",
+    clientSecret: "",
+    clientVersion: "1",
   });
   const [showPhonepeSalt, setShowPhonepeSalt] = useState(false);
+  const [showPhonepeClientSecret, setShowPhonepeClientSecret] = useState(false);
   const [isSavingPhonepe, setIsSavingPhonepe] = useState(false);
   const [phonepeSavedKey, setPhonepeSavedKey] = useState(false); // flag: salt key already saved
+  const [phonepeSavedClientSecret, setPhonepeSavedClientSecret] = useState(false); // flag: client secret already saved
   // Price visibility
   const [hidePricesForGuests, setHidePricesForGuests] = useState(false);
   // Shiprocket extended (pickup, dimensions, shipping charge)
@@ -259,9 +272,14 @@ export default function SiteSettingsPage() {
             merchantId: pp.phonepeMerchantId || "",
             saltKey: pp.phonepeSaltKey || "",
             saltIndex: pp.phonepeSaltIndex || "1",
+            authMethod: pp.phonepeAuthMethod || "V1",
+            clientId: pp.phonepeClientId || "",
+            clientSecret: pp.phonepeClientSecret || "",
+            clientVersion: pp.phonepeClientVersion || "1",
           });
           setPhonepeEnabled(pp.isActive);
           setPhonepeSavedKey(!!(pp.phonepeSaltKey));
+          setPhonepeSavedClientSecret(!!(pp.phonepeClientSecret));
         }
       }
     } catch (e) {
@@ -501,13 +519,30 @@ export default function SiteSettingsPage() {
   };
 
   const handleSavePhonePe = async () => {
-    if (phonepeForm.isActive && (!phonepeForm.merchantId || !phonepeForm.saltIndex)) {
-      toast.error("Merchant ID and Salt Index are required when PhonePe is enabled");
-      return;
-    }
-    if (phonepeForm.isActive && !phonepeForm.saltKey && !phonepeSavedKey) {
-      toast.error("Salt Key is required");
-      return;
+    if (phonepeForm.isActive) {
+      if (phonepeForm.authMethod === "V2") {
+        if (!phonepeForm.merchantId) {
+          toast.error("Merchant ID is required when PhonePe is enabled");
+          return;
+        }
+        if (!phonepeForm.clientId) {
+          toast.error("Client ID is required");
+          return;
+        }
+        if (!phonepeForm.clientSecret && !phonepeSavedClientSecret) {
+          toast.error("Client Secret is required");
+          return;
+        }
+      } else {
+        if (!phonepeForm.merchantId || !phonepeForm.saltIndex) {
+          toast.error("Merchant ID and Salt Index are required when PhonePe is enabled");
+          return;
+        }
+        if (!phonepeForm.saltKey && !phonepeSavedKey) {
+          toast.error("Salt Key is required");
+          return;
+        }
+      }
     }
     try {
       setIsSavingPhonepe(true);
@@ -521,11 +556,28 @@ export default function SiteSettingsPage() {
         isActive: phonepeForm.isActive,
         mode: phonepeForm.mode,
         phonepeMerchantId: phonepeForm.merchantId || null,
-        phonepeSaltIndex: phonepeForm.saltIndex || null,
+        phonepeAuthMethod: phonepeForm.authMethod || "V1",
+        phonepeClientId: phonepeForm.authMethod === "V2" ? (phonepeForm.clientId || null) : null,
+        phonepeClientVersion: phonepeForm.authMethod === "V2" ? (phonepeForm.clientVersion || null) : null,
+        phonepeSaltIndex: phonepeForm.authMethod === "V1" ? (phonepeForm.saltIndex || null) : null,
       };
-      // Only send saltKey if user typed something new
-      if (phonepeForm.saltKey && phonepeForm.saltKey !== "••••••••") {
-        payload.phonepeSaltKey = phonepeForm.saltKey;
+
+      // Only send saltKey if user typed something new and method is V1
+      if (phonepeForm.authMethod === "V1") {
+        if (phonepeForm.saltKey && phonepeForm.saltKey !== "••••••••") {
+          payload.phonepeSaltKey = phonepeForm.saltKey;
+        }
+      } else {
+        payload.phonepeSaltKey = null;
+      }
+
+      // Only send clientSecret if user typed something new and method is V2
+      if (phonepeForm.authMethod === "V2") {
+        if (phonepeForm.clientSecret && phonepeForm.clientSecret !== "••••••••") {
+          payload.phonepeClientSecret = phonepeForm.clientSecret;
+        }
+      } else {
+        payload.phonepeClientSecret = null;
       }
 
       const res = await api.post(`/api/admin/payment-gateway-settings/${adminId}`, payload);
@@ -950,53 +1002,156 @@ export default function SiteSettingsPage() {
                 </p>
               </div>
 
-              {/* Salt Key */}
+              {/* Authentication Method Selection */}
               <div className="space-y-1">
                 <Label className="text-[var(--text-primary)]">
-                  Salt Key <span className="text-red-500">*</span>
+                  Integration / Authentication Version
                 </Label>
-                <div className="relative">
-                  <Input
-                    type={showPhonepeSalt ? "text" : "password"}
-                    value={phonepeForm.saltKey}
-                    onChange={(e) => setPhonepeForm({ ...phonepeForm, saltKey: e.target.value })}
-                    placeholder={
-                      phonepeSavedKey
-                        ? "Leave empty to keep saved key"
-                        : phonepeForm.mode === "TEST"
-                          ? "96434309-7796-489d-8924-ab56988a6076"
-                          : "Your PhonePe Salt Key"
-                    }
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-0 top-0 h-full"
-                    onClick={() => setShowPhonepeSalt(!showPhonepeSalt)}
-                  >
-                    {showPhonepeSalt ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-                {phonepeSavedKey && (
-                  <p className="text-xs text-green-600">✓ Salt Key is saved (encrypted). Enter new key to replace.</p>
-                )}
-                <p className="text-xs text-[var(--text-secondary)]">Stored encrypted — never shown in plain text after saving.</p>
+                <Select
+                  value={phonepeForm.authMethod || "V1"}
+                  onValueChange={(value) =>
+                    setPhonepeForm({ ...phonepeForm, authMethod: value })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Auth Method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="V1">
+                      V1 Standard Checkout (uses Salt Key & Salt Index)
+                    </SelectItem>
+                    <SelectItem value="V2">
+                      V2 Standard Checkout (uses Client ID & Client Secret)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Choose between traditional Salt Key verification (V1) or OAuth Client ID Credentials flow (V2)
+                </p>
               </div>
 
-              {/* Salt Index */}
-              <div className="space-y-1">
-                <Label className="text-[var(--text-primary)]">
-                  Salt Index <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  value={phonepeForm.saltIndex}
-                  onChange={(e) => setPhonepeForm({ ...phonepeForm, saltIndex: e.target.value })}
-                  placeholder="1"
-                  className="w-32"
-                />
-                <p className="text-xs text-[var(--text-secondary)]">Usually "1" for both test and live mode</p>
-              </div>
+              {phonepeForm.authMethod === "V2" ? (
+                <>
+                  {/* Client ID */}
+                  <div className="space-y-1">
+                    <Label className="text-[var(--text-primary)]">
+                      Client ID <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      value={phonepeForm.clientId || ""}
+                      onChange={(e) =>
+                        setPhonepeForm({ ...phonepeForm, clientId: e.target.value })
+                      }
+                      placeholder="Enter your PhonePe Client ID"
+                    />
+                  </div>
+
+                  {/* Client Secret */}
+                  <div className="space-y-1">
+                    <Label className="text-[var(--text-primary)]">
+                      Client Secret <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        type={showPhonepeClientSecret ? "text" : "password"}
+                        value={phonepeForm.clientSecret || ""}
+                        onChange={(e) =>
+                          setPhonepeForm({ ...phonepeForm, clientSecret: e.target.value })
+                        }
+                        placeholder={
+                          phonepeSavedClientSecret
+                            ? "Leave empty to keep saved Client Secret"
+                            : "Enter your PhonePe Client Secret"
+                        }
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full"
+                        onClick={() => setShowPhonepeClientSecret(!showPhonepeClientSecret)}
+                      >
+                        {showPhonepeClientSecret ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {phonepeSavedClientSecret && (
+                      <p className="text-xs text-green-600">
+                        ✓ Client Secret saved (encrypted). Enter new secret to replace.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Client Version */}
+                  <div className="space-y-1">
+                    <Label className="text-[var(--text-primary)]">
+                      Client Version <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      value={phonepeForm.clientVersion || "1"}
+                      onChange={(e) =>
+                        setPhonepeForm({ ...phonepeForm, clientVersion: e.target.value })
+                      }
+                      placeholder="1"
+                      className="w-32"
+                    />
+                    <p className="text-xs text-[var(--text-secondary)]">Usually "1"</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Salt Key */}
+                  <div className="space-y-1">
+                    <Label className="text-[var(--text-primary)]">
+                      Salt Key <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        type={showPhonepeSalt ? "text" : "password"}
+                        value={phonepeForm.saltKey}
+                        onChange={(e) => setPhonepeForm({ ...phonepeForm, saltKey: e.target.value })}
+                        placeholder={
+                          phonepeSavedKey
+                            ? "Leave empty to keep saved key"
+                            : phonepeForm.mode === "TEST"
+                              ? "96434309-7796-489d-8924-ab56988a6076"
+                              : "Your PhonePe Salt Key"
+                        }
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full"
+                        onClick={() => setShowPhonepeSalt(!showPhonepeSalt)}
+                      >
+                        {showPhonepeSalt ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    {phonepeSavedKey && (
+                      <p className="text-xs text-green-600">✓ Salt Key is saved (encrypted). Enter new key to replace.</p>
+                    )}
+                    <p className="text-xs text-[var(--text-secondary)]">Stored encrypted — never shown in plain text after saving.</p>
+                  </div>
+
+                  {/* Salt Index */}
+                  <div className="space-y-1">
+                    <Label className="text-[var(--text-primary)]">
+                      Salt Index <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      value={phonepeForm.saltIndex}
+                      onChange={(e) => setPhonepeForm({ ...phonepeForm, saltIndex: e.target.value })}
+                      placeholder="1"
+                      className="w-32"
+                    />
+                    <p className="text-xs text-[var(--text-secondary)]">Usually "1" for both test and live mode</p>
+                  </div>
+                </>
+              )}
 
               {/* Save Button */}
               <div className="flex justify-between items-center pt-4 border-t border-[var(--border-color)]">

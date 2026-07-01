@@ -88,7 +88,6 @@ export const getMostViewedProducts = asyncHandler(async (req, res) => {
         where: { id: view.productId },
         include: {
           images: {
-            where: { isPrimary: true },
             take: 1,
           },
           variants: {
@@ -205,7 +204,6 @@ export const getUsersWithProductsInCart = asyncHandler(async (req, res) => {
               product: {
                 include: {
                   images: {
-                    where: { isPrimary: true },
                     take: 1,
                   },
                   categories: {
@@ -442,7 +440,6 @@ export const getTopSellingProducts = asyncHandler(async (req, res) => {
         where: { id: item.productId },
         include: {
           images: {
-            where: { isPrimary: true },
             take: 1,
           },
         },
@@ -491,7 +488,6 @@ export const getRepeatProducts = asyncHandler(async (req, res) => {
         where: { id: item.productId },
         include: {
           images: {
-            where: { isPrimary: true },
             take: 1,
           },
         },

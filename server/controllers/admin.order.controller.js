@@ -256,18 +256,18 @@ export const getOrderById = asyncHandler(async (req, res, next) => {
   const processedItems = order.items.map((item) => {
     let imageUrl = null;
 
-    // Priority 1: Product images (primary first)
-    if (item.product.images && item.product.images.length > 0) {
-      const primaryImage = item.product.images.find((img) => img.isPrimary);
-      const img = primaryImage || item.product.images[0];
-      imageUrl = img?.url ? getFileUrl(img.url) : null;
-    }
-    // Priority 2: Variant images as fallback
-    else if (item.variant?.images && item.variant.images.length > 0) {
+    // Priority 1: Variant images first
+    if (item.variant?.images && item.variant.images.length > 0) {
       const primaryVariantImage = item.variant.images.find(
         (img) => img.isPrimary
       );
       const img = primaryVariantImage || item.variant.images[0];
+      imageUrl = img?.url ? getFileUrl(img.url) : null;
+    }
+    // Priority 2: Product images as fallback
+    if (!imageUrl && item.product.images && item.product.images.length > 0) {
+      const primaryImage = item.product.images.find((img) => img.isPrimary);
+      const img = primaryImage || item.product.images[0];
       imageUrl = img?.url ? getFileUrl(img.url) : null;
     }
 

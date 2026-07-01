@@ -1085,7 +1085,6 @@ export const getOrderDetails = asyncHandler(async (req, res) => {
           product: {
             include: {
               images: {
-                where: { isPrimary: true },
                 take: 1,
               },
             },
@@ -1102,7 +1101,6 @@ export const getOrderDetails = asyncHandler(async (req, res) => {
                 },
               },
               images: {
-                where: { isPrimary: true },
                 take: 1,
               },
             },
@@ -1182,31 +1180,57 @@ export const getOrderDetails = asyncHandler(async (req, res) => {
         discountValue: parseFloat(order.coupon.discountValue),
       }
       : null,
-    items: order.items.map((item) => ({
-      id: item.id,
-      productId: item.productId,
-      name: item.product.name,
-      image: item.product.images[0]
-        ? getFileUrl(item.product.images[0].url)
-        : null,
-      slug: item.product.slug,
-      color: item.variant.color?.name,
-      size: item.variant.size?.name || null,
-      price: parseFloat(item.price),
-      quantity: item.quantity,
-      subtotal: parseFloat(item.subtotal),
-      // Include return request information
-      returnRequest: item.returnRequests && item.returnRequests.length > 0
-        ? {
-          id: item.returnRequests[0].id,
-          status: item.returnRequests[0].status,
-          reason: item.returnRequests[0].reason,
-          customReason: item.returnRequests[0].customReason,
-          createdAt: item.returnRequests[0].createdAt,
-          processedAt: item.returnRequests[0].processedAt,
+    items: order.items.map((item) => {
+      let color = null;
+      let colorHexCode = null;
+      let size = null;
+
+      if (item.variant?.attributes) {
+        const colorAttr = item.variant.attributes.find(
+          (attr) => attr.attributeValue?.attribute?.name === "Color"
+        );
+        if (colorAttr) {
+          color = colorAttr.attributeValue.value;
+          colorHexCode = colorAttr.attributeValue.hexCode || null;
         }
-        : null,
-    })),
+
+        const sizeAttr = item.variant.attributes.find(
+          (attr) => attr.attributeValue?.attribute?.name === "Size"
+        );
+        if (sizeAttr) {
+          size = sizeAttr.attributeValue.value;
+        }
+      }
+
+      return {
+        id: item.id,
+        productId: item.productId,
+        name: item.product.name,
+        image: item.variant?.images?.[0]?.url
+          ? getFileUrl(item.variant.images[0].url)
+          : item.product.images?.[0]?.url
+          ? getFileUrl(item.product.images[0].url)
+          : null,
+        slug: item.product.slug,
+        color,
+        colorHexCode,
+        size,
+        price: parseFloat(item.price),
+        quantity: item.quantity,
+        subtotal: parseFloat(item.subtotal),
+        // Include return request information
+        returnRequest: item.returnRequests && item.returnRequests.length > 0
+          ? {
+            id: item.returnRequests[0].id,
+            status: item.returnRequests[0].status,
+            reason: item.returnRequests[0].reason,
+            customReason: item.returnRequests[0].customReason,
+            createdAt: item.returnRequests[0].createdAt,
+            processedAt: item.returnRequests[0].processedAt,
+          }
+          : null,
+      };
+    }),
     shippingAddress: order.shippingAddress,
     billingAddress: order.billingAddressSameAsShipping
       ? order.shippingAddress

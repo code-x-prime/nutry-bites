@@ -725,7 +725,9 @@ export default function DashboardPage() {
                         className="h-14 w-14 rounded-lg bg-muted border border-border flex-shrink-0"
                         style={{
                           backgroundImage:
-                            product.images && product.images[0]
+                            product.imageUrl
+                              ? `url(${product.imageUrl})`
+                              : product.images && product.images[0]
                               ? `url(${getImageUrl(
                                 product.images[0].url || product.images[0]
                               )})`

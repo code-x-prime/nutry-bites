@@ -1267,6 +1267,7 @@ export const getOrderStats = asyncHandler(async (req, res, next) => {
   });
 
   // Get product details for the top products
+  const { getFileUrl } = await import("../utils/deleteFromS3.js");
   const topProductsDetails = await Promise.all(
     topProducts.map(async (product) => {
       const details = await prisma.product.findUnique({
@@ -1278,11 +1279,39 @@ export const getOrderStats = asyncHandler(async (req, res, next) => {
           images: {
             take: 1,
           },
+          variants: {
+            where: { isActive: true },
+            select: {
+              images: {
+                take: 1,
+              },
+            },
+          },
         },
       });
 
+      // Find the first image from product or its variants
+      let imageObj = null;
+      if (details?.images && details.images.length > 0) {
+        imageObj = details.images[0];
+      } else if (details?.variants) {
+        const variantWithImage = details.variants.find(
+          (v) => v.images && v.images.length > 0
+        );
+        if (variantWithImage) {
+          imageObj = variantWithImage.images[0];
+        }
+      }
+
+      // Convert image path using getFileUrl
+      const imageUrl = imageObj?.url ? getFileUrl(imageObj.url) : null;
+
       return {
-        ...details,
+        id: details?.id,
+        name: details?.name,
+        slug: details?.slug,
+        imageUrl: imageUrl,
+        images: imageObj ? [imageObj] : [], // Keep images array for backward compatibility
         quantitySold: product._sum.quantity,
         revenue: product._sum.subtotal,
       };

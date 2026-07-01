@@ -1293,7 +1293,7 @@ export const getOrderStats = asyncHandler(async (req, res, next) => {
   const pendingShipments = await prisma.order.findMany({
     where: {
       status: {
-        in: ["PROCESSING", "SHIPPED", "RETURN_APPROVED", "RETURN_INITIATED"]
+        in: ["PROCESSING", "SHIPPED", "RETURN_APPROVED"]
       },
       shiprocketOrderId: { not: null }
     },

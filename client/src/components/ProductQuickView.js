@@ -899,9 +899,10 @@ export default function ProductQuickView({ product, open, onOpenChange }) {
               )}
 
               {/* Description */}
-              <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                {displayProduct.description || "No description available"}
-              </p>
+              <div 
+                className="text-gray-600 text-sm mb-4 line-clamp-3"
+                dangerouslySetInnerHTML={{ __html: displayProduct.description || "No description available" }}
+              />
 
               {/* Color Selection */}
               {productDetails?.colorOptions &&

@@ -62,10 +62,8 @@ export const setCookies = (res, accessToken, refreshToken) => {
   // Only set these options in production
   if (isProduction) {
     cookieOptions.secure = true;
-    cookieOptions.sameSite = "strict";
-    if (process.env.COOKIE_DOMAIN) {
-      cookieOptions.domain = process.env.COOKIE_DOMAIN;
-    }
+    cookieOptions.sameSite = "none";
+    cookieOptions.domain = process.env.COOKIE_DOMAIN || ".nutrybites.co.in";
   }
 
   res.cookie("accessToken", accessToken, cookieOptions);

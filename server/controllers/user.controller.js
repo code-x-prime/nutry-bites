@@ -244,18 +244,22 @@ export const loginUser = asyncHandler(async (req, res, next) => {
 // Logout user
 export const logoutUser = asyncHandler(async (req, res, next) => {
   try {
-    // Clear cookies regardless of whether a user is authenticated
-    res.clearCookie("accessToken", {
+    const isProduction = process.env.NODE_ENV === "production";
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    });
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      path: "/",
+    };
 
-    res.clearCookie("refreshToken", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    });
+    if (isProduction) {
+      cookieOptions.domain = process.env.COOKIE_DOMAIN || ".nutrybites.co.in";
+    }
+
+    // Clear cookies regardless of whether a user is authenticated
+    res.clearCookie("accessToken", cookieOptions);
+    res.clearCookie("refreshToken", cookieOptions);
+    res.clearCookie("user_session", { ...cookieOptions, httpOnly: false });
 
     res.status(200).json(new ApiResponsive(200, {}, "Logged out successfully"));
   } catch (error) {
